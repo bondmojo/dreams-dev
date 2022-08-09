@@ -1,0 +1,6 @@
+{
+    "URL" : "https://xbkajzp2lg.execute-api.us-east-1.amazonaws.com",
+    "ZOHO_LOGGER_FILE_PATH": "/mnt/dreamsfs/logs/zoho_logs.log",
+    "ZOHO_RESOURCE_PATH" : "/mnt/dreamsfs/zoho_res",
+    "ZOHO_FILE_PATH": "/mnt/dreamsfs/zoho_sdk_tokens.txt"  
+}

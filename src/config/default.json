@@ -1,0 +1,6 @@
+{      
+     "URL":"http://localhost:4000",
+        "ZOHO_LOGGER_FILE_PATH": "/Users/mohitjoshi/Documents/GOJO/AWS/gojo-zoho-nodejs/zoho_res/zoho_logs.log",
+        "ZOHO_RESOURCE_PATH" : "/Users/mohitjoshi/Documents/GOJO/AWS/gojo_zoho_nodejs/zoho_res",
+        "ZOHO_FILE_PATH": "/Users/mohitjoshi/Documents/GOJO/AWS/gojo-zoho-nodejs/zoho_res/zoho_sdk_tokens.txt"
+}
