@@ -3,7 +3,11 @@ import { LoggerService, Logger } from '@nestjs/common';
 export class CustomLogger implements LoggerService {
 
 
-    private readonly logger = new Logger(CustomLogger.name);
+    private readonly logger;
+
+    constructor(context: string) {
+      this.logger = new Logger(context);
+    }
 
   /**
    * Write a 'log' level log.
