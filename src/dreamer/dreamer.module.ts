@@ -5,11 +5,12 @@ import {SendpulseModule} from "../external/sendpulse/sendpulse.module";
 import {ZohoModule} from "../external/zoho/zoho.module";
 import {DreamerRepository} from "./repository/dreamer.repository";
 import {UpdatePaymentDetailsUsecase} from "./usecases/update-payment-details.usecase";
+import {UpdateAdditionalDetailsUsecase} from "./usecases/update-additional-details.usecase";
 
 @Module({
     imports: [SendpulseModule, ZohoModule],
     controllers: [DreamerController],
-    providers: [CreateDreamerUsecase, UpdatePaymentDetailsUsecase, DreamerRepository]
+    providers: [CreateDreamerUsecase, UpdatePaymentDetailsUsecase, UpdateAdditionalDetailsUsecase, DreamerRepository]
 })
 export class DreamerModule {
 }
