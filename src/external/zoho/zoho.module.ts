@@ -45,7 +45,7 @@ export class ZohoModule {
     async init() {
         var user = new UserSignature("mohit.joshi@gojo.co");
         let environment = INDataCenter.PRODUCTION();
-        let sdkConfig = new SDKConfigBuilder().pickListValidation(false).autoRefreshFields(false).build();
+        let sdkConfig = new SDKConfigBuilder().pickListValidation(false).autoRefreshFields(true).build();
         let zoho_logger = Logger.getInstance(Levels.INFO, this.zohoLoggerFilePath!);
 
         //FILE PERSISTENCE STORE

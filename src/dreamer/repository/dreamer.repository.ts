@@ -6,6 +6,7 @@ import {Field} from "@zohocrm/typescript-sdk-2.0/core/com/zoho/crm/api/record/fi
 import {Choice} from "@zohocrm/typescript-sdk-2.0/utils/util/choice";
 import {CustomLogger} from "../../custom_logger";
 import {PaymentDetailsRequestDto} from "../dto/payment-details-request.dto";
+import {AdditionalDetailsRequestDto} from "../dto/additional-details-request.dto";
 
 @Injectable()
 export class DreamerRepository {
@@ -38,6 +39,25 @@ export class DreamerRepository {
         const record = new Record();
         record.addKeyValue('Provider', new Choice(paymentDetails.preferredPaymentMethod));
         record.addKeyValue('Account_Number', paymentDetails.paymentAccountNumber);
+
+        let map: Map<string, any> = await this.zohoservice.updateRecord(dreamerId, record);
+
+        this.log.log(`Successfully updated user ${dreamerId} data`);
+
+        return (map.get('id') as bigint).toString();
+    }
+
+    async updateAdditionalDetails(dreamerId: string, additionalDetails: AdditionalDetailsRequestDto): Promise<string> {
+        const record = new Record();
+        record.addKeyValue('Address_Line_1', additionalDetails.addressLine1);
+        record.addKeyValue('Address_Line_2', additionalDetails.addressLine2);
+        record.addKeyValue('City', additionalDetails.city);
+        record.addKeyValue('State', additionalDetails.state);
+        record.addKeyValue('Zip_Code', additionalDetails.pincode);
+        record.addKeyValue('Country', 'Cambodia');
+        record.addKeyValue('Alternate_Phone_Number', additionalDetails.alternatePhoneNumber);
+        record.addKeyValue('Type', new Choice(additionalDetails.employmentType));
+
 
         let map: Map<string, any> = await this.zohoservice.updateRecord(dreamerId, record);
 

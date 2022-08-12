@@ -4,12 +4,14 @@ import {AdditionalDetailsRequestDto} from "./dto/additional-details-request.dto"
 import {CreateDreamerUsecase} from "./usecases/create-dreamer.usecase";
 import {PaymentDetailsRequestDto} from "./dto/payment-details-request.dto";
 import {UpdatePaymentDetailsUsecase} from "./usecases/update-payment-details.usecase";
+import {UpdateAdditionalDetailsUsecase} from "./usecases/update-additional-details.usecase";
 
 @Controller('dreamers')
 export class DreamerController {
   constructor(
       private readonly createDreamerUsecase: CreateDreamerUsecase,
-      private readonly updatePaymentDetailsUsecase: UpdatePaymentDetailsUsecase
+      private readonly updatePaymentDetailsUsecase: UpdatePaymentDetailsUsecase,
+      private readonly updateAdditionalDetailsUsecase: UpdateAdditionalDetailsUsecase
   ) {}
 
   @Post()
@@ -18,11 +20,14 @@ export class DreamerController {
   }
 
   @Post(':dreamerId/additional_details')
-  updateAdditionalDetails(
+  async updateAdditionalDetails(
     @Param() params: any,
     @Body() request: AdditionalDetailsRequestDto,
   ) {
-    return params.dreamerId;
+    const updatedUserId = await this.updateAdditionalDetailsUsecase.update(params.dreamerId, request);
+    return {
+      id: updatedUserId,
+    };
   }
 
   @Post(':dreamerId/payment_details')
