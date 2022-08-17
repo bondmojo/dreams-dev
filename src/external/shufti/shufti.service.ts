@@ -75,12 +75,12 @@ export class ShuftiService {
         const event: KycEventDto = new KycEventDto();
         event.dreamerId = dreamerId;
         event.kycId = kycId;
-        event.first = response.verification_data.document.name.first_name;
-        event.last = response.verification_data.document.name.last_name;
-        event.full = response.verification_data.document.name.full_name;
-        event.dob = response.verification_data.document.dob;
-        event.documentNumber = response.verification_data.document.document_number;
-        event.gender = this.retrieveGender(response.verification_data.document.gender);
+        event.first = response.verification_data?.document?.name.first_name;
+        event.last = response.verification_data?.document?.name.last_name;
+        event.full = response.verification_data?.document?.name.full_name;
+        event.dob = response.verification_data?.document?.dob;
+        event.documentNumber = response.verification_data?.document?.document_number;
+        event.gender = this.retrieveGender(response.verification_data?.document?.gender);
         return event;
     }
 
