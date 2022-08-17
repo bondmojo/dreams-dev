@@ -1,7 +1,7 @@
 export class CreateDreamerDto {
-  loanAmount: number;
+  loanAmount: string;
   purpose: string;
-  pointsAmount: number;
+  pointsAmount: string;
   externalId: string;
   source: string;
 }
