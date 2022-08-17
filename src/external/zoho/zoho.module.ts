@@ -11,6 +11,7 @@ import {DBStore} from "@zohocrm/typescript-sdk-2.0/models/authenticator/store/db
 import {DBBuilder} from "@zohocrm/typescript-sdk-2.0/models/authenticator/store/db_builder";
 import {SDKConfigBuilder} from "@zohocrm/typescript-sdk-2.0/routes/sdk_config_builder";
 import {InitializeBuilder} from "@zohocrm/typescript-sdk-2.0/routes/initialize_builder"
+import * as fs from "fs";
 
 const ZOHO = {
     CLIENT_ID: "1000.2MD0ZWQ43T23HPTFJGCCNNJS728OND",
@@ -36,6 +37,7 @@ export class ZohoModule {
     constructor(private configService: ConfigService) {
         this.zohoLoggerFilePath = this.configService.get<string>('ZOHO_LOGGER_FILE_PATH');
         this.zohoResPath = this.configService.get<string>('ZOHO_RESOURCE_PATH');
+        fs.mkdirSync(this.zohoResPath!);
         this.zohoFilePath = this.configService.get<string>('ZOHO_FILE_PATH');
         this.customLogger.log("*********res path =" + this.zohoLoggerFilePath);
         this.init();
