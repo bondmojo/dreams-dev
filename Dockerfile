@@ -1,4 +1,4 @@
-FROM --platform=linux/amd64 node:14-alpine
+FROM --platform=linux/amd64 node:18-alpine
 WORKDIR /workspace
 COPY package.json yarn.lock /workspace/
 RUN yarn
