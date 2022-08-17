@@ -12,7 +12,7 @@ export class ShuftiService {
     private readonly clientId = 'aad4be30637892cd60e04ede36338a4da522c9fc57a237267de0007b160f2e3f';
     private readonly secret = '2C0yXdPyitNNQ5vlJ974sAqd9nVH4B6b';
     private readonly registrationUrl = 'https://gojo.retool.com/embedded/public/228e6187-4a66-4a81-b430-a63a646f82b8';
-    private readonly callbackUrl = 'https://eonqrmvu0pj6290.m.pipedream.net';
+    private readonly callbackUrl = 'https://dev.api.gojo.co/dreams/v1';
 
     private readonly logger = new CustomLogger(ShuftiService.name);
     constructor(private readonly httpService: HttpService, private eventEmitter: EventEmitter2) {}
