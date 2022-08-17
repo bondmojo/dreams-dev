@@ -5,13 +5,15 @@ import {CreateDreamerUsecase} from "./usecases/create-dreamer.usecase";
 import {PaymentDetailsRequestDto} from "./dto/payment-details-request.dto";
 import {UpdatePaymentDetailsUsecase} from "./usecases/update-payment-details.usecase";
 import {UpdateAdditionalDetailsUsecase} from "./usecases/update-additional-details.usecase";
+import {InitiateKycUsecase} from "./usecases/initiate-kyc.usecase";
 
 @Controller('dreamers')
 export class DreamerController {
   constructor(
       private readonly createDreamerUsecase: CreateDreamerUsecase,
       private readonly updatePaymentDetailsUsecase: UpdatePaymentDetailsUsecase,
-      private readonly updateAdditionalDetailsUsecase: UpdateAdditionalDetailsUsecase
+      private readonly updateAdditionalDetailsUsecase: UpdateAdditionalDetailsUsecase,
+      private readonly initateKycUsecase: InitiateKycUsecase
   ) {}
 
   @Post()
@@ -39,5 +41,10 @@ export class DreamerController {
     return {
         id: updatedUserId,
     };
+  }
+
+  @Post(':dreamerId/kyc')
+  async initiateKyc(@Param() params: any) {
+    return await this.initateKycUsecase.initiate(params.dreamerId);
   }
 }

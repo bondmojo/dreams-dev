@@ -7,6 +7,13 @@ import {Choice} from "@zohocrm/typescript-sdk-2.0/utils/util/choice";
 import {CustomLogger} from "../../custom_logger";
 import {PaymentDetailsRequestDto} from "../dto/payment-details-request.dto";
 import {AdditionalDetailsRequestDto} from "../dto/additional-details-request.dto";
+import {StreamWrapper} from "@zohocrm/typescript-sdk-2.0/utils/util/stream_wrapper";
+import {createWriteStream} from "fs";
+import * as os from "os";
+import * as path from 'path';
+import got from "got";
+import {promises} from "stream";
+import {KycEventDto, KYCStatus} from "../../external/shufti/dto/kyc-event.dto";
 
 @Injectable()
 export class DreamerRepository {
@@ -14,6 +21,15 @@ export class DreamerRepository {
     private readonly log = new CustomLogger(DreamerRepository.name);
 
     constructor(private readonly zohoservice: ZohoService) {}
+
+    async get(dreamer: string): Promise<DreamerModel> {
+        const dreamerModel = new DreamerModel();
+        let record: Record = await this.zohoservice.getRecord(dreamer);
+        dreamerModel.id = record.getKeyValue(Field.Leads.ID.getAPIName());
+        dreamerModel.externalId = record.getKeyValue('Telegram_Chat_ID');
+        //TODO: Map other values as required
+        return dreamerModel;
+    }
 
     async save(dreamer: DreamerModel): Promise<string> {
         const record = new Record();
@@ -65,4 +81,60 @@ export class DreamerRepository {
 
         return (map.get('id') as bigint).toString();
     }
+
+    async saveKycInitialDetails(dreamerId: string, kycId: string): Promise<string> {
+        const record = new Record();
+        record.addKeyValue('KYC_Id', kycId);
+        record.addKeyValue('Successful_KYC_Time', new Date());
+        record.addKeyValue('KYC_Status', new Choice('Initiated'));
+
+        let map: Map<string, any> = await this.zohoservice.updateRecord(dreamerId, record);
+
+        this.log.log(`Successfully updated user ${dreamerId} data`);
+
+        return (map.get('id') as bigint).toString();
+    }
+
+    async updatekycDetails(event: KycEventDto): Promise<string> {
+        this.log.log("Event received");
+        const filesToDeletes: string[] = [];
+        const record = new Record();
+        record.addKeyValue('KYC_End_Time', new Date());
+        if(event.status == KYCStatus.SUCCESS || event.status == KYCStatus.REJECTED) {
+            record.addKeyValue('National_Id', event.documentNumber);
+            record.addKeyValue('First_Name_On_Document', event.first);
+            record.addKeyValue('Last_Name_On_Document', event.first);
+            record.addKeyValue('DOB_On_Document', event.dob);
+            record.addKeyValue('Name1', event.full);
+            record.addKeyValue('Gender_On_Document', new Choice(event.gender));
+            record.addKeyValue('KYC_Status', new Choice(event.status == KYCStatus.SUCCESS? 'Success': 'Failed'));
+            await this.addDocument(record, filesToDeletes, event.dreamerId, event.kycId, event.documentProof, 'document', 'KYC_Documents');
+            await this.addDocument(record, filesToDeletes, event.dreamerId, event.kycId, event.faceProof, 'face', 'KYC_Documents');
+        } else {
+            record.addKeyValue('KYC_Status', new Choice('Failed'));
+            record.addKeyValue('KYC_Rejection_Reason', event.rejectionReason);
+        }
+        let map: Map<string, any> = await this.zohoservice.updateRecord(event.dreamerId, record);
+
+        this.log.log(`Successfully updated user ${event.dreamerId} data`);
+
+        return (map.get('id') as bigint).toString();
+    }
+
+    async addDocument(record: Record, filesToDeletes: string[],  dreamerId: string, kycId:string, proof: string, name: string, field: string) {
+        if(proof) {
+            const fileName = `${dreamerId}-${kycId}-${name}.jpg`;
+            const fileLocation = path.join(os.tmpdir(), fileName);
+            this.log.log(`File will be generated at ${fileLocation}`);
+
+            await promises.pipeline(got.stream(proof), createWriteStream(fileLocation));
+
+            const streamWrapper = new StreamWrapper(undefined, undefined, fileLocation);
+            let map: Map<string, any> = await this.zohoservice.uploadAttachments(dreamerId, streamWrapper);
+
+            const fileId = (map.get('id')).toString();
+            this.log.log(`Attachment uploaded to the Zoho server ${fileId}`);
+        }
+    }
+
 }
