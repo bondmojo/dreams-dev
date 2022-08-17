@@ -37,7 +37,7 @@ export class ZohoModule {
     constructor(private configService: ConfigService) {
         this.zohoLoggerFilePath = this.configService.get<string>('ZOHO_LOGGER_FILE_PATH');
         this.zohoResPath = this.configService.get<string>('ZOHO_RESOURCE_PATH');
-        fs.mkdirSync(this.zohoResPath!);
+        if(!fs.existsSync(this.zohoResPath!)) fs.mkdirSync(this.zohoResPath!);
         this.zohoFilePath = this.configService.get<string>('ZOHO_FILE_PATH');
         this.customLogger.log("*********res path =" + this.zohoLoggerFilePath);
         this.init();
