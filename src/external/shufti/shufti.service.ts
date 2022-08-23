@@ -58,8 +58,8 @@ export class ShuftiService {
         } else if(response.event === 'verification.declined' || response.event === 'verification.rejected') {
             const data: ShuftiResponseDto = await this.fetchKycData(kycId);
             this.logger.log(`Verification rejected for ${dreamerId} with kyc id ${kycId}`);
-            event.documentProof = data.proofs.document.proof;
-            event.faceProof = data.proofs.face.proof;
+            event.documentProof = data.proofs?.document?.proof;
+            event.faceProof = data.proofs?.face?.proof;
             event.status = KYCStatus.REJECTED;
             event.rejectionReason = data.declined_reason;
             this.eventEmitter.emit('kyc.callback', event);
