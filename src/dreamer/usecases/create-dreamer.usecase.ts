@@ -25,8 +25,8 @@ export class CreateDreamerUsecase {
     private populateRequestData(dreamer: DreamerModel, createDreamerDto: CreateDreamerDto) {
         dreamer.externalId = createDreamerDto.externalId;
         dreamer.loanRequest = new LoanRequest();
-        dreamer.loanRequest.amount = createDreamerDto.loanAmount;
-        dreamer.loanRequest.pointsAmount = createDreamerDto.pointsAmount;
+        dreamer.loanRequest.amount = Number(createDreamerDto.loanAmount);
+        dreamer.loanRequest.pointsAmount = Number(createDreamerDto.pointsAmount);
     }
 
     private popluateSendPulseData(dreamer: DreamerModel, contact: SendPulseContactDto) {

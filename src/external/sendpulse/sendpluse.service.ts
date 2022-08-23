@@ -6,6 +6,7 @@ import {SendPulseTokenDto} from "./dto/send-pulse-token.dto";
 import { firstValueFrom } from 'rxjs';
 import {CustomLogger} from "../../custom_logger";
 import {SendPulseResponseDto} from "./dto/send-pulse-response.dto";
+import {DreamerModel} from "../../dreamer/usecases/model/dreamer.model";
 
 @Injectable()
 export class SendpluseService{
@@ -27,8 +28,17 @@ export class SendpluseService{
         return response.data.data;
     }
 
-    runFlow(runFlowRequest: RunFlowRequestDto) {
-        return new RunFlowRequestDto();
+    async runFlow(model: DreamerModel, flow: string) {
+        const token = await this.generateToken();
+        this.log.log("Token successfully generated");
+        const response = await firstValueFrom(this.httpService.post<SendPulseResponseDto<SendPulseContactDto>>(
+            this.url+'/telegram/flows/run',
+            {contact_id: model.externalId, flow_id: flow},
+            {
+                headers: {'Authorization': 'Bearer '+ token},
+            }
+        ));
+        this.log.log(`Successfully initiated flow ${flow} with response ${response.statusText}`)
     }
 
     async generateToken(): Promise<string> {

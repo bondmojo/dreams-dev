@@ -5,17 +5,22 @@ import {CreateDreamerUsecase} from "./usecases/create-dreamer.usecase";
 import {PaymentDetailsRequestDto} from "./dto/payment-details-request.dto";
 import {UpdatePaymentDetailsUsecase} from "./usecases/update-payment-details.usecase";
 import {UpdateAdditionalDetailsUsecase} from "./usecases/update-additional-details.usecase";
+import {InitiateKycUsecase} from "./usecases/initiate-kyc.usecase";
+import {CustomLogger} from "../custom_logger";
 
 @Controller('dreamers')
 export class DreamerController {
+  private readonly logger = new CustomLogger(DreamerController.name);
   constructor(
       private readonly createDreamerUsecase: CreateDreamerUsecase,
       private readonly updatePaymentDetailsUsecase: UpdatePaymentDetailsUsecase,
-      private readonly updateAdditionalDetailsUsecase: UpdateAdditionalDetailsUsecase
+      private readonly updateAdditionalDetailsUsecase: UpdateAdditionalDetailsUsecase,
+      private readonly initateKycUsecase: InitiateKycUsecase
   ) {}
 
   @Post()
   async createDreamer(@Body() createDreamerRequestDto: CreateDreamerDto) {
+    this.logger.log(`Creating dreamers with request ${JSON.stringify(createDreamerRequestDto)}`);
     return await this.createDreamerUsecase.create(createDreamerRequestDto);
   }
 
@@ -24,6 +29,7 @@ export class DreamerController {
     @Param() params: any,
     @Body() request: AdditionalDetailsRequestDto,
   ) {
+    this.logger.log(`Updating additional details for request ${JSON.stringify(request)}`);
     const updatedUserId = await this.updateAdditionalDetailsUsecase.update(params.dreamerId, request);
     return {
       id: updatedUserId,
@@ -35,9 +41,16 @@ export class DreamerController {
       @Param() params: any,
       @Body() request: PaymentDetailsRequestDto,
   ) {
+    this.logger.log(`Updating payment details for request ${JSON.stringify(request)}`);
       const updatedUserId = await this.updatePaymentDetailsUsecase.update(params.dreamerId, request);
     return {
         id: updatedUserId,
     };
+  }
+
+  @Post(':dreamerId/kyc')
+  async initiateKyc(@Param() params: any) {
+    this.logger.log(`Generating KYC for dreamer ${params.dreamerId}`);
+    return await this.initateKycUsecase.initiate(params.dreamerId);
   }
 }

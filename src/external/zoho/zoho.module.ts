@@ -11,13 +11,14 @@ import {DBStore} from "@zohocrm/typescript-sdk-2.0/models/authenticator/store/db
 import {DBBuilder} from "@zohocrm/typescript-sdk-2.0/models/authenticator/store/db_builder";
 import {SDKConfigBuilder} from "@zohocrm/typescript-sdk-2.0/routes/sdk_config_builder";
 import {InitializeBuilder} from "@zohocrm/typescript-sdk-2.0/routes/initialize_builder"
+import * as fs from "fs";
 
 const ZOHO = {
     CLIENT_ID: "1000.2MD0ZWQ43T23HPTFJGCCNNJS728OND",
     SECRET: "f782b50389e59236c2c5ddef560af6d28dd46fa0c2",
     USER: "mohit.joshi@gojo.co",
     ID: "60015610290",
-    GRANT_TOKEN: "1000.8d05162b3e3ba8ddb331611123711740.321876142014cb31a012641b7734efd2"
+    GRANT_TOKEN: "1000.9e925ea019d48cc36e2ca782fcffedd9.8ef89227b2dd07e0fe268b954e3e1d26"
 }
 
 @Module({
@@ -36,6 +37,7 @@ export class ZohoModule {
     constructor(private configService: ConfigService) {
         this.zohoLoggerFilePath = this.configService.get<string>('ZOHO_LOGGER_FILE_PATH');
         this.zohoResPath = this.configService.get<string>('ZOHO_RESOURCE_PATH');
+        if(!fs.existsSync(this.zohoResPath!)) fs.mkdirSync(this.zohoResPath!);
         this.zohoFilePath = this.configService.get<string>('ZOHO_FILE_PATH');
         this.customLogger.log("*********res path =" + this.zohoLoggerFilePath);
         this.init();
@@ -50,10 +52,10 @@ export class ZohoModule {
 
         //FILE PERSISTENCE STORE
         let tokenstore: DBStore = new DBBuilder()
-            .host('localhost')
+            .host('dream-db.cgybhaewci9o.ap-southeast-1.rds.amazonaws.com')
             .databaseName('zohooauth')
-            .userName('root')
-            .password('mysql')
+            .userName('dreamservice')
+            .password('BSE97FGdC')
             .portNumber(3306)
             .build();
 
