@@ -107,6 +107,7 @@ export class DreamerRepository {
             record.addKeyValue('DOB_On_Document', event.dob);
             record.addKeyValue('Name1', event.full);
             record.addKeyValue('Gender_On_Document', new Choice(event.gender));
+            record.addKeyValue('KYC_Rejection_Reason', event.rejectionReason);
             record.addKeyValue('KYC_Status', new Choice(event.status == KYCStatus.SUCCESS? 'Success': 'Failed'));
             await this.addDocument(record, filesToDeletes, event.dreamerId, event.kycId, event.documentProof, 'document', 'KYC_Documents');
             await this.addDocument(record, filesToDeletes, event.dreamerId, event.kycId, event.faceProof, 'face', 'KYC_Documents');
