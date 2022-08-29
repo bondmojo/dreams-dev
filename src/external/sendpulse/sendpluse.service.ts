@@ -12,15 +12,20 @@ import {DreamerModel} from "../../dreamer/usecases/model/dreamer.model";
 export class SendpluseService{
     private readonly url = 'https://api.sendpulse.com';
     private readonly log = new CustomLogger(SendpluseService.name);
+    private access_token_expiry_time =0;
+    private token: String;
+
     constructor(private readonly httpService: HttpService) {}
 
     async getContact(id: string): Promise<SendPulseContactDto> {
-        const token = await this.generateToken();
-        this.log.log("Token successfully generated");
+        if(Date.now() >= this.access_token_expiry_time){
+            this.token = await this.generateToken();
+            this.log.log("Token successfully generated");    
+        }
         const response = await firstValueFrom(this.httpService.get<SendPulseResponseDto<SendPulseContactDto>>(
             this.url+'/telegram/contacts/get',
             {
-                headers: {'Authorization': 'Bearer '+ token},
+                headers: {'Authorization': 'Bearer '+ this.token},
                 params: {id: id}
             }
         ));
@@ -29,13 +34,15 @@ export class SendpluseService{
     }
 
     async runFlow(model: DreamerModel, flow: string) {
-        const token = await this.generateToken();
-        this.log.log("Token successfully generated");
+        if(Date.now() >= this.access_token_expiry_time){
+            this.token = await this.generateToken();
+            this.log.log("Token successfully generated");    
+        }
         const response = await firstValueFrom(this.httpService.post<SendPulseResponseDto<SendPulseContactDto>>(
             this.url+'/telegram/flows/run',
-            {contact_id: model.externalId, flow_id: flow},
+            {contact_id: model.externalId, flow_id: flow, external_data: model.external_data}, 
             {
-                headers: {'Authorization': 'Bearer '+ token},
+                headers: {'Authorization': 'Bearer '+ this.token},
             }
         ));
         this.log.log(`Successfully initiated flow ${flow} with response ${response.statusText}`)
@@ -49,7 +56,9 @@ export class SendpluseService{
             this.url+'/oauth/access_token',
             {client_id: clientId, client_secret: clientSecret, grant_type: granttype},
         ));
-        this.log.log(`Received token from the sendpulse server`);
+        this.access_token_expiry_time= Date.now() + response.data.expires_in*1000;
+
+        this.log.log(`Received token from the sendpulse server which expires in ` + this.access_token_expiry_time);
         return response.data.access_token;
     }
 }
