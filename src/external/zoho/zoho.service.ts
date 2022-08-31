@@ -119,15 +119,15 @@ export class ZohoService {
             throw new HttpException('Invalid data pushed to zoho', HttpStatus.BAD_REQUEST);
         }
 
-        if (responseObject instanceof APIException) {
-            throw new HttpException(responseObject.getMessage().getValue(), HttpStatus.BAD_REQUEST);
+        if (responseObject.constructor.name === 'APIException') {
+            throw new HttpException((responseObject as SuccessResponse).getMessage().getValue(), HttpStatus.BAD_REQUEST);
         }
 
         let actionResponses: ActionResponse[] = (responseObject as ActionWrapper).getData();
         let actionResponse = actionResponses[0];
 
-        if (actionResponse instanceof APIException) {
-            throw new HttpException(actionResponse.getMessage().getValue(), HttpStatus.BAD_REQUEST);
+        if (actionResponse.constructor.name === 'APIException') {
+            throw new HttpException((actionResponse as SuccessResponse).getMessage().getValue(), HttpStatus.BAD_REQUEST);
         }
 
         this.log.log("Successfully performed operation on Zoho");

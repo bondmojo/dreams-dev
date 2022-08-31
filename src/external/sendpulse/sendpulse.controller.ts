@@ -3,7 +3,8 @@ import { SendpluseService } from './sendpluse.service';
 import { SendMessageRequestDto } from './dto/send-message-request.dto';
 import { RunFlowRequestDto } from './dto/run-flow-request.dto';
 import {CustomLogger} from "../../custom_logger";
-import { DreamerModel } from 'src/dreamer/usecases/model/dreamer.model';
+import { DreamerModel } from '../../dreamer/usecases/model/dreamer.model';
+import { SendApprovalMessageRequestDto } from './dto/send-approval-message-request.dto';
 
 
 @Controller('sendpulse')
@@ -28,4 +29,25 @@ export class SendpulseController {
     await this.sendpulseService.runFlow(model, this.SENDPULSE_MESSAGING_FLOWID) ;
     return {"status": 'ok'}
   }
+
+  @Post('/sendApprovalMessage')
+  async sendApprovalMessage(@Body() messageObj: SendApprovalMessageRequestDto ) {
+    this.log.log(JSON.stringify(messageObj));
+
+    let model = new DreamerModel();
+    model.externalId=messageObj.contact_id;
+
+    //TODO: Language Support
+    let approval_message = "Your loan has been rejected";
+    if(messageObj.approved === "Approved"){
+      this.log.log(JSON.stringify("received loan is approved"));
+      approval_message ="Your loan request for $" +  messageObj.loan_amount + "has been approved";
+    }
+    model.external_data = {"message": approval_message};
+
+    await this.sendpulseService.runFlow(model, this.SENDPULSE_MESSAGING_FLOWID) ;
+    return {"status": 'ok'}
+  }
+
+
 }
