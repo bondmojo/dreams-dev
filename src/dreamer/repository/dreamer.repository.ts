@@ -73,6 +73,7 @@ export class DreamerRepository {
         record.addKeyValue('Country', 'Cambodia');
         record.addKeyValue('Alternate_Phone_Number', additionalDetails.alternatePhoneNumber);
         record.addKeyValue('Type', new Choice(additionalDetails.employmentType));
+        record.addKeyValue('Lead_Status', new Choice("KYC Details Submitted-2"));
 
 
         let map: Map<string, any> = await this.zohoservice.updateRecord(dreamerId, record);

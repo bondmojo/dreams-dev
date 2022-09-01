@@ -1,4 +1,4 @@
-import {Injectable} from "@nestjs/common";
+import {HttpException, HttpStatus, Injectable} from "@nestjs/common";
 import {SendPulseContactDto} from "./dto/send-pulse-contact.dto";
 import {RunFlowRequestDto} from "./dto/run-flow-request.dto";
 import {HttpService} from "@nestjs/axios";
@@ -22,6 +22,7 @@ export class SendpluseService{
             this.token = await this.generateToken();
             this.log.log("Token successfully generated");    
         }
+        try{
         const response = await firstValueFrom(this.httpService.get<SendPulseResponseDto<SendPulseContactDto>>(
             this.url+'/telegram/contacts/get',
             {
@@ -31,6 +32,15 @@ export class SendpluseService{
         ));
         this.log.log(`Successfully retrieved user data from send pulse ${response.statusText}`)
         return response.data.data;
+        }
+        catch(error){
+            this.log.log('send pulse error' + error);
+            throw new HttpException({
+                status: HttpStatus.BAD_GATEWAY,
+                error: 'sendpulse is not reachable',
+              }, HttpStatus.BAD_GATEWAY);
+        }
+
     }
 
     async runFlow(model: DreamerModel, flow: string) {
