@@ -10,7 +10,6 @@ import { CalculateLoanDto } from './dto/calculate-loan.dto';
 import { CalculationDto } from './dto/calculation.dto';
 import { SendpulseHelperService } from './sendpulse-helper.service';
 import { CalculationResultDto } from './dto/calculation-result.dto';
-import { id } from 'date-fns/locale';
 
 @Controller('sendpulse')
 export class SendpulseController {
