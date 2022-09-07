@@ -102,6 +102,24 @@ export class DreamerRepository {
         const record = new Record();
         record.addKeyValue('KYC_End_Time', new Date());
         if(event.status == KYCStatus.SUCCESS || event.status == KYCStatus.REJECTED) {
+
+            try{
+                if(event.dob){
+                   const today = new Date();
+                    const dateOfBirth = new Date(event.dob);
+                   
+                    var age = today.getFullYear() - dateOfBirth.getFullYear();
+                    const m = today.getMonth() - dateOfBirth.getMonth();
+    
+                    if (m < 0 || (m === 0 && today.getDate() < dateOfBirth.getDate())){
+                       age--;
+                    }
+                    this.log.log("Now Adding Age in Zoho=" +age);
+                    record.addKeyValue('Age', event.dob);
+                 }   
+            }catch(error){
+                    this.log.log("Error in Calculating Age " + error);
+            }
             record.addKeyValue('National_Id', event.documentNumber);
             record.addKeyValue('First_Name_On_Document', event.first);
             record.addKeyValue('Last_Name_On_Document', event.first);
