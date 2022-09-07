@@ -115,7 +115,7 @@ export class DreamerRepository {
                        age--;
                     }
                     this.log.log("Now Adding Age in Zoho=" +age);
-                    record.addKeyValue('Age', event.dob);
+                    record.addKeyValue('Age', age);
                  }   
             }catch(error){
                     this.log.log("Error in Calculating Age " + error);
