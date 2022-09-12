@@ -31,7 +31,7 @@ export class SendpulseController {
     return {"status": 'ok'}
   }
 
-  @Post('/sendApprovalMessage')
+  @Post('/updateApplicationStatus')
   async sendApprovalMessage(@Body() reqData: SendApprovalMessageRequestDto ) {
     this.log.log(JSON.stringify(reqData));
 
