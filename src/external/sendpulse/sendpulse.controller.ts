@@ -32,6 +32,35 @@ export class SendpulseController {
   }
 
   @Post('/updateApplicationStatus')
+  async updateApplicationStatus(@Body() reqData: SendApprovalMessageRequestDto ) {
+    this.log.log(JSON.stringify(reqData));
+
+    let appStatusDto = new SetVariableRequestDto();
+    appStatusDto.contact_id=reqData.contact_id;
+    appStatusDto.variable_name="application_status";
+    appStatusDto.variable_id="6319a9390219f75deb1c07d3";
+    appStatusDto.variable_value= reqData.application_status;
+    await this.sendpulseService.setVariable(appStatusDto);
+
+    let amountDto = new SetVariableRequestDto();
+    amountDto.contact_id=reqData.contact_id;
+    amountDto.variable_name="approved_rejected_amount";
+    amountDto.variable_id="6319aa4720f4c45a1b390826";
+    amountDto.variable_value= ""+ reqData.loan_amount;
+    await this.sendpulseService.setVariable(amountDto);
+
+    let model = new DreamerModel();
+    model.externalId=reqData.contact_id;
+
+    //TODO: Language Support
+    let approval_message = "There have been some issue with loan request. We will contact you soon.";
+    model.external_data = {"message": approval_message};
+
+    await this.sendpulseService.runFlow(model, this.SENDPULSE_MESSAGING_FLOWID) ;
+    return {"status": 'ok'}
+  }
+
+  @Post('/sendApprovalMessage')
   async sendApprovalMessage(@Body() reqData: SendApprovalMessageRequestDto ) {
     this.log.log(JSON.stringify(reqData));
 
