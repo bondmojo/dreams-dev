@@ -5,6 +5,7 @@ import { RunFlowRequestDto } from './dto/run-flow-request.dto';
 import {CustomLogger} from "../../custom_logger";
 import { DreamerModel } from '../../dreamer/usecases/model/dreamer.model';
 import { SendApprovalMessageRequestDto } from './dto/send-approval-message-request.dto';
+import { SetVariableRequestDto } from './dto/set-variable-request.dto';
 
 
 @Controller('sendpulse')
@@ -31,18 +32,28 @@ export class SendpulseController {
   }
 
   @Post('/sendApprovalMessage')
-  async sendApprovalMessage(@Body() messageObj: SendApprovalMessageRequestDto ) {
-    this.log.log(JSON.stringify(messageObj));
+  async sendApprovalMessage(@Body() reqData: SendApprovalMessageRequestDto ) {
+    this.log.log(JSON.stringify(reqData));
+
+    let appStatusDto = new SetVariableRequestDto();
+    appStatusDto.contact_id=reqData.contact_id;
+    appStatusDto.variable_name="application_status";
+    appStatusDto.variable_id="6319a9390219f75deb1c07d3";
+    appStatusDto.variable_value= reqData.application_status;
+    await this.sendpulseService.setVariable(appStatusDto);
+
+    let amountDto = new SetVariableRequestDto();
+    amountDto.contact_id=reqData.contact_id;
+    amountDto.variable_name="approved_rejected_amount";
+    amountDto.variable_id="6319aa4720f4c45a1b390826";
+    amountDto.variable_value= ""+ reqData.loan_amount;
+    await this.sendpulseService.setVariable(amountDto);
 
     let model = new DreamerModel();
-    model.externalId=messageObj.contact_id;
+    model.externalId=reqData.contact_id;
 
     //TODO: Language Support
-    let approval_message = "Your loan has been rejected";
-    if(messageObj.approved === "Approved"){
-      this.log.log(JSON.stringify("received loan is approved"));
-      approval_message ="Your loan request for $" +  messageObj.loan_amount + "has been approved";
-    }
+    let approval_message = "There have been some issue with loan request. We will contact you soon.";
     model.external_data = {"message": approval_message};
 
     await this.sendpulseService.runFlow(model, this.SENDPULSE_MESSAGING_FLOWID) ;
