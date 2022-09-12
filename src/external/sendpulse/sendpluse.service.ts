@@ -78,8 +78,9 @@ export class SendpluseService{
     }
 
     async checkAndGenerateToken(): Promise<string> {
-        if(Date.now() < this.access_token_expiry_time){
-           this.log.log("Valid token Available.")
+        if(Date.now() < this.access_token_expiry_time && this.token){
+           this.log.log("Valid token Available." + this.token);
+           return ""+this.token;
         }
 
         const clientId = '4b0aae3eeb0b3fc5fa57b615d02705cb';
@@ -89,8 +90,9 @@ export class SendpluseService{
             this.url+'/oauth/access_token',
             {client_id: clientId, client_secret: clientSecret, grant_type: granttype},
         ));
+        this.token = response.data.access_token;
         this.access_token_expiry_time= Date.now() + response.data.expires_in*1000;
-
+        
         this.log.log(`Generated token from the sendpulse server which expires in ` + this.access_token_expiry_time);
         return response.data.access_token;
     }
