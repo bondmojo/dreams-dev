@@ -1,5 +1,5 @@
 export class SendApprovalMessageRequestDto {
-contact_id: string;
+sendpulse_user_id: string;
 message: string;
 loan_amount: number;
 application_status: string;
