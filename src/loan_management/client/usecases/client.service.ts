@@ -1,8 +1,8 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateClientDto, GetClientDto } from "../dto";
-import { CustomLogger } from "../../../../custom_logger";
-import { Client } from '../../../../entities/client.entity';
+import { CustomLogger } from "../../../custom_logger";
+import { Client } from '../../../entities/client.entity';
 import { Repository } from 'typeorm';
 
 @Injectable()

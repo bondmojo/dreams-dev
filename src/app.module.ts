@@ -7,7 +7,7 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
 import { HealthCheckController } from "./config/health-check.controller";
 import { TypeOrmModule } from '@nestjs/typeorm';
 import DatabaseConfig from './config/database.config';
-import { ClientModule } from "./modules/loan_management/client/client.module";
+import { ClientModule } from "./loan_management/client/client.module";
 
 @Module({
   controllers: [HealthCheckController],

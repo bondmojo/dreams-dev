@@ -1,7 +1,7 @@
 import { CreateClientDto } from './dto';
 import { Body, Controller, Param, Post, Get } from '@nestjs/common';
 import { ClientService } from "./usecases/client.service";
-import { CustomLogger } from "../../../custom_logger";
+import { CustomLogger } from "../../custom_logger";
 
 @Controller('client')
 export class ClientController {
