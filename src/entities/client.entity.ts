@@ -3,8 +3,10 @@ import {
   Column,
   PrimaryColumn,
   CreateDateColumn,
-  UpdateDateColumn
+  UpdateDateColumn,
+  OneToMany
 } from 'typeorm';
+import { Loan } from './loan.entity';
 @Entity({ name: "clients", synchronize: true })
 export class Client {
   @PrimaryColumn()
@@ -12,6 +14,9 @@ export class Client {
 
   @Column({ nullable: true })
   first: string;
+
+  @OneToMany(() => Loan, loan => loan.client)
+  loan: Loan[]
 
   @Column({ nullable: true })
   zoho_id: string;
