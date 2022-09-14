@@ -52,7 +52,7 @@ export class ZohoModule {
 
         //FILE PERSISTENCE STORE
         let tokenstore: DBStore = new DBBuilder()
-            .host('dream-db.cgybhaewci9o.ap-southeast-1.rds.amazonaws.com')
+            .host('dreams-db.cgybhaewci9o.ap-southeast-1.rds.amazonaws.com')
             .databaseName('zohooauth')
             .userName('dreamservice')
             .password('BSE97FGdC')
