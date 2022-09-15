@@ -6,7 +6,7 @@ import {
   UpdateDateColumn,
   OneToMany
 } from 'typeorm';
-import { Loan } from './loan.entity';
+import { Loan } from '../../loan/entities/loan.entity';
 @Entity({ name: "clients", synchronize: true })
 export class Client {
   @PrimaryColumn()

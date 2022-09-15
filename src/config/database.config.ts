@@ -8,6 +8,6 @@ const database_config: MysqlConnectionOptions = {
     password: process.env.DATABASE_PASSWORD,
     database: process.env.DATABASE_NAME,
     synchronize: process.env.DATABASE_SYNCHRONIZE === 'true',
-    entities: ['dist/entities/*.entity.js'],
+    entities: ['dist/**/entities/*.entity.js', 'dist/**/**/entities/*.entity.js'],
 }
 export default database_config
