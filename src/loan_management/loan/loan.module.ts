@@ -10,6 +10,7 @@ import { LoanService } from './usecases/loan.service';
   imports: [TypeOrmModule.forFeature([Loan])],
   controllers: [LoanController],
   providers: [
-    LoanService]
+    LoanService],
+  exports: [LoanService]
 })
 export class LoanModule { }
