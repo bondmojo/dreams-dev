@@ -1,4 +1,4 @@
-import { CreateClientDto } from './dto';
+import { CreateClientAndLoanDto } from './dto';
 import { Body, Controller, Param, Post, Get } from '@nestjs/common';
 import { ClientService } from "./usecases/client.service";
 import { CustomLogger } from "../../custom_logger";
@@ -10,13 +10,13 @@ export class ClientController {
     private readonly clientService: ClientService,
   ) { }
 
-  @Post('create')
-  async createClient(@Body() createClientRequestDto: CreateClientDto) {
-    this.logger.log(`Creating client with request ${JSON.stringify(createClientRequestDto)}`);
-    return await this.clientService.create(createClientRequestDto);
+  @Post()
+  async createClientAndLoan(@Body() createClientAndLoanDto: CreateClientAndLoanDto) {
+    this.logger.log(`Creating client with request ${JSON.stringify(createClientAndLoanDto)}`);
+    return await this.clientService.create(createClientAndLoanDto);
   }
 
-  @Get('client/:id')
+  @Get(':id')
   async findOne(@Param('id') id: string) {
     this.logger.log(`Getting client with request ${+id}`);
     return await this.clientService.findOne({ id: id });
