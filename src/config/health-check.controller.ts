@@ -1,9 +1,13 @@
 import {Controller, Get} from "@nestjs/common";
+import { CustomLogger } from "src/custom_logger";
 
 @Controller("admin")
 export class HealthCheckController {
+
+    private readonly logger = new CustomLogger(HealthCheckController.name);
     @Get("health")
     check() {
+        this.logger.log("HealthCheckController ENV vairable =" + process.env.DB_NAME);
         return {
             status: 'OK'
         }

@@ -10,7 +10,7 @@ export class ClientController {
     private readonly clientService: ClientService,
   ) { }
 
-  @Post('create')
+  @Post()
   async createClientAndLoan(@Body() createClientAndLoanDto: CreateClientAndLoanDto) {
     this.logger.log(`Creating client with request ${JSON.stringify(createClientAndLoanDto)}`);
     return await this.clientService.create(createClientAndLoanDto);
