@@ -6,7 +6,7 @@ import {
   JoinColumn
 } from 'typeorm';
 
-import { Client } from "./client.entity";
+import { Client } from "../../client/entities/client.entity";
 
 @Entity({ name: "loans", synchronize: true })
 export class Loan {

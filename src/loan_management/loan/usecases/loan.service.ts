@@ -2,7 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { InjectRepository } from '@nestjs/typeorm';
 import { GetLoanDto } from "../dto";
 import { CustomLogger } from "../../../custom_logger";
-import { Loan } from '../../../entities/loan.entity';
+import { Loan } from '../entities/loan.entity';
 import { Repository } from 'typeorm';
 
 @Injectable()
