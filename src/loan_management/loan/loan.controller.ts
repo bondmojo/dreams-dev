@@ -10,11 +10,7 @@ export class LoanController {
     private readonly loanService: LoanService,
   ) { }
 
-<<<<<<< HEAD
-  @Post('create')
-=======
   @Post()
->>>>>>> dev
   async createLoan(@Body() createLoanDto: CreateLoanDto) {
     this.logger.log(`Creating loan with request ${JSON.stringify(createLoanDto)}`);
     return await this.loanService.create(createLoanDto);
