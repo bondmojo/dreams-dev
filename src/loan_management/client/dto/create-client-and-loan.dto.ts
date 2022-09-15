@@ -1,4 +1,3 @@
-
 export class CreateClientAndLoanDto {
   // Client Fields
   id: string;
@@ -28,4 +27,3 @@ export class CreateClientAndLoanDto {
   paid_date: Date;
   tenure_in_months: number;
 }
-
