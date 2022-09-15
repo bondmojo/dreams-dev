@@ -1,4 +1,4 @@
-import { CreateClientAndLoanDto } from './dto';
+import { CreateClientAndLoanDto } from './dto/create-client-and-loan.dto';
 import { Body, Controller, Param, Post, Get } from '@nestjs/common';
 import { ClientService } from "./usecases/client.service";
 import { CustomLogger } from "../../custom_logger";
