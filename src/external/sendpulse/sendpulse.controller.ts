@@ -6,7 +6,10 @@ import {CustomLogger} from "../../custom_logger";
 import { DreamerModel } from '../../dreamer/usecases/model/dreamer.model';
 import { SendApprovalMessageRequestDto } from './dto/send-approval-message-request.dto';
 import { SetVariableRequestDto } from './dto/set-variable-request.dto';
-
+import { CalculateLoanDto } from './dto/calculate-loan.dto';
+import { CalculationDto } from './dto/calculation.dto';
+import { SendpulseHelperService } from './sendpulse-helper.service';
+import { CalculationResultDto } from './dto/calculation-result.dto';
 
 @Controller('sendpulse')
 export class SendpulseController {
@@ -15,9 +18,22 @@ export class SendpulseController {
   private readonly SENDPULSE_MESSAGING_FLOWID="62fc9cd35c6b0b21d713cdea";
 
   constructor(
-    private readonly sendpulseService: SendpluseService,
+    private readonly sendpulseService: SendpluseService,    
+    private readonly sendpulseHelperServie: SendpulseHelperService
+
    ) {}
 
+   @Post('/calculator')
+   calculator(@Body() calculationDto: CalculationDto): CalculationResultDto {
+     this.log.log(`Received request to calculate ${JSON.stringify(calculationDto)}`);
+     return this.sendpulseHelperServie.calculate(calculationDto);
+   }
+ 
+   @Post('/calculator/loan')
+   loanCalculator(@Body() calculateLoanDto: CalculateLoanDto): CalculationResultDto {
+     this.log.log(`Received request to calculate loan ${JSON.stringify(calculateLoanDto)}`);
+     return this.sendpulseHelperServie.calculateLoan(calculateLoanDto);
+   }
 
   @Post('/sendMessage')
   async sendMessage(@Body() messageObj: SendMessageRequestDto ) {
