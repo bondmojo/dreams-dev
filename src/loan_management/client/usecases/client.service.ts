@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from '@nestjs/typeorm';
-import { CreateClientAndLoanDto, GetClientDto } from "../dto";
+import { CreateClientAndLoanDto, CreateClientDto, GetClientDto } from "../dto";
 import { CustomLogger } from "../../../custom_logger";
 import { Client } from '../entities/client.entity';
 import { Repository } from 'typeorm';
@@ -18,8 +18,9 @@ export class ClientService {
     async create(createClientAndLoanDto: CreateClientAndLoanDto): Promise<Client> {
 
         // Generating client id
-        createClientAndLoanDto.id = createClientAndLoanDto.client_id = 'CL' + Math.floor(Math.random() * 100000000);
-        const clientFromDb = await this.clientRepository.save(createClientAndLoanDto);
+        const createClientDto: CreateClientDto = createClientAndLoanDto;
+        createClientDto.id = createClientAndLoanDto.client_id = 'CL' + Math.floor(Math.random() * 100000000);
+        const clientFromDb = await this.clientRepository.save(createClientDto);
 
         // Create loan for client request object
         await this.loanService.create(createClientAndLoanDto);;
