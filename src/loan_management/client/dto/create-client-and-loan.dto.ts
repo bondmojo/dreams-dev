@@ -16,6 +16,8 @@ export class CreateClientAndLoanDto {
   summary_has_loan_in_arrear: string;
   summary_membership_level: string;
   acc_update_date: string;
+  dream_points_earned: number;
+  dream_points_committed: number;
 
   // Loan Fields
   client_id: string;

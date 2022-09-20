@@ -8,6 +8,8 @@ export class CreateClientDto {
   nickname: string;
   dob: Date;
   mobile: string;
+  dream_points_earned: number;
+  dream_points_committed: number;
   acc_provider_type: string;
   acc_number: string;
   acc_note: string;
