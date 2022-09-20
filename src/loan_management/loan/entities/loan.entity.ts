@@ -2,6 +2,8 @@ import {
   Entity,
   Column,
   PrimaryColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
   ManyToOne,
   JoinColumn
 } from 'typeorm';
@@ -30,16 +32,22 @@ export class Loan {
   status: string;
 
   @Column({ type: 'timestamp', nullable: true })
-  created_date: string;
-
-  @Column({ type: 'timestamp', nullable: true })
   disbursed_date: Date;
-
-  @Column({ type: 'timestamp', nullable: true })
-  paid_date: Date;
 
   @Column({ nullable: true })
   tenure_in_months: number;
+
+  @Column({ type: 'timestamp', nullable: true })
+  repayment_date: Date;
+  
+  @Column({ type: 'timestamp', nullable: true })
+  paid_date: Date;
+
+  @CreateDateColumn()
+  created_date: Date;
+
+  @UpdateDateColumn()
+  updated_at: Date;
 
 };
 
