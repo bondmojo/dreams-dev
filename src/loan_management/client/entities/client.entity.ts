@@ -33,8 +33,17 @@ export class Client {
   @Column({ nullable: true })
   nickname: string;
 
+  @Column({ type: 'double', default: 0 })
+  dream_points_earned: number;
+
+  @Column({ type: 'double', default: 0 })
+  dream_points_committed: number;
+
   @Column({ type: 'timestamp', nullable: true })
   dob: Date;
+
+  @Column({ default: 1 })
+  tier: string;
 
   @Column({ nullable: true })
   mobile: string;

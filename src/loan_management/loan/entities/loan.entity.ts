@@ -3,10 +3,13 @@ import {
   Column,
   PrimaryColumn,
   ManyToOne,
-  JoinColumn
+  OneToMany,
+  JoinColumn,
+  CreateDateColumn
 } from 'typeorm';
 
 import { Client } from "../../client/entities/client.entity";
+import { Transaction } from '../../transaction/entities/transaction.entity';
 
 @Entity({ name: "loans", synchronize: true })
 export class Loan {
@@ -23,17 +26,26 @@ export class Loan {
   @Column({ type: 'double', nullable: true })
   amount: number;
 
+  @Column({ nullable: true, default: 'USD' })
+  currency: string;
+
+  @Column({ nullable: true })
+  wire_transfer_type: string
+
   @Column({ type: 'double', nullable: true })
   dream_point: number;
+
+  @Column({ type: 'float', default: 0 })
+  loan_fee: number;
 
   @Column({ nullable: true })
   status: string;
 
   @Column({ type: 'timestamp', nullable: true })
-  created_date: string;
+  disbursed_date: Date;
 
   @Column({ type: 'timestamp', nullable: true })
-  disbursed_date: Date;
+  repayment_date: Date;
 
   @Column({ type: 'timestamp', nullable: true })
   paid_date: Date;
@@ -41,5 +53,10 @@ export class Loan {
   @Column({ nullable: true })
   tenure_in_months: number;
 
+  @OneToMany(() => Transaction, transaction => transaction.loan)
+  transaction: Transaction[]
+
+  @CreateDateColumn()
+  created_at: string;
 };
 
