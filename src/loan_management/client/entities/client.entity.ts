@@ -7,7 +7,7 @@ import {
   OneToMany
 } from 'typeorm';
 import { Loan } from '../../loan/entities/loan.entity';
-@Entity({ name: "clients", synchronize: true })
+@Entity({ name: "clients" })
 export class Client {
   @PrimaryColumn()
   id: string;

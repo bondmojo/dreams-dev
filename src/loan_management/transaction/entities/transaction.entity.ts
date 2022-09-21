@@ -9,7 +9,7 @@ import {
 
 import { Loan } from "../../loan/entities/loan.entity";
 
-@Entity({ name: "transactions", synchronize: true })
+@Entity({ name: "transactions" })
 export class Transaction {
   @PrimaryColumn()
   id: string;

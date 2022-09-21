@@ -11,7 +11,7 @@ import {
 import { Client } from "../../client/entities/client.entity";
 import { Transaction } from '../../transaction/entities/transaction.entity';
 
-@Entity({ name: "loans", synchronize: true })
+@Entity({ name: "loans" })
 export class Loan {
   @PrimaryColumn()
   id: string;
