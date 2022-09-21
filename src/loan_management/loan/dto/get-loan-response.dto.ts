@@ -1,0 +1,11 @@
+export class GetLoanResponse{
+    status: boolean;
+    loanAmount?: string;
+    dreamPoints?: string;
+    loanStatus?: string;
+    wireTransferType?: string;
+    dueDate?: string;
+    dueAmount?: string;
+    paidAmount?: String;
+}
+
