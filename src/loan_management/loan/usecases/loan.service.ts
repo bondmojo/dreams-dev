@@ -4,6 +4,7 @@ import { GetLoanDto } from "../dto";
 import { CustomLogger } from "../../../custom_logger";
 import { Loan } from '../entities/loan.entity';
 import { Repository } from 'typeorm';
+import { GetLoanResponse } from "../dto/get-loan-response.dto";
 
 @Injectable()
 export class LoanService {
@@ -20,11 +21,25 @@ export class LoanService {
         return loanFromDb;
     }
 
-    async findOne(fields: GetLoanDto): Promise<Loan | null> {
+    async findOne(fields: GetLoanDto): Promise<GetLoanResponse |null>{
         const loan = await this.loanRepository.findOne({
             where: fields,
         });
-        return loan;
+
+        const loanResponse = new GetLoanResponse();
+        if(!loan){
+            loanResponse.status=false;
+            return loanResponse
+        }
+        
+        loanResponse.status=true;
+        loanResponse.dreamPoints= ""+loan?.dream_point;
+        loanResponse.loanAmount = ""+loan?.amount;
+        loanResponse.wireTransferType = loan?.wire_transfer_type;
+        loanResponse.loanStatus = loan?.status;
+        loanResponse.dueDate= ""+ loan?.repayment_date;
+
+        return loanResponse;
     }
 
 }
