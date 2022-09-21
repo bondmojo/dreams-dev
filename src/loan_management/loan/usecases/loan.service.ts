@@ -31,7 +31,7 @@ export class LoanService {
             loanResponse.status=false;
             return loanResponse
         }
-        
+
         loanResponse.status=true;
         loanResponse.dreamPoints= ""+loan?.dream_point;
         loanResponse.loanAmount = ""+loan?.amount;
@@ -41,5 +41,4 @@ export class LoanService {
 
         return loanResponse;
     }
-
 }
