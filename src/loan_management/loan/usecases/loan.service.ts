@@ -1,11 +1,10 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from '@nestjs/typeorm';
-import { GetLoanDto } from "../dto";
+import { DisbursedLoanDto, GetLoanDto } from "../dto";
 import { CustomLogger } from "../../../custom_logger";
 import { Loan } from '../entities/loan.entity';
 import { Repository } from 'typeorm';
-import { TransactionService } from "../../transaction/usecases/transaction.service";
-import { EventEmitter2 } from "@nestjs/event-emitter";
+import { LoanHelperService } from "./loan-helper.service";
 
 @Injectable()
 export class LoanService {
@@ -13,8 +12,7 @@ export class LoanService {
     constructor(
         @InjectRepository(Loan)
         private readonly loanRepository: Repository<Loan>,
-        private readonly transactionService: TransactionService,
-        private eventEmitter: EventEmitter2
+        private readonly loanHelperService: LoanHelperService,
     ) { }
 
     // FIXME: Remove "any" Decorator from createLoanDto object
@@ -22,8 +20,8 @@ export class LoanService {
         createLoanDto.id = 'LN' + Math.floor(Math.random() * 100000000);
         const loanFromDb = await this.loanRepository.save(createLoanDto);
         //create transaction for dream_point_commited in database
-        await this.createTransactionForDreamPointCommited(createLoanDto);
-        await this.updateClientCommittedDreamPoint(createLoanDto);
+        await this.loanHelperService.createTransactionForDreamPointCommited(createLoanDto);
+        await this.loanHelperService.updateClientCommittedDreamPoint(createLoanDto);
         return loanFromDb;
     }
 
@@ -32,26 +30,6 @@ export class LoanService {
             where: fields,
         });
         return loan;
-    }
-
-
-    async createTransactionForDreamPointCommited(createLoanDto: any): Promise<any> {
-        const createTransactionDto = {
-            loan_id: createLoanDto.id,
-            amount: createLoanDto.dream_point,
-            type: "dream_point_commitment", // should comes from defines
-        };
-        const transaction = await this.transactionService.create(createTransactionDto);
-        return transaction;
-    }
-
-    async updateClientCommittedDreamPoint(createLoanDto: any): Promise<any> {
-        // this payload should contains only those fields which we need to update
-        const updateClientDto = {
-            id: createLoanDto.client_id,
-            dream_points_committed: createLoanDto.dream_point,
-        };
-        this.eventEmitter.emit('client.update', updateClientDto);
     }
 
 }
