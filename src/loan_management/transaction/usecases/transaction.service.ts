@@ -7,7 +7,8 @@ import { Repository } from 'typeorm';
 
 @Injectable()
 export class TransactionService {
-    private readonly log = new CustomLogger(TransactionService.name);
+    private readonly logger = new CustomLogger(TransactionService.name);
+
     constructor(
         @InjectRepository(Transaction)
         private readonly transactionRepository: Repository<Transaction>,
@@ -15,6 +16,7 @@ export class TransactionService {
 
     async create(createTransactionDto: any): Promise<Transaction> {
         createTransactionDto.id = 'TN' + Math.floor(Math.random() * 100000000);
+        this.logger.log(`Creating transaction with data ${JSON.stringify(createTransactionDto)}`);
         const transactionFromDb = await this.transactionRepository.save(createTransactionDto);
         return transactionFromDb;
     }

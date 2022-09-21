@@ -5,6 +5,7 @@ import { CustomLogger } from "../../../custom_logger";
 import { Loan } from '../entities/loan.entity';
 import { Repository } from 'typeorm';
 import { TransactionService } from "../../transaction/usecases/transaction.service";
+import { EventEmitter2 } from "@nestjs/event-emitter";
 
 @Injectable()
 export class LoanService {
@@ -12,16 +13,17 @@ export class LoanService {
     constructor(
         @InjectRepository(Loan)
         private readonly loanRepository: Repository<Loan>,
-        private readonly transactionService: TransactionService
+        private readonly transactionService: TransactionService,
+        private eventEmitter: EventEmitter2
     ) { }
 
     // FIXME: Remove "any" Decorator from createLoanDto object
     async create(createLoanDto: any): Promise<Loan> {
         createLoanDto.id = 'LN' + Math.floor(Math.random() * 100000000);
         const loanFromDb = await this.loanRepository.save(createLoanDto);
-
         //create transaction for dream_point_commited in database
         await this.createTransactionForDreamPointCommited(createLoanDto);
+        await this.updateClientCommittedDreamPoint(createLoanDto);
         return loanFromDb;
     }
 
@@ -41,6 +43,15 @@ export class LoanService {
         };
         const transaction = await this.transactionService.create(createTransactionDto);
         return transaction;
+    }
+
+    async updateClientCommittedDreamPoint(createLoanDto: any): Promise<any> {
+        // this payload should contains only those fields which we need to update
+        const updateClientDto = {
+            id: createLoanDto.client_id,
+            dream_points_committed: createLoanDto.dream_point,
+        };
+        this.eventEmitter.emit('client.update', updateClientDto);
     }
 
 }
