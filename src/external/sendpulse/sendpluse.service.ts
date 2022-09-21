@@ -79,7 +79,7 @@ export class SendpluseService{
 
     async checkAndGenerateToken(): Promise<string> {
         if(Date.now() < this.access_token_expiry_time && this.token){
-           this.log.log("Valid token Available." + this.token);
+           this.log.log("Valid token Available." );
            return ""+this.token;
         }
 

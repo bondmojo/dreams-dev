@@ -9,11 +9,13 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import DatabaseConfig from './config/database.config';
 import { ClientModule } from "./loan_management/client/client.module";
 import { LoanModule } from "./loan_management/loan/loan.module";
+import { ScheduleModule } from '@nestjs/schedule';
+
 
 @Module({
   controllers: [HealthCheckController],
   imports: [
-    TypeOrmModule.forRoot(DatabaseConfig),
+    TypeOrmModule.forRoot(DatabaseConfig), ScheduleModule.forRoot(),
     ConfigModule.forRoot(), EventEmitterModule.forRoot(), ZohoModule, DreamerModule, SendpulseModule, ClientModule, LoanModule]
 })
 export class AppModule {

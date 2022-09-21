@@ -31,13 +31,17 @@ export class Loan {
   @Column({ nullable: true })
   status: string;
 
+  @Column({ nullable: true })
+  wire_transfer_type: string;
+
+
   @Column({ type: 'timestamp', nullable: true })
   disbursed_date: Date;
 
   @Column({ nullable: true })
   tenure_in_months: number;
 
-  @Column({ type: 'timestamp', nullable: true })
+  @Column({ type: 'date', nullable: true })
   repayment_date: Date;
   
   @Column({ type: 'timestamp', nullable: true })

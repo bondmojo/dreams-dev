@@ -33,4 +33,11 @@ export class ClientService {
         return client;
     }
 
+    async findbyId(clientId: string): Promise<Client | null> {
+        const client = await this.clientRepository.findOneBy({
+            id : clientId
+        });
+        return client;
+    }
+
 }
