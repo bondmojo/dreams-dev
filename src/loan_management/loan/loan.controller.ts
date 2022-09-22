@@ -1,4 +1,4 @@
-import { CreateLoanDto } from './dto';
+import { DisbursedLoanDto, CreateLoanDto } from './dto';
 import { Body, Controller, Param, Post, Get } from '@nestjs/common';
 import { LoanService } from "./usecases/loan.service";
 import { CustomLogger } from "../../custom_logger";
@@ -14,6 +14,12 @@ export class LoanController {
   async createLoan(@Body() createLoanDto: CreateLoanDto) {
     this.logger.log(`Creating loan with request ${JSON.stringify(createLoanDto)}`);
     return await this.loanService.create(createLoanDto);
+  }
+
+  @Post('disbursed')
+  async disbursed(@Body() disbursedLoanDto: DisbursedLoanDto) {
+    this.logger.log(`Disbursed loan with request ${JSON.stringify(disbursedLoanDto)}`);
+    return await this.loanService.disbursed(disbursedLoanDto);
   }
 
   @Get(':id')

@@ -18,6 +18,7 @@ export class LoanService {
     // FIXME: Remove "any" Decorator from createLoanDto object
     async create(createLoanDto: any): Promise<Loan> {
         createLoanDto.id = 'LN' + Math.floor(Math.random() * 100000000);
+        createLoanDto.loan_fee = 3; // should be come from defines
         const loanFromDb = await this.loanRepository.save(createLoanDto);
         //create transaction for dream_point_commited in database
         await this.loanHelperService.createTransactionForDreamPointCommited(createLoanDto);
@@ -29,6 +30,16 @@ export class LoanService {
         const loan = await this.loanRepository.findOne({
             where: fields,
         });
+        return loan;
+    }
+
+    async disbursed(disbursedLoanDto: DisbursedLoanDto): Promise<any> {
+        const loan = await this.findOne({ id: disbursedLoanDto.loan_id });
+        if (!loan) {
+            return;
+        }
+        await this.loanHelperService.createCreditDisbursementTransaction(loan, disbursedLoanDto);
+        // create transaction
         return loan;
     }
 
