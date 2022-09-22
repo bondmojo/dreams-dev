@@ -14,6 +14,6 @@ import { TransactionModule } from "../transaction/transaction.module";
   controllers: [LoanController],
   providers: [
     LoanService, LoanHelperService],
-  exports: [LoanService]
+  exports: [LoanService, LoanHelperService]
 })
 export class LoanModule { }
