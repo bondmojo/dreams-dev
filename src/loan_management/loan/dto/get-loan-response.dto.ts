@@ -6,6 +6,7 @@ export class GetLoanResponse{
     wireTransferType?: string;
     dueDate?: string;
     dueAmount?: string;
-    paidAmount?: String;
+    paidAmount?: string;
+    outstandingBalance?: string;
 }
 

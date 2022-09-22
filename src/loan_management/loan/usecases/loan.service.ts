@@ -38,6 +38,8 @@ export class LoanService {
         loanResponse.wireTransferType = loan?.wire_transfer_type;
         loanResponse.loanStatus = loan?.status;
         loanResponse.dueDate= ""+ loan?.repayment_date;
+        //FIXME: calculate balance
+        loanResponse.outstandingBalance ="75";
 
         return loanResponse;
     }
