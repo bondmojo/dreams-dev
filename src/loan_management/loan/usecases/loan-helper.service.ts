@@ -24,7 +24,7 @@ export class LoanHelperService {
         const createTransactionDto = {
             loan_id: createLoanDto.id,
             amount: createLoanDto.dream_point,
-            type: "dream_point_commitment", // should come from defines
+            type: this.globalService.TRANSACTION_TYPE.DREAM_POINT_COMMITMENT,
         };
         const transaction = await this.transactionService.create(createTransactionDto);
         return transaction;
@@ -45,7 +45,7 @@ export class LoanHelperService {
         const disbursementTransactionDto = {
             loan_id: loan.id,
             amount: credit_disbursed_amount,
-            type: 'credit_disbursement',
+            type: this.globalService.TRANSACTION_TYPE.CREDIT_DISBURSEMENT,
             note: disbursedLoanDto.note,
         }
         const transaction = await this.transactionService.create(disbursementTransactionDto);
@@ -54,13 +54,13 @@ export class LoanHelperService {
 
     async checkAndCreateWingTransferFeeTransaction(loan: Loan, disbursedLoanDto: DisbursedLoanDto): Promise<any> {
         // Verify this with Akash
-        if (disbursedLoanDto?.wire_transfer_type == 'mobile') {
+        if (disbursedLoanDto?.wire_transfer_type == this.globalService.WIRE_TRANSFER_TYPES.MOBILE) {
             const disbursed_amount = loan.amount - loan.dream_point;
             const wing_wei_luy_transfer_fee = this.globalService.CALC_WING_WEI_LUY_TRANSFER_FEE(disbursed_amount);
             const transactionDto = {
                 loan_id: loan.id,
                 amount: wing_wei_luy_transfer_fee,
-                type: 'debit_wing_wei_luy_transfer_fee',
+                type: this.globalService.TRANSACTION_TYPE.DEBIT_WING_WEI_LUY_TRANSFER_FEE,
                 note: disbursedLoanDto.note,
             }
             await this.transactionService.create(transactionDto);

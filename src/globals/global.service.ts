@@ -4,6 +4,15 @@ import { Injectable } from "@nestjs/common";
 @Injectable()
 export class GlobalService {
     public readonly LOAN_FEES: number = 3;
+    public readonly TRANSACTION_TYPE: any = {
+        DEBIT_WING_WEI_LUY_TRANSFER_FEE: 'debit_wing_wei_luy_transfer_fee',
+        CREDIT_DISBURSEMENT: 'credit_disbursement',
+        DREAM_POINT_COMMITMENT: 'dream_point_commitment'
+    };
+    public readonly WIRE_TRANSFER_TYPES: any = {
+        MOBILE: 'mobile',
+        ACCOUNT: 'account'
+    }
 
     CALC_WING_WEI_LUY_TRANSFER_FEE(amount: number): number {
         if (amount >= 0 && amount <= 25) {
