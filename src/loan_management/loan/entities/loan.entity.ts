@@ -39,6 +39,12 @@ export class Loan {
   loan_fee: number;
 
   @Column({ nullable: true })
+  wing_code: number;
+
+  @Column({ type: 'float', default: 0 })
+  wing_wei_luy_transfer_fee: number; // storing in DB bcz if the value change in future then it will lead to misscalculations.
+
+  @Column({ nullable: true })
   status: string;
 
   @Column({ type: 'timestamp', nullable: true })
@@ -58,5 +64,6 @@ export class Loan {
 
   @CreateDateColumn()
   created_at: string;
+
 };
 
