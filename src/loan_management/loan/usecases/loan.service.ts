@@ -5,6 +5,7 @@ import { CustomLogger } from "../../../custom_logger";
 import { Loan } from '../entities/loan.entity';
 import { Repository } from 'typeorm';
 import { LoanHelperService } from "./loan-helper.service";
+import { GlobalService } from "../../../globals/global.service"
 
 @Injectable()
 export class LoanService {
@@ -13,6 +14,7 @@ export class LoanService {
         @InjectRepository(Loan)
         private readonly loanRepository: Repository<Loan>,
         private readonly loanHelperService: LoanHelperService,
+        private readonly globalService: GlobalService
     ) { }
 
     // FIXME: Remove "any" Decorator from createLoanDto object
@@ -39,7 +41,9 @@ export class LoanService {
             return;
         }
         await this.loanHelperService.createCreditDisbursementTransaction(loan, disbursedLoanDto);
-        // create transaction
+        await this.loanHelperService.checkAndCreateWingTransferFeeTransaction(loan, disbursedLoanDto);
+
+        // update loan status, unpaid_amount/ wing_code & wire_transer_loan & next_repayment_date
         return loan;
     }
 

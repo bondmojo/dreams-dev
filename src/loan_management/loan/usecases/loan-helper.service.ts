@@ -6,6 +6,7 @@ import { TransactionService } from "../../transaction/usecases/transaction.servi
 import { EventEmitter2 } from "@nestjs/event-emitter";
 import { Repository } from 'typeorm';
 import { DisbursedLoanDto } from '../dto';
+import { GlobalService } from "../../../globals/global.service"
 
 
 @Injectable()
@@ -15,7 +16,8 @@ export class LoanHelperService {
         @InjectRepository(Loan)
         private readonly loanRepository: Repository<Loan>,
         private readonly transactionService: TransactionService,
-        private eventEmitter: EventEmitter2
+        private eventEmitter: EventEmitter2,
+        private readonly globalService: GlobalService
     ) { }
 
     async createTransactionForDreamPointCommited(createLoanDto: any): Promise<any> {
@@ -48,6 +50,22 @@ export class LoanHelperService {
         }
         const transaction = await this.transactionService.create(disbursementTransactionDto);
         return transaction;
+    }
+
+    async checkAndCreateWingTransferFeeTransaction(loan: Loan, disbursedLoanDto: DisbursedLoanDto): Promise<any> {
+        // Verify this with Akash
+        if (disbursedLoanDto?.wire_transfer_type == 'mobile') {
+            const disbursed_amount = loan.amount - loan.dream_point;
+            const wing_wei_luy_transfer_fee = this.globalService.CALC_WING_WEI_LUY_TRANSFER_FEE(disbursed_amount);
+            const transactionDto = {
+                loan_id: loan.id,
+                amount: wing_wei_luy_transfer_fee,
+                type: 'debit_wing_wei_luy_transfer_fee',
+                note: disbursedLoanDto.note,
+            }
+            await this.transactionService.create(transactionDto);
+        }
+        return;
     }
 
 }
