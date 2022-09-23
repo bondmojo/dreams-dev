@@ -63,13 +63,13 @@ export class SendpulseController {
       appStatusDto.variable_value= reqData.application_status;
       await this.sendpulseService.setVariable(appStatusDto);
     }
-
-    const setLoanIdRequest = new SetVariableRequestDto();
-    setLoanIdRequest.contact_id = reqData.sendpulse_user_id;
-    setLoanIdRequest.variable_id="632ae8966a397f4a4c32c516";
-    setLoanIdRequest.variable_value=reqData.loan_id;
-    await this.sendpulseService.setVariable(setLoanIdRequest);
-    
+    else {
+      const setLoanIdRequest = new SetVariableRequestDto();
+      setLoanIdRequest.contact_id = reqData.sendpulse_user_id;
+      setLoanIdRequest.variable_id="632ae8966a397f4a4c32c516";
+      setLoanIdRequest.variable_value=reqData.loan_id;
+      await this.sendpulseService.setVariable(setLoanIdRequest);
+    }
     let model = new DreamerModel();
     model.externalId=reqData.sendpulse_user_id;
     model.external_data = {};
