@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { ConsoleLogger, Injectable } from "@nestjs/common";
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateClientAndLoanDto, GetClientDto } from "../dto";
 import { CustomLogger } from "../../../custom_logger";
@@ -27,16 +27,16 @@ export class ClientService {
     }
 
     async findOne(fields: GetClientDto): Promise<Client | null> {
+        this.log.log("findOne =" +JSON.stringify(fields));
         const client = await this.clientRepository.findOne({
             where: fields,
         });
         return client;
     }
 
-    async findbyId(clientId: string): Promise<Client | null> {
-        const client = await this.clientRepository.findOneBy({
-            id : clientId
-        });
+    async findbyId(clientId: string): Promise<Client[] | any> {
+        this.log.log("findbyId =" +clientId);
+        const client = await this.findOne({ id: clientId });
         return client;
     }
 

@@ -7,6 +7,6 @@ export class ClientReminderModel{
     loan_amount: string;
     paid_amount: string;
     remaining_amount: string;
-    sendpulse_id?: string;
-    last_name?: string;
+    sendpulse_id: string;
+    first_name?: string;
 }

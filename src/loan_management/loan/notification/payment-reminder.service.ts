@@ -8,6 +8,9 @@ import { addDays, differenceInDays } from "date-fns";
 import { ClientReminderModel } from './reminder.model';
 import { ClientService } from '../../client/usecases/client.service';
 import { Client } from 'src/loan_management/client/entities/client.entity';
+import { SendpluseService } from 'src/external/sendpulse/sendpluse.service';
+import { RunFlowModel } from 'src/external/sendpulse/model/run-flow-model';
+import { GetClientDto } from 'src/loan_management/client/dto';
 
 
 @Injectable()
@@ -17,43 +20,132 @@ export class PaymentReminderService {
   constructor(
     @InjectRepository(Loan) 
     private readonly loanRepository: Repository<Loan>, 
-    private readonly clientService: ClientService
+    private readonly clientService: ClientService,
+    private readonly sendpulseService: SendpluseService
     ) { }
 
 @Cron('4 * * * * *')
 async morningTimeScheduler(){
-  await this.runPaymentScheduler();
+  await this.runPaymentScheduler(true);
 }
 
 @Cron('34 * * * * *')
 async dayTimeScheduler(){
-  await this.runPaymentScheduler();
+  await this.runPaymentScheduler(false);
 }
 
-async runPaymentScheduler() {
-    const now =new Date();
+async runPaymentScheduler(isMorning: boolean) {
+     const now =new Date();
+    const today =  new Date(now.getFullYear(),now.getMonth(), now.getDate());
+  
+    if(isMorning){
+      await this.sendNotification(now, today, 23, isMorning);
+      await this.sendNotification(now, today, 16, isMorning);
+      await this.sendNotification(now, today, 9, isMorning);
+      await this.sendNotification(now, today, 2, isMorning);
+      await this.sendNotification(now, today, 1, isMorning);
 
-    const today =  new Date(now.getFullYear(),now.getMonth(), now.getDate() ) ;
-    const next23Days =addDays(today, 23);
-    const next16Days =addDays(today, 16);
-    const next9Days =addDays(today, 9);
-    const next2Days =addDays(today, 2);
-
-    const loansPromise = await this.loanRepository.findBy({
-       repayment_date: In ([today, next23Days, next16Days, next9Days, next2Days]) 
-    });
-    this.log.log("repayment_dateloans=" +JSON.stringify(loansPromise));
-
-    if(loansPromise && loansPromise.length >0){
-      loansPromise.forEach(loan => {
-         const reminderModel =this.populateReminderModel(loan, today);
-         this.log.log("REMINDER MODEL ="+ JSON.stringify(reminderModel));
-      });
-
+      await this.sendNotification(now, today, 0, isMorning);
+      await this.sendNotification(now, today, -1, isMorning);
+      await this.sendNotification(now, today, -2, isMorning);
+      await this.sendNotification(now, today, -3, isMorning);
     }
+    else{
+      await this.sendNotification(now, today, 0, isMorning);
+      await this.sendNotification(now, today, -1, isMorning);
+      await this.sendNotification(now, today, -2, isMorning);
+      await this.sendNotification(now, today, -3, isMorning);
+    }
+
 }
 
-populateReminderModel(loan : Loan, today: Date): ClientReminderModel{
+async sendNotification(now: Date, today: Date, remainingDays: number, isMorning: boolean){
+
+  if(isMorning)
+    this.log.log("Running MORNING Schedule for remaining Days =" + remainingDays);
+  else
+    this.log.log("Running DAY Schedule for remaining Days =" + remainingDays);
+
+  const remaining_days =addDays(today, remainingDays);    
+  const loansPromise = await this.fetchCustomersByDueDate(remaining_days);
+
+  if(!loansPromise  || loansPromise.length ==0){
+    this.log.log("NO Customer Reminder to be sent");
+    return;
+  }
+
+  loansPromise.forEach(loan => {
+    const modelArray =  this.populateReminderModel(loan, today);
+    modelArray.then( reminderModel =>{
+        this.log.log("REMINDER MODEL ="+ JSON.stringify(reminderModel));
+        let flow = new RunFlowModel();  
+         
+        if(reminderModel.sendpulse_id){
+            this.log.log("sendpulse ID =" + reminderModel.sendpulse_id);
+            flow.contact_id= reminderModel.sendpulse_id;
+            flow.external_data =reminderModel;
+            switch(remainingDays){
+                  case 23:    
+                    flow.flow_id="632c3a3f8de7ab098c2673d9";
+                  break;
+                  case 16:    
+                  flow.flow_id="632c3d8e123ab83d924cddc8";
+                  break;
+                  case 9:    
+                  flow.flow_id="632c3f04c54feb769e5a4082";
+                  break;
+                  case 2:    
+                  flow.flow_id="632c40021f206771792caf37";
+                  break;
+                  case 1:    
+                  flow.flow_id="632c407d02efd900e2548dab";
+                  break;
+                  case 0:    
+                        if(isMorning) 
+                          flow.flow_id="632c44a770b9686d4b564a39";
+                        else
+                          flow.flow_id="632c44d8b14ebd4e7c09fd99";
+                  break;
+                  case -1:    
+                        if(isMorning) 
+                          flow.flow_id="632c5a35415c9d1596763aa1";
+                        else
+                          flow.flow_id="632c5c685033365c2a07a378";
+                  break;
+                  case -2:    
+                        if(isMorning) 
+                          flow.flow_id="632c5cf8ffd93d3a4168adb0";
+                        else
+                          flow.flow_id="632c5e8d5315aa0ef11404f5";
+                  break;
+                  case  -3:    
+                        if(isMorning) 
+                          flow.flow_id="632c5f2e48a0b42b26095073";
+                        else
+                          flow.flow_id="632c615064d2872411413292";
+                  break;
+                  default:
+                        //FIXME: update flow ID
+                        if(remainingDays < -3)
+                          flow.flow_id="632c40021f206771792caf37";
+                        break;
+            }
+            this.sendpulseService.runSendpulseFlow(flow);
+          }
+       });
+    });
+}
+
+async fetchCustomersByDueDate(dueDate : Date): Promise<Loan[] | null>{
+    this.log.log("FETCHing Clients with Due date =" +dueDate);
+    let loanPromise= await this.loanRepository.find({
+        where: { repayment_date: dueDate }
+    });
+    this.log.log("repayment_date loans=" +JSON.stringify(loanPromise));
+    return loanPromise;
+}
+
+async populateReminderModel(loan : Loan, today: Date): Promise<ClientReminderModel>{
   const reminderModel = new ClientReminderModel();
   reminderModel.client_id=loan.client_id;
   reminderModel.loan_id=loan.id;
@@ -64,26 +156,32 @@ populateReminderModel(loan : Loan, today: Date): ClientReminderModel{
   this.log.log("Due Days = "+ dueDays);
   reminderModel.due_days= "" + dueDays;
 
-  reminderModel.remaining_amount= "" + this.calculateRemainingLoanAmount(loan.id, loan.amount);
+  reminderModel.remaining_amount= "" + await this.calculateRemainingLoanAmount(loan.id, loan.amount);
   
-  const clientPromise =this.getClientData(loan.client_id);
-  clientPromise.then( function (client) {
-    reminderModel.sendpulse_id=client?.sendpulse_id;
-    reminderModel.last_name=client?.last;
-  });
+  const clientPromise = await this.getClientData(loan.client_id);
+  if(clientPromise){
+    reminderModel.sendpulse_id=clientPromise.sendpulse_id;
+    reminderModel.first_name=clientPromise.first;
+
+  }
 
   return reminderModel;
 }
 
-calculateRemainingLoanAmount(loanId: string, loanAmount: number): number{
+async calculateRemainingLoanAmount(loanId: string, loanAmount: number): Promise<number>{
 //TODO
   return (loanAmount-0);
 }
 
-getClientData(clientId: string) : Promise<Client | null>{
+async getClientData(clientId: string) : Promise<Client | null>{
 
-  const client = this.clientService.findbyId(clientId);
-  console.log(" client data ="+ JSON.stringify(client));
+  const dto = new GetClientDto();
+  dto.id=clientId;
+  const client = await this.clientService.findbyId(clientId);
+  console.log("id ="+ clientId+" client data ="+ JSON.stringify(client));
+  const client1 = this.clientService.findOne(dto);
+  console.log("id ="+ clientId+" client 1 ="+ JSON.stringify(client1));
+
   return client;
 }
 

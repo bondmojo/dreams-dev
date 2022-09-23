@@ -8,9 +8,10 @@ import { Loan } from './entities/loan.entity';
 import { LoanController } from './loan.controller';
 import { PaymentReminderService } from './notification/payment-reminder.service';
 import { LoanService } from './usecases/loan.service';
+import { SendpulseModule } from 'src/external/sendpulse/sendpulse.module';
 
 @Module({
-  imports: [ forwardRef(() => ClientModule), TypeOrmModule.forFeature([Loan])],
+  imports: [ forwardRef(() => ClientModule), TypeOrmModule.forFeature([Loan]), SendpulseModule],
   controllers: [LoanController],
   providers: [
     LoanService, PaymentReminderService],

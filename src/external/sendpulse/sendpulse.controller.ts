@@ -53,7 +53,7 @@ export class SendpulseController {
   async updateApplicationStatus(@Body() reqData: UpdateApplicationStatusRequestDto ) {
     this.log.log(JSON.stringify(reqData));
 
-    let appStatusDto = new SetVariableRequestDto();
+   /*  let appStatusDto = new SetVariableRequestDto();
     appStatusDto.contact_id=reqData.sendpulse_user_id;
     appStatusDto.variable_name="application_status";
     appStatusDto.variable_id="6319a9390219f75deb1c07d3";
@@ -65,7 +65,7 @@ export class SendpulseController {
     amountDto.variable_name="approved_rejected_amount";
     amountDto.variable_id="6319aa4720f4c45a1b390826";
     amountDto.variable_value= ""+ reqData.loan_amount;
-    await this.sendpulseService.setVariable(amountDto);
+    await this.sendpulseService.setVariable(amountDto); */
 
     if(reqData.application_status === this.APPLICATION_STATUS[2]){
       let transfertypeDto = new SetVariableRequestDto();

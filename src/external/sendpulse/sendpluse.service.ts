@@ -9,6 +9,7 @@ import {SendPulseResponseDto} from "./dto/send-pulse-response.dto";
 import {DreamerModel} from "../../dreamer/usecases/model/dreamer.model";
 import { SendpulseModule } from "./sendpulse.module";
 import { SetVariableRequestDto } from "./dto/set-variable-request.dto";
+import { RunFlowModel } from "./model/run-flow-model";
 
 @Injectable()
 export class SendpluseService{
@@ -41,6 +42,24 @@ export class SendpluseService{
               }, HttpStatus.BAD_GATEWAY);
         }
 
+    }
+
+    async runSendpulseFlow(model: RunFlowModel) {
+        await this.checkAndGenerateToken();
+        try{
+        const response = await firstValueFrom(this.httpService.post<SendPulseResponseDto<SendPulseContactDto>>(
+            this.url+'/telegram/flows/run',
+            {contact_id: model.contact_id, flow_id: model.flow_id, external_data: model.external_data}, 
+            {
+                headers: {'Authorization': 'Bearer '+ this.token},
+            }
+        ));
+        this.log.log(`Successfully initiated flow ${model.flow_id} with response ${response.statusText}`);
+        }catch(ex){
+            this.log.error("ERROR OCCURED WHILE RUNNING FLOW =" + JSON.stringify(ex));
+            this.log.log("ERROR OCCURED WHILE RUNNING FLOW =" + JSON.stringify(ex));
+
+        }
     }
 
     async runFlow(model: DreamerModel, flow: string) {
