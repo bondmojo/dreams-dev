@@ -26,12 +26,14 @@ export class LoanService {
             where: fields,
         });
 
+        this.log.log("LOAN DATA =" + loan);
+
         const loanResponse = new GetLoanResponse();
         if(!loan){
             loanResponse.status=false;
             return loanResponse
         }
-        
+
         loanResponse.status=true;
         loanResponse.dreamPoints= ""+loan?.dream_point;
         loanResponse.loanAmount = ""+loan?.amount;
@@ -43,5 +45,4 @@ export class LoanService {
 
         return loanResponse;
     }
-
 }
