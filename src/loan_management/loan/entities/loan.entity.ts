@@ -26,6 +26,9 @@ export class Loan {
   @Column({ type: 'double', nullable: true })
   amount: number;
 
+  @Column({ type: 'double', nullable: true })
+  outstanding_amount: number;
+
   @Column({ nullable: true, default: 'USD' })
   currency: string;
 
@@ -39,7 +42,7 @@ export class Loan {
   loan_fee: number;
 
   @Column({ nullable: true })
-  wing_code: number;
+  wing_code: string;
 
   @Column({ type: 'float', default: 0 })
   wing_wei_luy_transfer_fee: number; // storing in DB bcz if the value change in future then it will lead to misscalculations.
