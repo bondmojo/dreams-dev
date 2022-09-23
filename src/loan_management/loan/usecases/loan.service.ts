@@ -42,8 +42,7 @@ export class LoanService {
         }
         await this.loanHelperService.createCreditDisbursementTransaction(loan, disbursedLoanDto);
         await this.loanHelperService.checkAndCreateWingTransferFeeTransaction(loan, disbursedLoanDto);
-
-        // update loan status, unpaid_amount/ wing_code & wire_transer_loan & next_repayment_date
+        await this.loanHelperService.updateLoanDataAfterDisbursement(loan, disbursedLoanDto);
         return loan;
     }
 

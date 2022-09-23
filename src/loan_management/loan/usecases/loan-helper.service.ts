@@ -7,6 +7,7 @@ import { EventEmitter2 } from "@nestjs/event-emitter";
 import { Repository } from 'typeorm';
 import { DisbursedLoanDto } from '../dto';
 import { GlobalService } from "../../../globals/global.service"
+import { add } from 'date-fns';
 
 
 @Injectable()
@@ -67,5 +68,36 @@ export class LoanHelperService {
         }
         return;
     }
+
+    async updateLoanDataAfterDisbursement(loan: Loan, disbursedLoanDto: DisbursedLoanDto) {
+        let wing_wei_luy_transfer_fee = 0;
+        let outstanding_amount = loan.amount + loan.loan_fee;
+
+        // if wire_transfer_type is mobile then calc wing_wei_luy_transfer_fee and add it into outstanding_amount
+        if (disbursedLoanDto?.wire_transfer_type == this.globalService.WIRE_TRANSFER_TYPES.MOBILE) {
+            const disbursed_amount = loan.amount - loan.dream_point;
+            wing_wei_luy_transfer_fee = this.globalService.CALC_WING_WEI_LUY_TRANSFER_FEE(disbursed_amount);
+            outstanding_amount = outstanding_amount + wing_wei_luy_transfer_fee;
+        }
+
+        const tenure_in_months = loan.tenure_in_months ? loan.tenure_in_months : 1; // default one month tenure
+        const today = new Date(); // current time
+        const repayment_date = add(today, { months: tenure_in_months }); // today + tenure_in_months
+
+        const fields_to_be_update: object = {
+            wing_code: disbursedLoanDto.wing_code,
+            outstanding_amount: outstanding_amount,
+            wire_transfer_type: disbursedLoanDto?.wire_transfer_type,
+            disbursed_date: today,
+            repayment_date: repayment_date,
+            status: this.globalService.LOAN_STATUS.DISBURSED,
+            wing_wei_luy_transfer_fee: wing_wei_luy_transfer_fee,
+        }
+
+        this.log.log(`Updating loan with data ${JSON.stringify(fields_to_be_update)}`);
+        await this.loanRepository.update(loan.id, fields_to_be_update);
+        return;
+    }
+
 
 }
