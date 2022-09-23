@@ -53,6 +53,17 @@ export class SendpulseController {
   async updateApplicationStatus(@Body() reqData: UpdateApplicationStatusRequestDto) {
     this.log.log(JSON.stringify(reqData));
 
+    //if application status is rejected update application status on sendpulse and send message.
+    //in this case entry is not made in LMS by zoho
+    if(reqData.application_status === this.APPLICATION_STATUS[1]){
+      let appStatusDto = new SetVariableRequestDto();
+      appStatusDto.contact_id=reqData.sendpulse_user_id;
+      appStatusDto.variable_name="application_status";
+      appStatusDto.variable_id="6319a9390219f75deb1c07d3";
+      appStatusDto.variable_value= reqData.application_status;
+      await this.sendpulseService.setVariable(appStatusDto);
+    }
+
     const setLoanIdRequest = new SetVariableRequestDto();
     setLoanIdRequest.contact_id = reqData.sendpulse_user_id;
     setLoanIdRequest.variable_id="632ae8966a397f4a4c32c516";
