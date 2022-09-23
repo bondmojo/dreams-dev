@@ -4,4 +4,5 @@ export class DisbursedLoanDto {
   loan_id: string;
   note: string;
   wire_transfer_type: string;
+  wing_code: string;
 }

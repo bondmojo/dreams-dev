@@ -4,6 +4,12 @@ import { Injectable } from "@nestjs/common";
 @Injectable()
 export class GlobalService {
     public readonly LOAN_FEES: number = 3;
+
+    public readonly LOAN_STATUS: any = {
+        APPROVED: 'approved',
+        DISBURSED: 'disbursed'
+    }
+
     public readonly TRANSACTION_TYPE: any = {
         DEBIT_WING_WEI_LUY_TRANSFER_FEE: 'debit_wing_wei_luy_transfer_fee',
         CREDIT_DISBURSEMENT: 'credit_disbursement',
