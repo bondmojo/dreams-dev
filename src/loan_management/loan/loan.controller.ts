@@ -18,7 +18,7 @@ export class LoanController {
 
   @Get(':id')
   async findOne(@Param('id') id: string) {
-    this.logger.log(`Getting loan with request ${+id}`);
+    this.logger.log('Getting loan with request id ='  +id);
     return await this.loanService.findOne({ id: id });
   }
 

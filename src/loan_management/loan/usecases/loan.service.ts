@@ -26,6 +26,8 @@ export class LoanService {
             where: fields,
         });
 
+        this.log.log("LOAN DATA =" + loan);
+
         const loanResponse = new GetLoanResponse();
         if(!loan){
             loanResponse.status=false;
