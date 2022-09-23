@@ -9,7 +9,7 @@ import { OnEvent } from "@nestjs/event-emitter";
 
 @Injectable()
 export class ClientService {
-    private readonly logger = new CustomLogger(ClientService.name);
+    private readonly log = new CustomLogger(ClientService.name);
     constructor(
         @InjectRepository(Client)
         private readonly clientRepository: Repository<Client>,
@@ -36,7 +36,7 @@ export class ClientService {
 
     @OnEvent('client.update')
     async update(updateClientDto: UpdateClientDto) {
-        this.logger.log(`Updating client with data ${JSON.stringify(updateClientDto)}`);
+        this.log.log(`Updating client with data ${JSON.stringify(updateClientDto)}`);
         await this.clientRepository.update(updateClientDto.id, updateClientDto);
     }
 
