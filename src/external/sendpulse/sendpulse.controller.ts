@@ -77,5 +77,4 @@ export class SendpulseController {
     await this.sendpulseService.runFlow(model, this.SENDPULSE_MESSAGING_FLOWID) ;
     return {"status": 'ok'}
   }
-
 }
