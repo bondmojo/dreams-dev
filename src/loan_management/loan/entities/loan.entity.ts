@@ -2,10 +2,11 @@ import {
   Entity,
   Column,
   PrimaryColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
   ManyToOne,
   OneToMany,
   JoinColumn,
-  CreateDateColumn
 } from 'typeorm';
 
 import { Client } from "../../client/entities/client.entity";
@@ -26,14 +27,14 @@ export class Loan {
   @Column({ type: 'double', nullable: true })
   amount: number;
 
-  @Column({ type: 'double', nullable: true })
-  outstanding_amount: number;
-
   @Column({ nullable: true, default: 'USD' })
   currency: string;
 
   @Column({ nullable: true })
   wire_transfer_type: string
+
+  @Column({ type: 'double', nullable: true })
+  outstanding_amount: number;
 
   @Column({ type: 'double', nullable: true })
   dream_point: number;
@@ -56,11 +57,14 @@ export class Loan {
   @Column({ type: 'timestamp', nullable: true })
   repayment_date: Date;
 
+  @Column({ nullable: true })
+  tenure_in_months: number;
+
   @Column({ type: 'timestamp', nullable: true })
   paid_date: Date;
 
-  @Column({ nullable: true })
-  tenure_in_months: number;
+  @CreateDateColumn()
+  created_date: Date;
 
   @OneToMany(() => Transaction, transaction => transaction.loan)
   transaction: Transaction[]
@@ -68,5 +72,7 @@ export class Loan {
   @CreateDateColumn()
   created_at: string;
 
-};
+  @UpdateDateColumn()
+  updated_at: Date;
 
+};

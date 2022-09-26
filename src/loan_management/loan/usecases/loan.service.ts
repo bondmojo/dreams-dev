@@ -6,6 +6,7 @@ import { Loan } from '../entities/loan.entity';
 import { Repository } from 'typeorm';
 import { LoanHelperService } from "./loan-helper.service";
 import { GlobalService } from "../../../globals/global.service"
+import { GetLoanResponse } from "../dto/get-loan-response.dto";
 
 @Injectable()
 export class LoanService {
@@ -28,11 +29,28 @@ export class LoanService {
         return loanFromDb;
     }
 
-    async findOne(fields: GetLoanDto): Promise<Loan | null> {
+    async findOne(fields: GetLoanDto): Promise<GetLoanResponse | null> {
         const loan = await this.loanRepository.findOne({
             where: fields,
         });
-        return loan;
+        this.log.log("LOAN DATA =" + loan);
+
+        const loanResponse = new GetLoanResponse();
+        if (!loan) {
+            loanResponse.status = false;
+            return loanResponse
+        }
+
+        loanResponse.status = true;
+        loanResponse.dreamPoints = "" + loan?.dream_point;
+        loanResponse.loanAmount = "" + loan?.amount;
+        loanResponse.wireTransferType = loan?.wire_transfer_type;
+        loanResponse.loanStatus = loan?.status;
+        loanResponse.dueDate = "" + loan?.repayment_date;
+        //FIXME: calculate balance
+        loanResponse.outstandingBalance = "75";
+
+        return loanResponse;
     }
 
     async disbursed(disbursedLoanDto: DisbursedLoanDto): Promise<any> {

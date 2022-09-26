@@ -15,10 +15,10 @@ import { LoanModule } from "./loan_management/loan/loan.module";
 import { TransactionModule } from "./loan_management/transaction/transaction.module";
 
 @Module({
-  controllers: [HealthCheckController],
-  imports: [
-    TypeOrmModule.forRoot(DatabaseConfig),
-    ConfigModule.forRoot(), EventEmitterModule.forRoot(), GlobalModule, ZohoModule, DreamerModule, SendpulseModule, ClientModule, LoanModule, TransactionModule]
+    controllers: [HealthCheckController],
+    imports: [
+        TypeOrmModule.forRoot(DatabaseConfig),
+        ConfigModule.forRoot(), EventEmitterModule.forRoot(), GlobalModule, ZohoModule, DreamerModule, SendpulseModule, ClientModule, LoanModule, TransactionModule]
 })
 export class AppModule {
 
