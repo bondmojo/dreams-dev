@@ -11,7 +11,7 @@ export class GlobalController {
 
   @Get('CalculateWingWeiLuyTransferFee/:amount')
   async CalculateWingWeiLuyTransferFee(@Param('amount') amount: number) {
-    return await this.globalService.CALC_WING_WEI_LUY_TRANSFER_FEE(amount);
+    const WingWeiLuyTransferFee = await this.globalService.CALC_WING_WEI_LUY_TRANSFER_FEE(amount);
+    return { WingWeiLuyTransferFee: WingWeiLuyTransferFee };
   }
-
 }
