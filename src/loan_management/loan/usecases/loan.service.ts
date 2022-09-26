@@ -57,8 +57,10 @@ export class LoanService {
         return loanResponse;
     }
 
-    async disbursed(disbursedLoanDto: DisbursedLoanDto): Promise<any> {
-        const loan = await this.findOne({ id: disbursedLoanDto.loan_id });
+    async disbursed(disbursedLoanDto: DisbursedLoanDto): Promise<Loan | undefined> {
+        const loan = await this.loanRepository.findOneBy({
+            id: disbursedLoanDto.loan_id,
+        });
         if (!loan) {
             return;
         }
