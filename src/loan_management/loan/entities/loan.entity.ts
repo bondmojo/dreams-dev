@@ -54,17 +54,17 @@ export class Loan {
   @Column({ type: 'timestamp', nullable: true })
   disbursed_date: Date;
 
-  @Column({ type: 'timestamp', nullable: true })
-  repayment_date: Date;
-
   @Column({ nullable: true })
   tenure_in_months: number;
 
   @Column({ type: 'timestamp', nullable: true })
-  paid_date: Date;
+  repayment_date: Date;
 
   @CreateDateColumn()
   created_date: Date;
+
+  @Column({ type: 'timestamp', nullable: true })
+  paid_date: Date;
 
   @OneToMany(() => Transaction, transaction => transaction.loan)
   transaction: Transaction[]

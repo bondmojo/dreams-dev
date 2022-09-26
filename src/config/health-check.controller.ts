@@ -1,5 +1,5 @@
 import {Controller, Get} from "@nestjs/common";
-import { CustomLogger } from "src/custom_logger";
+import { CustomLogger } from "../custom_logger";
 
 @Controller("admin")
 export class HealthCheckController {

@@ -3,10 +3,13 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { DisbursedLoanDto, GetLoanDto } from "../dto";
 import { CustomLogger } from "../../../custom_logger";
 import { Loan } from '../entities/loan.entity';
-import { Repository } from 'typeorm';
 import { LoanHelperService } from "./loan-helper.service";
 import { GlobalService } from "../../../globals/global.service"
 import { GetLoanResponse } from "../dto/get-loan-response.dto";
+import { Repository, In, Between } from 'typeorm';
+import { Cron } from '@nestjs/schedule';
+import { add, addDays, endOfDay, format } from "date-fns";
+
 
 @Injectable()
 export class LoanService {
@@ -22,6 +25,7 @@ export class LoanService {
     async create(createLoanDto: any): Promise<Loan> {
         createLoanDto.id = 'LN' + Math.floor(Math.random() * 100000000);
         createLoanDto.loan_fee = this.globalService.LOAN_FEES;
+
         const loanFromDb = await this.loanRepository.save(createLoanDto);
         //create transaction for dream_point_commited in database
         await this.loanHelperService.createTransactionForDreamPointCommited(createLoanDto);
