@@ -41,4 +41,10 @@ export class ClientService {
         return client;
     }
 
+    @OnEvent('client.update')
+    async update(updateClientDto: UpdateClientDto) {
+        this.log.log(`Updating client with data ${JSON.stringify(updateClientDto)}`);
+        await this.clientRepository.update(updateClientDto.id, updateClientDto);
+    }
+
 }
