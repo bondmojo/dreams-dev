@@ -6,7 +6,7 @@ import { TransactionService } from "../../transaction/usecases/transaction.servi
 import { EventEmitter2 } from "@nestjs/event-emitter";
 import { Repository } from 'typeorm';
 import { DisbursedLoanDto } from '../dto';
-import { GlobalService } from "../../../globals/global.service"
+import { GlobalService } from "../../../globals/usecases/global.service"
 import { add } from 'date-fns';
 
 
