@@ -1,10 +1,11 @@
-import { Injectable } from "@nestjs/common";
+import { ConsoleLogger, Injectable } from "@nestjs/common";
 import { InjectRepository } from '@nestjs/typeorm';
-import { CreateClientAndLoanDto, GetClientDto } from "../dto";
+import { CreateClientAndLoanDto, CreateClientDto, GetClientDto, UpdateClientDto } from "../dto";
 import { CustomLogger } from "../../../custom_logger";
 import { Client } from '../entities/client.entity';
 import { Repository } from 'typeorm';
 import { LoanService } from "../../loan/usecases/loan.service";
+import { OnEvent } from "@nestjs/event-emitter";
 
 @Injectable()
 export class ClientService {
@@ -16,10 +17,10 @@ export class ClientService {
     ) { }
 
     async create(createClientAndLoanDto: CreateClientAndLoanDto): Promise<Client> {
-
         // Generating client id
-        createClientAndLoanDto.id = createClientAndLoanDto.client_id = 'CL' + Math.floor(Math.random() * 100000000);
-        const clientFromDb = await this.clientRepository.save(createClientAndLoanDto);
+        const createClientDto: CreateClientDto = createClientAndLoanDto;
+        createClientDto.id = createClientAndLoanDto.client_id = 'CL' + Math.floor(Math.random() * 100000000);
+        const clientFromDb = await this.clientRepository.save(createClientDto);
 
         // Create loan for client request object
         await this.loanService.create(createClientAndLoanDto);;
@@ -27,10 +28,23 @@ export class ClientService {
     }
 
     async findOne(fields: GetClientDto): Promise<Client | null> {
+        this.log.log("findOne =" + JSON.stringify(fields));
         const client = await this.clientRepository.findOne({
             where: fields,
         });
         return client;
+    }
+
+    async findbyId(clientId: string): Promise<Client[] | any> {
+        this.log.log("findbyId =" + clientId);
+        const client = await this.findOne({ id: clientId });
+        return client;
+    }
+
+    @OnEvent('client.update')
+    async update(updateClientDto: UpdateClientDto) {
+        this.log.log(`Updating client with data ${JSON.stringify(updateClientDto)}`);
+        await this.clientRepository.update(updateClientDto.id, updateClientDto);
     }
 
 }

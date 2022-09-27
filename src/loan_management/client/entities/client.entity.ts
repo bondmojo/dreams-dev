@@ -7,7 +7,7 @@ import {
   OneToMany
 } from 'typeorm';
 import { Loan } from '../../loan/entities/loan.entity';
-@Entity({ name: "clients", synchronize: true })
+@Entity({ name: "clients" })
 export class Client {
   @PrimaryColumn()
   id: string;
@@ -16,7 +16,7 @@ export class Client {
   first: string;
 
   @OneToMany(() => Loan, loan => loan.client)
-  loan: Loan[]
+  loan: Loan
 
   @Column({ nullable: true })
   zoho_id: string;
@@ -33,8 +33,17 @@ export class Client {
   @Column({ nullable: true })
   nickname: string;
 
+  @Column({ type: 'double', default: 0 })
+  dream_points_earned: number;
+
+  @Column({ type: 'double', default: 0 })
+  dream_points_committed: number;
+
   @Column({ type: 'timestamp', nullable: true })
   dob: Date;
+
+  @Column({ default: 1 })
+  tier: string;
 
   @Column({ nullable: true })
   mobile: string;

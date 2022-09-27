@@ -1,4 +1,4 @@
-export class GetLoanResponse{
+export class GetLoanResponse {
     status: boolean;
     loanAmount?: string;
     dreamPoints?: string;
@@ -8,5 +8,6 @@ export class GetLoanResponse{
     dueAmount?: string;
     paidAmount?: string;
     outstandingBalance?: string;
+    membershipTier?: string;
 }
 
