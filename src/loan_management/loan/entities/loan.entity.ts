@@ -60,9 +60,6 @@ export class Loan {
   @Column({ type: 'date', nullable: true })
   repayment_date: Date;
 
-  @CreateDateColumn()
-  created_date: Date;
-
   @Column({ type: 'timestamp', nullable: true })
   paid_date: Date;
 
