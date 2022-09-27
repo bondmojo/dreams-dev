@@ -4,7 +4,7 @@ import { DisbursedLoanDto, GetLoanDto } from "../dto";
 import { CustomLogger } from "../../../custom_logger";
 import { Loan } from '../entities/loan.entity';
 import { LoanHelperService } from "./loan-helper.service";
-import { GlobalService } from "../../../globals/global.service"
+import { GlobalService } from "../../../globals/usecases/global.service"
 import { GetLoanResponse } from "../dto/get-loan-response.dto";
 import { Repository, In, Between } from 'typeorm';
 import { Cron } from '@nestjs/schedule';
@@ -25,7 +25,6 @@ export class LoanService {
     async create(createLoanDto: any): Promise<Loan> {
         createLoanDto.id = 'LN' + Math.floor(Math.random() * 100000000);
         createLoanDto.loan_fee = this.globalService.LOAN_FEES;
-
         const loanFromDb = await this.loanRepository.save(createLoanDto);
         //create transaction for dream_point_commited in database
         await this.loanHelperService.createTransactionForDreamPointCommited(createLoanDto);
@@ -36,6 +35,7 @@ export class LoanService {
     async findOne(fields: GetLoanDto): Promise<GetLoanResponse | null> {
         const loan = await this.loanRepository.findOne({
             where: fields,
+            relations: ['client']
         });
         this.log.log("LOAN DATA =" + loan);
 
@@ -44,15 +44,15 @@ export class LoanService {
             loanResponse.status = false;
             return loanResponse
         }
-
+        const client = loan?.client;
         loanResponse.status = true;
-        loanResponse.dreamPoints = "" + loan?.dream_point;
+        loanResponse.dreamPoints = "" + (client?.dream_points_earned + loan?.client?.dream_points_committed);
         loanResponse.loanAmount = "" + loan?.amount;
         loanResponse.wireTransferType = loan?.wire_transfer_type;
         loanResponse.loanStatus = loan?.status;
         loanResponse.dueDate = "" + loan?.repayment_date;
-        //FIXME: calculate balance
-        loanResponse.outstandingBalance = "75";
+        loanResponse.outstandingBalance = "" + loan?.outstanding_amount;
+        loanResponse.membershipTier = client?.tier;
 
         return loanResponse;
     }
