@@ -6,8 +6,9 @@ export class GlobalService {
     public readonly LOAN_FEES: number = 3;
 
     public readonly LOAN_STATUS: any = {
-        APPROVED: 'approved',
-        DISBURSED: 'disbursed'
+        APPROVED: 'Approved',
+        DISBURSED: 'Disbursed',
+        NOT_QUALIFIED: 'Not Qualified',
     }
 
     public readonly TRANSACTION_TYPE: any = {
