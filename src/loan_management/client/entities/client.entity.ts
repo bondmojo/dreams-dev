@@ -16,7 +16,7 @@ export class Client {
   first: string;
 
   @OneToMany(() => Loan, loan => loan.client)
-  loan: Loan[]
+  loan: Loan
 
   @Column({ nullable: true })
   zoho_id: string;

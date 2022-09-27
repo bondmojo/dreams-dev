@@ -22,7 +22,7 @@ export class Loan {
 
   @ManyToOne(() => Client, client => client.loan)
   @JoinColumn({ name: 'client_id', referencedColumnName: 'id' })
-  client: Client[];
+  client: Client;
 
   @Column({ type: 'double', nullable: true })
   amount: number;
