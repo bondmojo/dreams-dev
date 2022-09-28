@@ -46,8 +46,8 @@ export class LoanService {
         }
         const client = loan?.client;
         loanResponse.status = true;
-        loanResponse.dreamPoints = "" + (client?.dream_points_earned + loan?.client?.dream_points_committed);
-        loanResponse.loanAmount = "" + loan?.amount;
+        loanResponse.dreamPoints = "" + (client?.dream_points_earned + client?.dream_points_committed);
+        loanResponse.loanAmount = "" + (loan?.amount - loan?.dream_point);
         loanResponse.wireTransferType = loan?.wire_transfer_type;
         loanResponse.loanStatus = loan?.status;
         loanResponse.dueDate = "" + loan?.repayment_date;
