@@ -2,12 +2,14 @@ import { DisbursedLoanDto, CreateLoanDto } from './dto';
 import { Body, Controller, Param, Post, Get } from '@nestjs/common';
 import { LoanService } from "./usecases/loan.service";
 import { CustomLogger } from "../../custom_logger";
+import { PaymentReminderService } from "./notification/payment-reminder.service";
 
 @Controller('loan')
 export class LoanController {
   private readonly logger = new CustomLogger(LoanController.name);
   constructor(
     private readonly loanService: LoanService,
+    private readonly paymentReminderService: PaymentReminderService,
   ) { }
 
   @Post()
@@ -22,9 +24,15 @@ export class LoanController {
     return await this.loanService.disbursed(disbursedLoanDto);
   }
 
+  @Get('runCronApis/:id')
+  async runCronApis(@Param('id') id: number) {
+    this.logger.log('Running Cron Job Api');
+    return await this.paymentReminderService.runCronApis(id);
+  }
+
   @Get(':id')
   async findOne(@Param('id') id: string) {
-    this.logger.log('Getting loan with request id ='  +id);
+    this.logger.log('Getting loan with request id =' + id);
     return await this.loanService.findOne({ id: id });
   }
 
