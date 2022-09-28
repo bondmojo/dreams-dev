@@ -14,6 +14,9 @@ import * as path from 'path';
 import got from "got";
 import {promises} from "stream";
 import {KycEventDto, KYCStatus} from "../../external/shufti/dto/kyc-event.dto";
+import { User } from "@zohocrm/typescript-sdk-2.0/core/com/zoho/crm/api/users/user";
+import { getMilliseconds } from "date-fns";
+import { LeadConverter } from "@zohocrm/typescript-sdk-2.0/core/com/zoho/crm/api/record/lead_converter";
 
 @Injectable()
 export class DreamerRepository {
@@ -31,6 +34,32 @@ export class DreamerRepository {
         return dreamerModel;
     }
 
+    async createTask() {
+        const taskRecord = new Record();
+        const today = new Date();
+        const user = new User();
+        user.setEmail('mohit.joshi@gojo.co');
+        const id =BigInt("364346000000744002");
+
+        
+        taskRecord.addFieldValue(Field.Tasks.SUBJECT, "Payment Received");
+        taskRecord.addFieldValue(Field.Tasks.CREATED_TIME, today);
+        taskRecord.addFieldValue(Field.Tasks.STATUS, new Choice("Not Started"));
+        taskRecord.addFieldValue(Field.Tasks.OWNER, user);
+        taskRecord.addFieldValue(Field.Tasks.DESCRIPTION, "The Description Doesn't appear in the ZOHO Task");
+        taskRecord.addFieldValue(Field.Tasks.DUE_DATE, today);
+
+        const whatId = new Record();
+        whatId.setId(id);
+        taskRecord.addFieldValue(Field.Tasks.WHAT_ID, whatId );
+        taskRecord.addKeyValue("$se_module", "Leads");
+        taskRecord.addKeyValue("Custom_Description", "https://bitbucket.org/");
+
+        let map: Map<string, any> = await this.zohoservice.saveRecord(taskRecord, "Tasks");
+        this.log.log(`Successfully saved user as ${map.get('id')}`);
+        return (map.get('id') as bigint).toString();
+    }
+
     async save(dreamer: DreamerModel): Promise<string> {
         const record = new Record();
 
@@ -44,7 +73,7 @@ export class DreamerRepository {
         record.addKeyValue('Telegram_Chat_ID', dreamer.externalId);
         record.addKeyValue('Amount', dreamer.loanRequest.amount);
         record.addKeyValue('Points', dreamer.loanRequest.pointsAmount);
-        let map: Map<string, any> = await this.zohoservice.saveRecord(record);
+        let map: Map<string, any> = await this.zohoservice.saveRecord(record, 'Leads');
 
         this.log.log(`Successfully saved user ${dreamer.externalId} as ${map.get('id')}`);
 

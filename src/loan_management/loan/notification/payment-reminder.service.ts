@@ -24,25 +24,16 @@ export class PaymentReminderService {
     private readonly sendpulseService: SendpluseService
   ) { }
 
-  async runCronApis(id: number) {
-    if (id == 1) {
-      this.log.log("Running 9AM scheduler");
-      await this.runPaymentScheduler(true);
-    } else {
-      this.log.log("Running 2PM scheduler");
-      await this.runPaymentScheduler(false);
-    }
-  }
+@Cron('4 * * * * *')
+async morningTimeScheduler(){
+//  await this.runPaymentScheduler(true);
+}
 
-  @Cron('0 16 * * *')
-  async morningTimeScheduler() {
-    await this.runPaymentScheduler(true);
-  }
+@Cron('34 * * * * *')
+async dayTimeScheduler(){
+//  await this.runPaymentScheduler(false);
+}
 
-  @Cron('0 21 * * *')
-  async dayTimeScheduler() {
-    await this.runPaymentScheduler(false);
-  }
 
   async runPaymentScheduler(isMorning: boolean) {
     const now = new Date();

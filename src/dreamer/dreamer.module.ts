@@ -9,6 +9,7 @@ import {UpdateAdditionalDetailsUsecase} from "./usecases/update-additional-detai
 import {ShuftiModule} from "../external/shufti/shufti.module";
 import {InitiateKycUsecase} from "./usecases/initiate-kyc.usecase";
 import {KycCompletionUpdateUsecase} from "./usecases/kyc-completion-update.usecase";
+import { CreateTaskUsecase } from "./usecases/create-task.usecase";
 
 @Module({
     imports: [SendpulseModule, ZohoModule, ShuftiModule],
@@ -19,6 +20,7 @@ import {KycCompletionUpdateUsecase} from "./usecases/kyc-completion-update.useca
         UpdateAdditionalDetailsUsecase,
         InitiateKycUsecase,
         KycCompletionUpdateUsecase,
+        CreateTaskUsecase,
         DreamerRepository]
 })
 export class DreamerModule {
