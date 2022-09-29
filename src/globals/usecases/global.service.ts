@@ -13,6 +13,7 @@ export class GlobalService {
 
     public readonly TRANSACTION_TYPE: any = {
         DEBIT_WING_WEI_LUY_TRANSFER_FEE: 'debit_wing_wei_luy_transfer_fee',
+        CREDIT_WING_WEI_LUY_TRANSFER_FEE: 'credit_wing_wei_luy_transfer_fee',
         CREDIT_DISBURSEMENT: 'credit_disbursement',
         DREAM_POINT_COMMITMENT: 'dream_point_commitment',
         CREDIT_REPAYMENT: 'credit_repayment',

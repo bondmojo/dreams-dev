@@ -123,4 +123,17 @@ export class LoanHelperService {
         const transaction = await this.transactionService.create(transactionDto);
         return transaction;
     }
+
+    async checkAndCreateCreditWingTransferFeeTransaction(loan: Loan, createRepaymentTransactionDto: CreateRepaymentTransactionDto): Promise<any> {
+        if (loan.wing_wei_luy_transfer_fee) {
+            const transactionDto = {
+                loan_id: loan.id,
+                amount: loan.wing_wei_luy_transfer_fee,
+                type: this.globalService.TRANSACTION_TYPE.CREDIT_WING_WEI_LUY_TRANSFER_FEE,
+                note: createRepaymentTransactionDto.note,
+            }
+            const transaction = await this.transactionService.create(transactionDto);
+            return transaction;
+        }
+    }
 }

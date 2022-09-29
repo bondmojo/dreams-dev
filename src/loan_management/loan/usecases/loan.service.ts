@@ -87,6 +87,7 @@ export class LoanService {
         if (createRepaymentTransactionDto.amount == loan.outstanding_amount) {
             await this.loanHelperService.createCreditRepaymentTransaction(loan, createRepaymentTransactionDto);
             await this.loanHelperService.createFeePaymentTransaction(loan, createRepaymentTransactionDto);
+            await this.loanHelperService.checkAndCreateCreditWingTransferFeeTransaction(loan, createRepaymentTransactionDto);
         }
         return creditRepaymentResponse;
     }
