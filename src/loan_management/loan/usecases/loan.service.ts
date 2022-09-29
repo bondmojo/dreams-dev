@@ -86,6 +86,7 @@ export class LoanService {
         // case of fully repaid
         if (createRepaymentTransactionDto.amount == loan.outstanding_amount) {
             await this.loanHelperService.createCreditRepaymentTransaction(loan, createRepaymentTransactionDto);
+            await this.loanHelperService.createFeePaymentTransaction(loan, createRepaymentTransactionDto);
         }
         return creditRepaymentResponse;
     }

@@ -41,6 +41,7 @@ export class LoanHelperService {
         this.eventEmitter.emit('client.update', updateClientDto);
     }
 
+    /** -----------------------   Disbursement helper functions     ---------------------------- */
     async createCreditDisbursementTransaction(loan: Loan, disbursedLoanDto: DisbursedLoanDto): Promise<any> {
         const credit_disbursed_amount = loan.amount - loan.dream_point;
         const disbursementTransactionDto = {
@@ -99,12 +100,24 @@ export class LoanHelperService {
         return;
     }
 
+    /** -----------------------   Create Repayment Transaction functions     ---------------------------- */
     async createCreditRepaymentTransaction(loan: Loan, createRepaymentTransactionDto: CreateRepaymentTransactionDto): Promise<any> {
         const credit_amount = loan.amount - loan.dream_point;
         const transactionDto = {
             loan_id: loan.id,
             amount: credit_amount,
             type: this.globalService.TRANSACTION_TYPE.CREDIT_REPAYMENT,
+            note: createRepaymentTransactionDto.note,
+        }
+        const transaction = await this.transactionService.create(transactionDto);
+        return transaction;
+    }
+
+    async createFeePaymentTransaction(loan: Loan, createRepaymentTransactionDto: CreateRepaymentTransactionDto): Promise<any> {
+        const transactionDto = {
+            loan_id: loan.id,
+            amount: loan.loan_fee,
+            type: this.globalService.TRANSACTION_TYPE.FEE_PAYMENT,
             note: createRepaymentTransactionDto.note,
         }
         const transaction = await this.transactionService.create(transactionDto);

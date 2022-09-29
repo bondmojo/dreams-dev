@@ -16,6 +16,7 @@ export class GlobalService {
         CREDIT_DISBURSEMENT: 'credit_disbursement',
         DREAM_POINT_COMMITMENT: 'dream_point_commitment',
         CREDIT_REPAYMENT: 'credit_repayment',
+        FEE_PAYMENT: 'fee_payment',
     };
     public readonly WIRE_TRANSFER_TYPES: any = {
         MOBILE: 'mobile',
