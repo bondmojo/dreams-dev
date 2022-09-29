@@ -57,17 +57,20 @@ export class LoanService {
         return loanResponse;
     }
 
-    async disbursed(disbursedLoanDto: DisbursedLoanDto): Promise<Loan | undefined> {
+    async disbursed(disbursedLoanDto: DisbursedLoanDto): Promise<any> {
+        const disbursedResponse = { status: true };
         const loan = await this.loanRepository.findOneBy({
             id: disbursedLoanDto.loan_id,
         });
+
         if (!loan) {
-            return;
+            disbursedResponse.status = false;
+            return disbursedResponse;
         }
         await this.loanHelperService.createCreditDisbursementTransaction(loan, disbursedLoanDto);
         await this.loanHelperService.checkAndCreateWingTransferFeeTransaction(loan, disbursedLoanDto);
         await this.loanHelperService.updateLoanDataAfterDisbursement(loan, disbursedLoanDto);
-        return loan;
+        return disbursedResponse;
     }
 
 }
