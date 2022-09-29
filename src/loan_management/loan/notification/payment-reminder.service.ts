@@ -24,12 +24,22 @@ export class PaymentReminderService {
     private readonly sendpulseService: SendpluseService
   ) { }
 
-  @Cron('0 9 * * *')
+  async runCronApis(id: number) {
+    if (id == 1) {
+      this.log.log("Running 9AM scheduler");
+      await this.runPaymentScheduler(true);
+    } else {
+      this.log.log("Running 2PM scheduler");
+      await this.runPaymentScheduler(false);
+    }
+  }
+
+  @Cron('0 16 * * *')
   async morningTimeScheduler() {
     await this.runPaymentScheduler(true);
   }
 
-  @Cron('0 14 * * *')
+  @Cron('0 21 * * *')
   async dayTimeScheduler() {
     await this.runPaymentScheduler(false);
   }
