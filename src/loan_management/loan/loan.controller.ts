@@ -1,4 +1,4 @@
-import { DisbursedLoanDto, CreateLoanDto } from './dto';
+import { DisbursedLoanDto, CreateLoanDto, CreateRepaymentTransactionDto } from './dto';
 import { Body, Controller, Param, Post, Get } from '@nestjs/common';
 import { LoanService } from "./usecases/loan.service";
 import { CustomLogger } from "../../custom_logger";
@@ -22,6 +22,13 @@ export class LoanController {
   async disbursed(@Body() disbursedLoanDto: DisbursedLoanDto) {
     this.logger.log(`Disbursed loan with request ${JSON.stringify(disbursedLoanDto)}`);
     return await this.loanService.disbursed(disbursedLoanDto);
+  }
+
+  @Post('repayment/transaction/create')
+  async createRepaymentTransaction(@Body() createRepaymentTransactionDto: CreateRepaymentTransactionDto) {
+    this.logger.log(`Creating Loan Repayment Transaction with request ${JSON.stringify(createRepaymentTransactionDto)}`);
+    //  FIXME:: add for transaction type dream_point_refund
+    return await this.loanService.createRepaymentTransaction(createRepaymentTransactionDto);
   }
 
   @Get('runCronApis/:id')
