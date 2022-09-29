@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from '@nestjs/typeorm';
-import { DisbursedLoanDto, GetLoanDto } from "../dto";
+import { DisbursedLoanDto, CreateRepaymentTransactionDto, GetLoanDto } from "../dto";
 import { CustomLogger } from "../../../custom_logger";
 import { Loan } from '../entities/loan.entity';
 import { LoanHelperService } from "./loan-helper.service";
@@ -71,6 +71,23 @@ export class LoanService {
         await this.loanHelperService.checkAndCreateWingTransferFeeTransaction(loan, disbursedLoanDto);
         await this.loanHelperService.updateLoanDataAfterDisbursement(loan, disbursedLoanDto);
         return disbursedResponse;
+    }
+
+    async createRepaymentTransaction(createRepaymentTransactionDto: CreateRepaymentTransactionDto): Promise<any> {
+        const creditRepaymentResponse = { status: true };
+        const loan = await this.loanRepository.findOneBy({
+            id: createRepaymentTransactionDto.loan_id,
+        });
+
+        if (!loan || !createRepaymentTransactionDto.amount) {
+            creditRepaymentResponse.status = false;
+            return creditRepaymentResponse;
+        }
+        // case of fully repaid
+        if (createRepaymentTransactionDto.amount == loan.outstanding_amount) {
+            await this.loanHelperService.createCreditRepaymentTransaction(loan, createRepaymentTransactionDto);
+        }
+        return creditRepaymentResponse;
     }
 
 }

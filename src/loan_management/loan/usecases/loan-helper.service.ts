@@ -5,7 +5,7 @@ import { Loan } from '../entities/loan.entity';
 import { TransactionService } from "../../transaction/usecases/transaction.service";
 import { EventEmitter2 } from "@nestjs/event-emitter";
 import { Repository } from 'typeorm';
-import { DisbursedLoanDto } from '../dto';
+import { DisbursedLoanDto, CreateRepaymentTransactionDto } from '../dto';
 import { GlobalService } from "../../../globals/usecases/global.service"
 import { add } from 'date-fns';
 
@@ -99,5 +99,15 @@ export class LoanHelperService {
         return;
     }
 
-
+    async createCreditRepaymentTransaction(loan: Loan, createRepaymentTransactionDto: CreateRepaymentTransactionDto): Promise<any> {
+        const credit_amount = loan.amount - loan.dream_point;
+        const transactionDto = {
+            loan_id: loan.id,
+            amount: credit_amount,
+            type: this.globalService.TRANSACTION_TYPE.CREDIT_REPAYMENT,
+            note: createRepaymentTransactionDto.note,
+        }
+        const transaction = await this.transactionService.create(transactionDto);
+        return transaction;
+    }
 }
