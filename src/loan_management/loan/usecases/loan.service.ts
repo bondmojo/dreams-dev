@@ -75,7 +75,7 @@ export class LoanService {
     }
 
     async createRepaymentTransaction(createRepaymentTransactionDto: CreateRepaymentTransactionDto): Promise<any> {
-        const creditRepaymentResponse = { status: true };
+        const creditRepaymentResponse = { status: true, error: '' };
         const loan = await this.loanRepository.findOne({
             where: { id: createRepaymentTransactionDto.loan_id },
             relations: ['client']
@@ -85,6 +85,13 @@ export class LoanService {
             creditRepaymentResponse.status = false;
             return creditRepaymentResponse;
         }
+        if (createRepaymentTransactionDto.amount > loan.outstanding_amount) {
+            // Case: ammount is greater then due ammount
+            creditRepaymentResponse.status = false;
+            creditRepaymentResponse.error = 'Amount is greater then outstanding balance.';
+            return creditRepaymentResponse;
+        }
+
         if (createRepaymentTransactionDto.amount == loan.outstanding_amount) {
             // Case: of fully repaid
             await this.loanHelperService.createCreditRepaymentTransaction(loan, createRepaymentTransactionDto);
