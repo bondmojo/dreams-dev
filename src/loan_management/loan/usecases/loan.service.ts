@@ -85,14 +85,18 @@ export class LoanService {
             creditRepaymentResponse.status = false;
             return creditRepaymentResponse;
         }
-        // case of fully repaid
         if (createRepaymentTransactionDto.amount == loan.outstanding_amount) {
+            // Case: of fully repaid
             await this.loanHelperService.createCreditRepaymentTransaction(loan, createRepaymentTransactionDto);
             await this.loanHelperService.createFeePaymentTransaction(loan, createRepaymentTransactionDto);
             await this.loanHelperService.checkAndCreateCreditWingTransferFeeTransaction(loan, createRepaymentTransactionDto);
             await this.loanHelperService.createDreamPointEarnedTransaction(loan, createRepaymentTransactionDto);
             await this.loanHelperService.updateLoanAfterFullyPaid(loan, createRepaymentTransactionDto);
             await this.loanHelperService.updateClientAfterFullyPaid(loan, createRepaymentTransactionDto);
+        }
+        else if (createRepaymentTransactionDto.amount < loan.outstanding_amount) {
+            // Case: Partial payment
+            await this.loanHelperService.doPartialPaymentProcess(loan, createRepaymentTransactionDto);
         }
         return creditRepaymentResponse;
     }

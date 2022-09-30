@@ -178,4 +178,24 @@ export class LoanHelperService {
         }
         return;
     }
+
+    async doPartialPaymentProcess(loan: Loan, createRepaymentTransactionDto: CreateRepaymentTransactionDto): Promise<any> {
+        // Create transaction for partial payment
+        const transactionDto = {
+            loan_id: loan.id,
+            amount: createRepaymentTransactionDto.amount,
+            type: this.globalService.TRANSACTION_TYPE.PARTIAL_PAYMENT,
+            note: createRepaymentTransactionDto.note,
+        }
+        const transaction = await this.transactionService.create(transactionDto);
+
+        // Update outstanding balance in loan record
+        const outstanding_amount = loan.outstanding_amount - createRepaymentTransactionDto.amount;
+        const fields_to_be_update: object = {
+            outstanding_amount: outstanding_amount
+        }
+        this.log.log(`Updating loan outstandingvamount partial  with data ${JSON.stringify(fields_to_be_update)}`);
+        await this.loanRepository.update(loan.id, fields_to_be_update);
+        return transaction;
+    }
 }
