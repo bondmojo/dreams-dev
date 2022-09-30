@@ -63,7 +63,7 @@ export class LoanService {
             relations: ['client']
         });
 
-        if (!loan) {
+        if (!loan || loan.status != this.globalService.LOAN_STATUS.APPROVED) {
             disbursedResponse.status = false;
             return disbursedResponse;
         }
@@ -80,7 +80,7 @@ export class LoanService {
             relations: ['client']
         });
 
-        if (!loan || !createRepaymentTransactionDto.amount) {
+        if (!loan || !createRepaymentTransactionDto.amount || loan.status != this.globalService.LOAN_STATUS.DISBURSED) {
             creditRepaymentResponse.status = false;
             return creditRepaymentResponse;
         }
@@ -93,6 +93,7 @@ export class LoanService {
 
         if (createRepaymentTransactionDto.amount == loan.outstanding_amount) {
             // Case: of fully repaid
+            await this.loanHelperService.createPartialTransactionOnFullyPaid(loan, createRepaymentTransactionDto);
             await this.loanHelperService.createCreditRepaymentTransaction(loan, createRepaymentTransactionDto);
             await this.loanHelperService.createFeePaymentTransaction(loan, createRepaymentTransactionDto);
             await this.loanHelperService.checkAndCreateCreditWingTransferFeeTransaction(loan, createRepaymentTransactionDto);
@@ -102,7 +103,7 @@ export class LoanService {
         }
         else if (createRepaymentTransactionDto.amount < loan.outstanding_amount) {
             // Case: Partial payment
-            await this.loanHelperService.doPartialPaymentProcess(loan, createRepaymentTransactionDto);
+            await this.loanHelperService.doProcessPartialPayment(loan, createRepaymentTransactionDto);
         }
         return creditRepaymentResponse;
     }
