@@ -160,4 +160,22 @@ export class LoanHelperService {
         await this.loanRepository.update(loan.id, fields_to_be_update);
         return;
     }
+
+    async updateClientAfterFullyPaid(loan: Loan, createRepaymentTransactionDto: CreateRepaymentTransactionDto): Promise<any> {
+
+        const client_new_tier = +loan?.client?.tier + 1;
+        const dream_point_earned = loan?.client?.dream_points_earned + loan?.dream_point;
+        const dream_point_committed = loan?.client?.dream_points_committed - loan?.dream_point;
+
+        if (dream_point_committed >= 0) {
+            const updateClientDto = {
+                id: loan?.client?.id,
+                tier: client_new_tier,
+                dream_points_earned: dream_point_earned,
+                dream_points_committed: dream_point_committed
+            };
+            this.eventEmitter.emit('client.update', updateClientDto);
+        }
+        return;
+    }
 }

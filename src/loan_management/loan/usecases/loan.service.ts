@@ -76,8 +76,9 @@ export class LoanService {
 
     async createRepaymentTransaction(createRepaymentTransactionDto: CreateRepaymentTransactionDto): Promise<any> {
         const creditRepaymentResponse = { status: true };
-        const loan = await this.loanRepository.findOneBy({
-            id: createRepaymentTransactionDto.loan_id
+        const loan = await this.loanRepository.findOne({
+            where: { id: createRepaymentTransactionDto.loan_id },
+            relations: ['client']
         });
 
         if (!loan || !createRepaymentTransactionDto.amount) {
@@ -91,6 +92,7 @@ export class LoanService {
             await this.loanHelperService.checkAndCreateCreditWingTransferFeeTransaction(loan, createRepaymentTransactionDto);
             await this.loanHelperService.createDreamPointEarnedTransaction(loan, createRepaymentTransactionDto);
             await this.loanHelperService.updateLoanAfterFullyPaid(loan, createRepaymentTransactionDto);
+            await this.loanHelperService.updateClientAfterFullyPaid(loan, createRepaymentTransactionDto);
         }
         return creditRepaymentResponse;
     }
