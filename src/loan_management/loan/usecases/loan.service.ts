@@ -90,7 +90,7 @@ export class LoanService {
             await this.loanHelperService.createFeePaymentTransaction(loan, createRepaymentTransactionDto);
             await this.loanHelperService.checkAndCreateCreditWingTransferFeeTransaction(loan, createRepaymentTransactionDto);
             await this.loanHelperService.createDreamPointEarnedTransaction(loan, createRepaymentTransactionDto);
-
+            await this.loanHelperService.updateLoanAfterFullyPaid(loan, createRepaymentTransactionDto);
         }
         return creditRepaymentResponse;
     }

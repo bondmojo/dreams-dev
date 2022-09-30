@@ -9,6 +9,7 @@ export class GlobalService {
         APPROVED: 'Approved',
         DISBURSED: 'Disbursed',
         NOT_QUALIFIED: 'Not Qualified',
+        FULLY_PAID: 'Fully Paid',
     }
 
     public readonly TRANSACTION_TYPE: any = {

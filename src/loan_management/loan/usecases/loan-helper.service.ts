@@ -147,4 +147,17 @@ export class LoanHelperService {
         const transaction = await this.transactionService.create(transactionDto);
         return transaction;
     }
+
+    async updateLoanAfterFullyPaid(loan: Loan, createRepaymentTransactionDto: CreateRepaymentTransactionDto): Promise<any> {
+        const today = new Date(); // current time
+        const fields_to_be_update: object = {
+            outstanding_amount: 0,
+            paid_date: today,
+            status: this.globalService.LOAN_STATUS.FULLY_PAID
+        }
+
+        this.log.log(`Updating loan after fully paid with data ${JSON.stringify(fields_to_be_update)}`);
+        await this.loanRepository.update(loan.id, fields_to_be_update);
+        return;
+    }
 }
