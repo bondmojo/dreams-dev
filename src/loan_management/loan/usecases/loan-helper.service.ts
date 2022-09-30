@@ -136,4 +136,15 @@ export class LoanHelperService {
             return transaction;
         }
     }
+
+    async createDreamPointEarnedTransaction(loan: Loan, createRepaymentTransactionDto: CreateRepaymentTransactionDto): Promise<any> {
+        const transactionDto = {
+            loan_id: loan.id,
+            amount: loan.dream_point,
+            type: this.globalService.TRANSACTION_TYPE.DREAM_POINT_EARNED,
+            note: createRepaymentTransactionDto.note,
+        }
+        const transaction = await this.transactionService.create(transactionDto);
+        return transaction;
+    }
 }

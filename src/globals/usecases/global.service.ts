@@ -16,6 +16,7 @@ export class GlobalService {
         CREDIT_WING_WEI_LUY_TRANSFER_FEE: 'credit_wing_wei_luy_transfer_fee',
         CREDIT_DISBURSEMENT: 'credit_disbursement',
         DREAM_POINT_COMMITMENT: 'dream_point_commitment',
+        DREAM_POINT_EARNED: 'dream_point_earned',
         CREDIT_REPAYMENT: 'credit_repayment',
         FEE_PAYMENT: 'fee_payment',
     };
