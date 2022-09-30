@@ -21,25 +21,22 @@ export class LoanHelperService {
         private readonly globalService: GlobalService
     ) { }
 
-    async createTransactionForDreamPointCommited(createLoanDto: any): Promise<any> {
+    async manageDreamPointCommitedAfterLoanCreation(createLoanDto: any): Promise<any> {
         const createTransactionDto = {
             loan_id: createLoanDto.id,
             amount: createLoanDto.dream_point,
             type: this.globalService.TRANSACTION_TYPE.DREAM_POINT_COMMITMENT,
         };
         const transaction = await this.transactionService.create(createTransactionDto);
-        return transaction;
-    }
 
-    async updateClientCommittedDreamPoint(createLoanDto: any): Promise<any> {
-        // this payload should contains only those fields which we need to update
-        // FIXME:: always update dream_points not replace
         const updateClientDto = {
             id: createLoanDto.client_id,
             dream_points_committed: createLoanDto.dream_point,
         };
         this.eventEmitter.emit('client.update', updateClientDto);
+        return transaction;
     }
+
 
     /** -----------------------   Disbursement helper functions     ---------------------------- */
     async createCreditDisbursementTransaction(loan: Loan, disbursedLoanDto: DisbursedLoanDto): Promise<any> {

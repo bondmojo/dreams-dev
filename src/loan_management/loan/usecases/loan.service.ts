@@ -27,8 +27,7 @@ export class LoanService {
         createLoanDto.loan_fee = this.globalService.LOAN_FEES;
         const loanFromDb = await this.loanRepository.save(createLoanDto);
         //create transaction for dream_point_commited in database
-        await this.loanHelperService.createTransactionForDreamPointCommited(createLoanDto);
-        await this.loanHelperService.updateClientCommittedDreamPoint(createLoanDto);
+        await this.loanHelperService.manageDreamPointCommitedAfterLoanCreation(createLoanDto);
         return loanFromDb;
     }
 
