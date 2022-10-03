@@ -22,9 +22,15 @@ export class GlobalService {
         FEE_PAYMENT: 'fee_payment',
         PARTIAL_PAYMENT: 'partial_payment'
     };
+
     public readonly WIRE_TRANSFER_TYPES: any = {
         MOBILE: 'mobile',
         ACCOUNT: 'account'
+    }
+
+    public readonly REPAYMENT_TRANSACTION_TYPE: any = {
+        CLIENT_CREDIT: 'client_credit',
+        DREAM_POINT_REFUND: 'dream_point_refund'
     }
 
     CALC_WING_WEI_LUY_TRANSFER_FEE(amount: number): number {

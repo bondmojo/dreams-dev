@@ -98,6 +98,41 @@ export class LoanHelperService {
     }
 
     /** -----------------------   Create Repayment Transaction functions     ---------------------------- */
+    async handleClientCreditRepayments(createRepaymentTransactionDto: CreateRepaymentTransactionDto): Promise<any> {
+        const creditRepaymentResponse = { status: true, error: '' };
+        const loan = await this.loanRepository.findOne({
+            where: { id: createRepaymentTransactionDto.loan_id },
+            relations: ['client']
+        });
+
+        if (!loan || !createRepaymentTransactionDto.amount || loan.status != this.globalService.LOAN_STATUS.DISBURSED) {
+            creditRepaymentResponse.status = false;
+            return creditRepaymentResponse;
+        }
+        if (createRepaymentTransactionDto.amount > loan.outstanding_amount) {
+            // Case: ammount is greater then due ammount
+            creditRepaymentResponse.status = false;
+            creditRepaymentResponse.error = 'Amount is greater then outstanding balance.';
+            return creditRepaymentResponse;
+        }
+
+        if (createRepaymentTransactionDto.amount == loan.outstanding_amount) {
+            // Case: of fully repaid
+            await this.createPartialTransactionOnFullyPaid(loan, createRepaymentTransactionDto);
+            await this.createCreditRepaymentTransaction(loan, createRepaymentTransactionDto);
+            await this.createFeePaymentTransaction(loan, createRepaymentTransactionDto);
+            await this.checkAndCreateCreditWingTransferFeeTransaction(loan, createRepaymentTransactionDto);
+            await this.createDreamPointEarnedTransaction(loan, createRepaymentTransactionDto);
+            await this.updateLoanAfterFullyPaid(loan, createRepaymentTransactionDto);
+            await this.updateClientAfterFullyPaid(loan, createRepaymentTransactionDto);
+        }
+        else if (createRepaymentTransactionDto.amount < loan.outstanding_amount) {
+            // Case: Partial payment
+            await this.doProcessPartialPayment(loan, createRepaymentTransactionDto);
+        }
+        return creditRepaymentResponse;
+    }
+
     async createCreditRepaymentTransaction(loan: Loan, createRepaymentTransactionDto: CreateRepaymentTransactionDto): Promise<any> {
         const credit_amount = loan.amount - loan.dream_point;
         const transactionDto = {
