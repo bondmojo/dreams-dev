@@ -39,7 +39,7 @@ export class DreamerRepository {
         return dreamerModel;
     }
 
-    async createPaymentReceivedTask(dreamerId:string, taskDetails: ZohoTaskRequest) {
+    async createTask(dreamerId:string, taskDetails: ZohoTaskRequest) {
         const taskRecord = new Record();
 
         const today = new Date();

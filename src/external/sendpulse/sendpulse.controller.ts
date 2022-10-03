@@ -21,20 +21,20 @@ export class SendpulseController {
 
   constructor(
     private readonly sendpulseService: SendpluseService,
-    private readonly sendpulseHelperServie: SendpulseHelperService
+    private readonly sendpulseHelperService: SendpulseHelperService
 
   ) { }
 
   @Post('/calculator')
   calculator(@Body() calculationDto: CalculationDto): CalculationResultDto {
     this.log.log(`Received request to calculate ${JSON.stringify(calculationDto)}`);
-    return this.sendpulseHelperServie.calculate(calculationDto);
+    return this.sendpulseHelperService.calculate(calculationDto);
   }
 
   @Post('/calculator/loan')
   loanCalculator(@Body() calculateLoanDto: CalculateLoanDto): CalculationResultDto {
     this.log.log(`Received request to calculate loan ${JSON.stringify(calculateLoanDto)}`);
-    return this.sendpulseHelperServie.calculateLoan(calculateLoanDto);
+    return this.sendpulseHelperService.calculateLoan(calculateLoanDto);
   }
 
   @Post('/sendMessage')
@@ -45,8 +45,7 @@ export class SendpulseController {
     model.externalId = messageObj.contact_id;
     //runFlowObj.flow_id=this.SENDPULSE_MESSAGING_FLOWID;
     model.external_data = { "message": messageObj.message };
-    await this.sendpulseService.runFlow(model, this.SENDPULSE_MESSAGING_FLOWID);
-    return { "status": 'ok' }
+    return await this.sendpulseService.runFlow(model, this.SENDPULSE_MESSAGING_FLOWID);
   }
 
   @Post('/updateApplicationStatus')
@@ -60,12 +59,11 @@ export class SendpulseController {
       transfertypeDto.variable_id = "632ae8966a397f4a4c32c516";
       transfertypeDto.variable_value = "" + reqData.loan_id;
       await this.sendpulseService.setVariable(transfertypeDto);
+      this.sendpulseHelperService.emitDisbursementEvent(reqData);
     }
     const model = new DreamerModel();
     model.externalId = reqData.sendpulse_user_id;
     model.external_data = {};
-
-    await this.sendpulseService.runFlow(model, this.SENDPULSE_MESSAGING_FLOWID);
-    return { "status": 'ok' }
+    return await this.sendpulseService.runFlow(model, this.SENDPULSE_MESSAGING_FLOWID);
   }
 }
