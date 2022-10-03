@@ -17,13 +17,18 @@ import {KycEventDto, KYCStatus} from "../../external/shufti/dto/kyc-event.dto";
 import { User } from "@zohocrm/typescript-sdk-2.0/core/com/zoho/crm/api/users/user";
 import { getMilliseconds } from "date-fns";
 import { LeadConverter } from "@zohocrm/typescript-sdk-2.0/core/com/zoho/crm/api/record/lead_converter";
+import { ZohoTaskRequest } from "../usecases/dto/zoho-task-request.dto";
+import { GlobalService } from "src/globals/usecases/global.service";
+
 
 @Injectable()
 export class DreamerRepository {
     private readonly COMPANY_NAME = 'GOJO';
     private readonly log = new CustomLogger(DreamerRepository.name);
 
-    constructor(private readonly zohoservice: ZohoService) {}
+    constructor(private readonly zohoservice: ZohoService,
+        private readonly globalService: GlobalService
+    ) {}
 
     async get(dreamer: string): Promise<DreamerModel> {
         const dreamerModel = new DreamerModel();
@@ -34,26 +39,31 @@ export class DreamerRepository {
         return dreamerModel;
     }
 
-    async createTask() {
+    async createPaymentReceivedTask(dreamerId:string, taskDetails: ZohoTaskRequest) {
         const taskRecord = new Record();
+
         const today = new Date();
         const user = new User();
-        user.setEmail('mohit.joshi@gojo.co');
-        const id =BigInt("364346000000744002");
+        user.setEmail(taskDetails.assign_to);
 
+        //Set dreamerId/leadid
+        const id =BigInt(dreamerId);
+        const whatId = new Record();
+        whatId.setId(id);
+        taskRecord.addFieldValue(Field.Tasks.WHAT_ID, whatId);
         
-        taskRecord.addFieldValue(Field.Tasks.SUBJECT, "Payment Received");
+        taskRecord.addFieldValue(Field.Tasks.SUBJECT, taskDetails.subject);
         taskRecord.addFieldValue(Field.Tasks.CREATED_TIME, today);
         taskRecord.addFieldValue(Field.Tasks.STATUS, new Choice("Not Started"));
         taskRecord.addFieldValue(Field.Tasks.OWNER, user);
-        taskRecord.addFieldValue(Field.Tasks.DESCRIPTION, "The Description Doesn't appear in the ZOHO Task");
+
+        const retoolUrl = this.globalService.BASE_RETOOL_URL+ "#customer_id="+ taskDetails.dreamservice_customer_id;
+        this.log.log(`createPaymentReceivedTask. Retool URL = ${retoolUrl}`);
+        taskRecord.addFieldValue(Field.Tasks.DESCRIPTION, retoolUrl);
         taskRecord.addFieldValue(Field.Tasks.DUE_DATE, today);
 
-        const whatId = new Record();
-        whatId.setId(id);
-        taskRecord.addFieldValue(Field.Tasks.WHAT_ID, whatId );
         taskRecord.addKeyValue("$se_module", "Leads");
-        taskRecord.addKeyValue("Custom_Description", "https://bitbucket.org/");
+        //taskRecord.addKeyValue("Retool_Url", taskDetails.retool_url);
 
         let map: Map<string, any> = await this.zohoservice.saveRecord(taskRecord, "Tasks");
         this.log.log(`Successfully saved user as ${map.get('id')}`);

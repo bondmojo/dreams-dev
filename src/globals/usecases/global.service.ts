@@ -38,6 +38,8 @@ export class GlobalService {
         return 2.00;
     }
 
+    public readonly BASE_RETOOL_URL ="https://gojo.retool.com/apps/ed171e5c-250d-11ed-b962-9fea298077ce/CBS?_releaseVersion=latest";
+
 
 
 }

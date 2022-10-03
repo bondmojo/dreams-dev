@@ -9,10 +9,11 @@ import {UpdateAdditionalDetailsUsecase} from "./usecases/update-additional-detai
 import {ShuftiModule} from "../external/shufti/shufti.module";
 import {InitiateKycUsecase} from "./usecases/initiate-kyc.usecase";
 import {KycCompletionUpdateUsecase} from "./usecases/kyc-completion-update.usecase";
-import { CreateTaskUsecase } from "./usecases/create-task.usecase";
+import { CreatePaymentReceivedTaskUsecase } from "./usecases/create-payment-received-task.usecase";
+import { GlobalModule } from "src/globals/global.module";
 
 @Module({
-    imports: [SendpulseModule, ZohoModule, ShuftiModule],
+    imports: [SendpulseModule, ZohoModule, ShuftiModule, GlobalModule],
     controllers: [DreamerController],
     providers: [
         CreateDreamerUsecase,
@@ -20,7 +21,7 @@ import { CreateTaskUsecase } from "./usecases/create-task.usecase";
         UpdateAdditionalDetailsUsecase,
         InitiateKycUsecase,
         KycCompletionUpdateUsecase,
-        CreateTaskUsecase,
+        CreatePaymentReceivedTaskUsecase,
         DreamerRepository]
 })
 export class DreamerModule {
