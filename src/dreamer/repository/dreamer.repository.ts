@@ -14,13 +14,21 @@ import * as path from 'path';
 import got from "got";
 import {promises} from "stream";
 import {KycEventDto, KYCStatus} from "../../external/shufti/dto/kyc-event.dto";
+import { User } from "@zohocrm/typescript-sdk-2.0/core/com/zoho/crm/api/users/user";
+import { getMilliseconds } from "date-fns";
+import { LeadConverter } from "@zohocrm/typescript-sdk-2.0/core/com/zoho/crm/api/record/lead_converter";
+import { ZohoTaskRequest } from "../usecases/dto/zoho-task-request.dto";
+import { GlobalService } from "src/globals/usecases/global.service";
+
 
 @Injectable()
 export class DreamerRepository {
     private readonly COMPANY_NAME = 'GOJO';
     private readonly log = new CustomLogger(DreamerRepository.name);
 
-    constructor(private readonly zohoservice: ZohoService) {}
+    constructor(private readonly zohoservice: ZohoService,
+        private readonly globalService: GlobalService
+    ) {}
 
     async get(dreamer: string): Promise<DreamerModel> {
         const dreamerModel = new DreamerModel();
@@ -29,6 +37,37 @@ export class DreamerRepository {
         dreamerModel.externalId = record.getKeyValue('Telegram_Chat_ID');
         //TODO: Map other values as required
         return dreamerModel;
+    }
+
+    async createTask(dreamerId:string, taskDetails: ZohoTaskRequest) {
+        const taskRecord = new Record();
+
+        const today = new Date();
+        const user = new User();
+        user.setEmail(taskDetails.assign_to);
+
+        //Set dreamerId/leadid
+        const id =BigInt(dreamerId);
+        const whatId = new Record();
+        whatId.setId(id);
+        taskRecord.addFieldValue(Field.Tasks.WHAT_ID, whatId);
+        
+        taskRecord.addFieldValue(Field.Tasks.SUBJECT, taskDetails.subject);
+        taskRecord.addFieldValue(Field.Tasks.CREATED_TIME, today);
+        taskRecord.addFieldValue(Field.Tasks.STATUS, new Choice("Not Started"));
+        taskRecord.addFieldValue(Field.Tasks.OWNER, user);
+
+        const retoolUrl = this.globalService.BASE_RETOOL_URL+ "#customer_id="+ taskDetails.dreamservice_customer_id;
+        this.log.log(`createPaymentReceivedTask. Retool URL = ${retoolUrl}`);
+        taskRecord.addFieldValue(Field.Tasks.DESCRIPTION, retoolUrl);
+        taskRecord.addFieldValue(Field.Tasks.DUE_DATE, today);
+
+        taskRecord.addKeyValue("$se_module", "Leads");
+        //taskRecord.addKeyValue("Retool_Url", taskDetails.retool_url);
+
+        let map: Map<string, any> = await this.zohoservice.saveRecord(taskRecord, "Tasks");
+        this.log.log(`Successfully saved user as ${map.get('id')}`);
+        return (map.get('id') as bigint).toString();
     }
 
     async save(dreamer: DreamerModel): Promise<string> {
@@ -44,7 +83,7 @@ export class DreamerRepository {
         record.addKeyValue('Telegram_Chat_ID', dreamer.externalId);
         record.addKeyValue('Amount', dreamer.loanRequest.amount);
         record.addKeyValue('Points', dreamer.loanRequest.pointsAmount);
-        let map: Map<string, any> = await this.zohoservice.saveRecord(record);
+        let map: Map<string, any> = await this.zohoservice.saveRecord(record, 'Leads');
 
         this.log.log(`Successfully saved user ${dreamer.externalId} as ${map.get('id')}`);
 

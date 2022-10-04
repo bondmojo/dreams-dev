@@ -1,13 +1,11 @@
 import {HttpException, HttpStatus, Injectable} from "@nestjs/common";
 import {SendPulseContactDto} from "./dto/send-pulse-contact.dto";
-import {RunFlowRequestDto} from "./dto/run-flow-request.dto";
 import {HttpService} from "@nestjs/axios";
 import {SendPulseTokenDto} from "./dto/send-pulse-token.dto";
 import { firstValueFrom } from 'rxjs';
 import {CustomLogger} from "../../custom_logger";
 import {SendPulseResponseDto} from "./dto/send-pulse-response.dto";
 import {DreamerModel} from "../../dreamer/usecases/model/dreamer.model";
-import { SendpulseModule } from "./sendpulse.module";
 import { SetVariableRequestDto } from "./dto/set-variable-request.dto";
 import { RunFlowModel } from "./model/run-flow-model";
 
@@ -62,7 +60,7 @@ export class SendpluseService{
         }
     }
 
-    async runFlow(model: DreamerModel, flow: string) {
+    async runFlow(model: DreamerModel, flow: string): Promise<any> {
         await this.checkAndGenerateToken();
         
         const response = await firstValueFrom(this.httpService.post<SendPulseResponseDto<SendPulseContactDto>>(
@@ -72,7 +70,8 @@ export class SendpluseService{
                 headers: {'Authorization': 'Bearer '+ this.token},
             }
         ));
-        this.log.log(`Successfully initiated flow ${flow} with response ${response.statusText}`)
+        this.log.log(`Successfully initiated flow ${flow} with response ${response.statusText}`);
+        return response.status;
     }
 
     async setVariable(variableDto: SetVariableRequestDto): Promise<string>{
@@ -92,8 +91,8 @@ export class SendpluseService{
         }
         catch(error){
             this.log.log("setVariable: Exception occured" + JSON.stringify(error));
+            throw error;
         }
-        return "ERROR";
     }
 
     async checkAndGenerateToken(): Promise<string> {

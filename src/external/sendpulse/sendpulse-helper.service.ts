@@ -5,6 +5,8 @@ import {CustomLogger} from "../../custom_logger";
 import {CalculateLoanDto} from "./dto/calculate-loan.dto";
 import {CalculateLoanResultDto} from "./dto/calculate-loan-result.dto";
 import { format, add } from 'date-fns'
+import { UpdateApplicationStatusRequestDto } from "./dto/update-application-status-request.dto";
+
 
 @Injectable()
 export class SendpulseHelperService {
@@ -48,7 +50,6 @@ export class SendpulseHelperService {
 
         }
     }
-
 
     private strlenOperation(calculateDto: CalculationDto) {
         calculateDto.value = `"${calculateDto.value}".length >= ${calculateDto.min} && "${calculateDto.value}".length <= ${calculateDto.max}`;
