@@ -59,7 +59,6 @@ export class SendpulseController {
       transfertypeDto.variable_id = "632ae8966a397f4a4c32c516";
       transfertypeDto.variable_value = "" + reqData.loan_id;
       await this.sendpulseService.setVariable(transfertypeDto);
-      this.sendpulseHelperService.emitDisbursementEvent(reqData);
     }
     const model = new DreamerModel();
     model.externalId = reqData.sendpulse_user_id;

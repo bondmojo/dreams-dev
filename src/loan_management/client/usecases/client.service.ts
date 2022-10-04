@@ -6,6 +6,8 @@ import { Client } from '../entities/client.entity';
 import { Repository } from 'typeorm';
 import { LoanService } from "../../loan/usecases/loan.service";
 import { OnEvent } from "@nestjs/event-emitter";
+import {EventEmitter2} from "@nestjs/event-emitter";
+
 
 @Injectable()
 export class ClientService {
@@ -14,6 +16,7 @@ export class ClientService {
         @InjectRepository(Client)
         private readonly clientRepository: Repository<Client>,
         private readonly loanService: LoanService,
+        private eventEmitter: EventEmitter2
     ) { }
 
     async create(createClientAndLoanDto: CreateClientAndLoanDto): Promise<Client> {
@@ -23,7 +26,10 @@ export class ClientService {
         const clientFromDb = await this.clientRepository.save(createClientDto);
 
         // Create loan for client request object
-        await this.loanService.create(createClientAndLoanDto);;
+        await this.loanService.create(createClientAndLoanDto);
+        //emitting loan approved event in  order to notify admin
+        this.eventEmitter.emit('loan.approved', clientFromDb);
+
         return clientFromDb;
     }
 

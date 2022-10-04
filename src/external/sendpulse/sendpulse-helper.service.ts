@@ -6,7 +6,6 @@ import {CalculateLoanDto} from "./dto/calculate-loan.dto";
 import {CalculateLoanResultDto} from "./dto/calculate-loan-result.dto";
 import { format, add } from 'date-fns'
 import { UpdateApplicationStatusRequestDto } from "./dto/update-application-status-request.dto";
-import {EventEmitter2} from "@nestjs/event-emitter";
 
 
 @Injectable()
@@ -14,9 +13,6 @@ export class SendpulseHelperService {
     private readonly FEES: number = 3;
     private readonly LOAN_CYCLE: number = 30;
     private readonly log = new CustomLogger(SendpulseHelperService.name);
-
-    constructor(private eventEmitter: EventEmitter2) {}
-
 
     calculateLoan(calculateLoanDto: CalculateLoanDto): CalculateLoanResultDto {
         const result = new CalculateLoanResultDto();
@@ -53,10 +49,6 @@ export class SendpulseHelperService {
                 }
 
         }
-    }
-
-    emitDisbursementEvent(applStatus : UpdateApplicationStatusRequestDto){
-        this.eventEmitter.emit('loan.disbursed', applStatus);
     }
 
     private strlenOperation(calculateDto: CalculationDto) {

@@ -5,8 +5,8 @@ import {SendPulseContactDto} from "../../external/sendpulse/dto/send-pulse-conta
 import {DreamerRepository} from "../repository/dreamer.repository";
 import { ZohoTaskRequest } from "./dto/zoho-task-request.dto";
 import { OnEvent } from "@nestjs/event-emitter";
-import { UpdateApplicationStatusRequestDto } from "src/external/sendpulse/dto/update-application-status-request.dto";
-import { GlobalService } from "src/globals/usecases/global.service";
+import { GlobalService } from "../../globals/usecases/global.service";
+import { Client } from "../../loan_management/client/entities/client.entity";
 
 @Injectable()
 export class CreateZohoTaskUsecase {
@@ -19,15 +19,15 @@ export class CreateZohoTaskUsecase {
         return id;
     }
 
-    @OnEvent('loan.disbursed')
-    async createDisbursementTask(applStatus : UpdateApplicationStatusRequestDto): Promise<string>{
-        this.log.log("RECEIVED EVENT: createDisbursementTask =" + JSON.stringify(applStatus));
+    @OnEvent('loan.approved')
+    async createDisbursementTask(client : Client): Promise<string>{
+        this.log.log("Received Loan Approved EVENT: now createDisbursementTask =" + JSON.stringify(client));
         const task =new ZohoTaskRequest();
         task.assign_to =this.global.DISBURSEMENT_TASK_ASSIGNEE;
-        task.subject = "Disburse Loan to "+ applStatus.full_name;
-        task.dreamservice_customer_id= applStatus.client_id;
+        task.subject = "Disburse Loan to "+ client.full_en;
+        task.dreamservice_customer_id= client.id;
        
-        const id = await this.repository.createTask(applStatus.dreamer_id, task);
+        const id = await this.repository.createTask(client.zoho_id, task);
         return id;
     }
 }
