@@ -97,7 +97,7 @@ export class LoanHelperService {
         return;
     }
 
-    /** -----------------------   Create Repayment Transaction functions     ---------------------------- */
+    /** -----------------------   Create Repayment Transaction: status client_credit functions     ---------------------------- */
     async handleClientCreditRepayments(createRepaymentTransactionDto: CreateRepaymentTransactionDto): Promise<any> {
         const creditRepaymentResponse = { status: true, error: '' };
         const loan = await this.loanRepository.findOne({
@@ -241,5 +241,45 @@ export class LoanHelperService {
         }
         const transaction = await this.transactionService.create(transactionDto);
         return transaction;
+    }
+
+    /** -----------------------   Repayment Transaction status dream point refund functions     ---------------------------- */
+
+    async handleDreamPointRefundRepayments(createRepaymentTransactionDto: CreateRepaymentTransactionDto): Promise<any> {
+        const response = { status: true, error: '' };
+        const loan = await this.loanRepository.findOne({
+            where: { id: createRepaymentTransactionDto.loan_id },
+            relations: ['client']
+        });
+
+        if (!loan || !createRepaymentTransactionDto.amount) {
+            response.status = false;
+            return response;
+        }
+
+        const dream_points_earned = loan?.client?.dream_points_earned;
+        if (dream_points_earned < createRepaymentTransactionDto.amount) {
+            // Case: ammount is greater then due ammount
+            response.status = false;
+            response.error = 'Amount is Greater then Dream Point Balance.';
+            return response;
+        }
+
+        // Create Dream Point Refund Transaction
+        const transactionDto = {
+            loan_id: loan.id,
+            amount: createRepaymentTransactionDto.amount,
+            type: this.globalService.TRANSACTION_TYPE.DREAM_POINT_REFUND,
+            note: createRepaymentTransactionDto.note,
+        }
+        await this.transactionService.create(transactionDto);
+        // Update Client Data
+        const updateClientDto = {
+            id: loan?.client?.id,
+            tier: 1,
+            dream_points_earned: dream_points_earned - createRepaymentTransactionDto.amount,
+        };
+        this.eventEmitter.emit('client.update', updateClientDto);
+        return response;
     }
 }

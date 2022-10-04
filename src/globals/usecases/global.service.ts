@@ -20,7 +20,8 @@ export class GlobalService {
         DREAM_POINT_EARNED: 'dream_point_earned',
         CREDIT_REPAYMENT: 'credit_repayment',
         FEE_PAYMENT: 'fee_payment',
-        PARTIAL_PAYMENT: 'partial_payment'
+        PARTIAL_PAYMENT: 'partial_payment',
+        DREAM_POINT_REFUND: 'dream_point_refund',
     };
 
     public readonly WIRE_TRANSFER_TYPES: any = {

@@ -77,6 +77,11 @@ export class LoanService {
         if (createRepaymentTransactionDto.type == this.globalService.REPAYMENT_TRANSACTION_TYPE.CLIENT_CREDIT) {
             return await this.loanHelperService.handleClientCreditRepayments(createRepaymentTransactionDto);
         }
+
+        if (createRepaymentTransactionDto.type == this.globalService.REPAYMENT_TRANSACTION_TYPE.DREAM_POINT_REFUND) {
+            return await this.loanHelperService.handleDreamPointRefundRepayments(createRepaymentTransactionDto);
+        }
+
         return false;
     }
 }
