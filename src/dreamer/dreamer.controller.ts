@@ -1,12 +1,12 @@
-import {CreateDreamerDto} from './dto/create-dreamer.dto';
-import {Body, Controller, Param, Post} from '@nestjs/common';
-import {AdditionalDetailsRequestDto} from "./dto/additional-details-request.dto";
-import {CreateDreamerUsecase} from "./usecases/create-dreamer.usecase";
-import {PaymentDetailsRequestDto} from "./dto/payment-details-request.dto";
-import {UpdatePaymentDetailsUsecase} from "./usecases/update-payment-details.usecase";
-import {UpdateAdditionalDetailsUsecase} from "./usecases/update-additional-details.usecase";
-import {InitiateKycUsecase} from "./usecases/initiate-kyc.usecase";
-import {CustomLogger} from "../custom_logger";
+import { CreateDreamerDto } from './dto/create-dreamer.dto';
+import { Body, Controller, Param, Post } from '@nestjs/common';
+import { AdditionalDetailsRequestDto } from "./dto/additional-details-request.dto";
+import { CreateDreamerUsecase } from "./usecases/create-dreamer.usecase";
+import { PaymentDetailsRequestDto } from "./dto/payment-details-request.dto";
+import { UpdatePaymentDetailsUsecase } from "./usecases/update-payment-details.usecase";
+import { UpdateAdditionalDetailsUsecase } from "./usecases/update-additional-details.usecase";
+import { InitiateKycUsecase } from "./usecases/initiate-kyc.usecase";
+import { CustomLogger } from "../custom_logger";
 import { ZohoTaskRequest } from 'src/dreamer/usecases/dto/zoho-task-request.dto';
 import { CreateZohoTaskUsecase } from './usecases/create-zoho-task.usecase';
 
@@ -15,11 +15,11 @@ export class DreamerController {
   private readonly logger = new CustomLogger(DreamerController.name);
   constructor(
     private readonly createDreamerUsecase: CreateDreamerUsecase,
-    private readonly createTaskUsecase: CreateZohoTaskUsecase,  
-      private readonly updatePaymentDetailsUsecase: UpdatePaymentDetailsUsecase,
-      private readonly updateAdditionalDetailsUsecase: UpdateAdditionalDetailsUsecase,
-      private readonly initateKycUsecase: InitiateKycUsecase
-  ) {}
+    private readonly createTaskUsecase: CreateZohoTaskUsecase,
+    private readonly updatePaymentDetailsUsecase: UpdatePaymentDetailsUsecase,
+    private readonly updateAdditionalDetailsUsecase: UpdateAdditionalDetailsUsecase,
+    private readonly initateKycUsecase: InitiateKycUsecase
+  ) { }
 
   @Post()
   async createDreamer(@Body() createDreamerRequestDto: CreateDreamerDto) {
@@ -27,12 +27,11 @@ export class DreamerController {
     return await this.createDreamerUsecase.create(createDreamerRequestDto);
   }
 
-  @Post(':dreamerId/payment_received')
+  @Post('create_payment_recieved_task/:sendpulse_id')
   async createTask(
-    @Param() params: any,
-    @Body() request: ZohoTaskRequest) {
-    this.logger.log(`Creating task with request ${JSON.stringify(request)}`);
-    return await this.createTaskUsecase.create(params.dreamerId, request);
+    @Param('sendpulse_id') sendpulse_id: string) {
+    this.logger.log(`Creating payment recieved task with request ${JSON.stringify(sendpulse_id)}`);
+    return await this.createTaskUsecase.createPaymentRecievedTask(sendpulse_id);
   }
 
   @Post(':dreamerId/additional_details')
@@ -49,13 +48,13 @@ export class DreamerController {
 
   @Post(':dreamerId/payment_details')
   async updatePaymentDetails(
-      @Param() params: any,
-      @Body() request: PaymentDetailsRequestDto,
+    @Param() params: any,
+    @Body() request: PaymentDetailsRequestDto,
   ) {
     this.logger.log(`Updating payment details for request ${JSON.stringify(request)}`);
-      const updatedUserId = await this.updatePaymentDetailsUsecase.update(params.dreamerId, request);
+    const updatedUserId = await this.updatePaymentDetailsUsecase.update(params.dreamerId, request);
     return {
-        id: updatedUserId,
+      id: updatedUserId,
     };
   }
 

@@ -6,7 +6,7 @@ import { Client } from '../entities/client.entity';
 import { Repository } from 'typeorm';
 import { LoanService } from "../../loan/usecases/loan.service";
 import { OnEvent } from "@nestjs/event-emitter";
-import {EventEmitter2} from "@nestjs/event-emitter";
+import { EventEmitter2 } from "@nestjs/event-emitter";
 
 
 @Injectable()
@@ -41,9 +41,15 @@ export class ClientService {
         return client;
     }
 
+    async findbySendpulseId(id: string): Promise<Client[] | any> {
+        this.log.log("findbySendpulseId =" + id);
+        const client = await this.clientRepository.findOneBy({ sendpulse_id: id });
+        return client;
+    }
+
     async findbyId(clientId: string): Promise<Client[] | any> {
         this.log.log("findbyId =" + clientId);
-        const client = await this.findOne({ id: clientId });
+        const client = await this.clientRepository.findOneBy({ id: clientId });
         return client;
     }
 

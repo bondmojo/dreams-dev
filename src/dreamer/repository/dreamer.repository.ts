@@ -1,25 +1,25 @@
-import {Injectable} from "@nestjs/common";
-import {DreamerModel} from "../usecases/model/dreamer.model";
-import {ZohoService} from "../../external/zoho/zoho.service";
-import {Record} from "@zohocrm/typescript-sdk-2.0/core/com/zoho/crm/api/record/record";
-import {Field} from "@zohocrm/typescript-sdk-2.0/core/com/zoho/crm/api/record/field";
-import {Choice} from "@zohocrm/typescript-sdk-2.0/utils/util/choice";
-import {CustomLogger} from "../../custom_logger";
-import {PaymentDetailsRequestDto} from "../dto/payment-details-request.dto";
-import {AdditionalDetailsRequestDto} from "../dto/additional-details-request.dto";
-import {StreamWrapper} from "@zohocrm/typescript-sdk-2.0/utils/util/stream_wrapper";
-import {createWriteStream} from "fs";
+import { Injectable } from "@nestjs/common";
+import { DreamerModel } from "../usecases/model/dreamer.model";
+import { ZohoService } from "../../external/zoho/zoho.service";
+import { Record } from "@zohocrm/typescript-sdk-2.0/core/com/zoho/crm/api/record/record";
+import { Field } from "@zohocrm/typescript-sdk-2.0/core/com/zoho/crm/api/record/field";
+import { Choice } from "@zohocrm/typescript-sdk-2.0/utils/util/choice";
+import { CustomLogger } from "../../custom_logger";
+import { PaymentDetailsRequestDto } from "../dto/payment-details-request.dto";
+import { AdditionalDetailsRequestDto } from "../dto/additional-details-request.dto";
+import { StreamWrapper } from "@zohocrm/typescript-sdk-2.0/utils/util/stream_wrapper";
+import { createWriteStream } from "fs";
 import * as os from "os";
 import * as path from 'path';
 import got from "got";
-import {promises} from "stream";
-import {KycEventDto, KYCStatus} from "../../external/shufti/dto/kyc-event.dto";
+import { promises } from "stream";
+import { KycEventDto, KYCStatus } from "../../external/shufti/dto/kyc-event.dto";
 import { User } from "@zohocrm/typescript-sdk-2.0/core/com/zoho/crm/api/users/user";
 import { getMilliseconds } from "date-fns";
 import { LeadConverter } from "@zohocrm/typescript-sdk-2.0/core/com/zoho/crm/api/record/lead_converter";
 import { ZohoTaskRequest } from "../usecases/dto/zoho-task-request.dto";
 import { GlobalService } from "src/globals/usecases/global.service";
-
+import { ClientService } from "../../loan_management/client/usecases/client.service";
 
 @Injectable()
 export class DreamerRepository {
@@ -27,45 +27,48 @@ export class DreamerRepository {
     private readonly log = new CustomLogger(DreamerRepository.name);
 
     constructor(private readonly zohoservice: ZohoService,
-        private readonly globalService: GlobalService
-    ) {}
+        private readonly globalService: GlobalService,
+        private readonly clientService: ClientService,
+    ) { }
 
     async get(dreamer: string): Promise<DreamerModel> {
         const dreamerModel = new DreamerModel();
-        let record: Record = await this.zohoservice.getRecord(dreamer);
+        const record: Record = await this.zohoservice.getRecord(dreamer);
         dreamerModel.id = record.getKeyValue(Field.Leads.ID.getAPIName());
         dreamerModel.externalId = record.getKeyValue('Telegram_Chat_ID');
         //TODO: Map other values as required
         return dreamerModel;
     }
 
-    async createTask(dreamerId:string, taskDetails: ZohoTaskRequest) {
+    async createTask(dreamerId: string, taskDetails: ZohoTaskRequest) {
         const taskRecord = new Record();
-
         const today = new Date();
         const user = new User();
         user.setEmail(taskDetails.assign_to);
 
         //Set dreamerId/leadid
-        const id =BigInt(dreamerId);
+        const id = BigInt(dreamerId);
         const whatId = new Record();
         whatId.setId(id);
         taskRecord.addFieldValue(Field.Tasks.WHAT_ID, whatId);
-        
+
         taskRecord.addFieldValue(Field.Tasks.SUBJECT, taskDetails.subject);
         taskRecord.addFieldValue(Field.Tasks.CREATED_TIME, today);
-        taskRecord.addFieldValue(Field.Tasks.STATUS, new Choice("Not Started"));
+        taskRecord.addFieldValue(Field.Tasks.STATUS, new Choice(taskDetails.status));
         taskRecord.addFieldValue(Field.Tasks.OWNER, user);
 
-        const retoolUrl = this.globalService.BASE_RETOOL_URL+ "#customer_id="+ taskDetails.dreamservice_customer_id;
-        this.log.log(`createPaymentReceivedTask. Retool URL = ${retoolUrl}`);
-        taskRecord.addFieldValue(Field.Tasks.DESCRIPTION, retoolUrl);
-        taskRecord.addFieldValue(Field.Tasks.DUE_DATE, today);
+        if (taskDetails?.dreamservice_customer_id) {
+            const retoolUrl = this.globalService.BASE_RETOOL_URL + "#customer_id=" + taskDetails?.dreamservice_customer_id;
+            taskRecord.addFieldValue(Field.Tasks.DESCRIPTION, retoolUrl);
+            this.log.log(`createPaymentReceivedTask. Retool URL = ${retoolUrl}`);
+        }
+
+        taskRecord.addFieldValue(Field.Tasks.DUE_DATE, taskDetails.due_date); //FIXME:: move outside
 
         taskRecord.addKeyValue("$se_module", "Leads");
         //taskRecord.addKeyValue("Retool_Url", taskDetails.retool_url);
 
-        let map: Map<string, any> = await this.zohoservice.saveRecord(taskRecord, "Tasks");
+        const map: Map<string, any> = await this.zohoservice.saveRecord(taskRecord, "Tasks");
         this.log.log(`Successfully saved user as ${map.get('id')}`);
         return (map.get('id') as bigint).toString();
     }
@@ -83,7 +86,7 @@ export class DreamerRepository {
         record.addKeyValue('Telegram_Chat_ID', dreamer.externalId);
         record.addKeyValue('Amount', dreamer.loanRequest.amount);
         record.addKeyValue('Points', dreamer.loanRequest.pointsAmount);
-        let map: Map<string, any> = await this.zohoservice.saveRecord(record, 'Leads');
+        const map: Map<string, any> = await this.zohoservice.saveRecord(record, 'Leads');
 
         this.log.log(`Successfully saved user ${dreamer.externalId} as ${map.get('id')}`);
 
@@ -95,7 +98,7 @@ export class DreamerRepository {
         record.addKeyValue('Provider', new Choice(paymentDetails.preferredPaymentMethod));
         record.addKeyValue('Account_Number', paymentDetails.paymentAccountNumber);
 
-        let map: Map<string, any> = await this.zohoservice.updateRecord(dreamerId, record);
+        const map: Map<string, any> = await this.zohoservice.updateRecord(dreamerId, record);
 
         this.log.log(`Successfully updated user ${dreamerId} data`);
 
@@ -115,7 +118,7 @@ export class DreamerRepository {
         record.addKeyValue('Lead_Status', new Choice("KYC Details Submitted-2"));
 
 
-        let map: Map<string, any> = await this.zohoservice.updateRecord(dreamerId, record);
+        const map: Map<string, any> = await this.zohoservice.updateRecord(dreamerId, record);
 
         this.log.log(`Successfully updated user ${dreamerId} data`);
 
@@ -128,7 +131,7 @@ export class DreamerRepository {
         record.addKeyValue('Successful_KYC_Time', new Date());
         record.addKeyValue('KYC_Status', new Choice('Initiated'));
 
-        let map: Map<string, any> = await this.zohoservice.updateRecord(dreamerId, record);
+        const map: Map<string, any> = await this.zohoservice.updateRecord(dreamerId, record);
 
         this.log.log(`Successfully updated user ${dreamerId} data`);
 
@@ -140,24 +143,24 @@ export class DreamerRepository {
         const filesToDeletes: string[] = [];
         const record = new Record();
         record.addKeyValue('KYC_End_Time', new Date());
-        if(event.status == KYCStatus.SUCCESS || event.status == KYCStatus.REJECTED) {
+        if (event.status == KYCStatus.SUCCESS || event.status == KYCStatus.REJECTED) {
 
-            try{
-                if(event.dob){
-                   const today = new Date();
+            try {
+                if (event.dob) {
+                    const today = new Date();
                     const dateOfBirth = new Date(event.dob);
-                   
-                    var age = today.getFullYear() - dateOfBirth.getFullYear();
+
+                    let age = today.getFullYear() - dateOfBirth.getFullYear();
                     const m = today.getMonth() - dateOfBirth.getMonth();
-    
-                    if (m < 0 || (m === 0 && today.getDate() < dateOfBirth.getDate())){
-                       age--;
+
+                    if (m < 0 || (m === 0 && today.getDate() < dateOfBirth.getDate())) {
+                        age--;
                     }
-                    this.log.log("Now Adding Age in Zoho=" +age);
+                    this.log.log("Now Adding Age in Zoho=" + age);
                     record.addKeyValue('Age', age);
-                 }   
-            }catch(error){
-                    this.log.log("Error in Calculating Age " + error);
+                }
+            } catch (error) {
+                this.log.log("Error in Calculating Age " + error);
             }
             record.addKeyValue('National_Id', event.documentNumber);
             record.addKeyValue('First_Name_On_Document', event.first);
@@ -166,22 +169,22 @@ export class DreamerRepository {
             record.addKeyValue('Name1', event.full);
             record.addKeyValue('Gender_On_Document', new Choice(event.gender));
             record.addKeyValue('KYC_Rejection_Reason', event.rejectionReason);
-            record.addKeyValue('KYC_Status', new Choice(event.status == KYCStatus.SUCCESS? 'Success': 'Failed'));
+            record.addKeyValue('KYC_Status', new Choice(event.status == KYCStatus.SUCCESS ? 'Success' : 'Failed'));
             await this.addDocument(record, filesToDeletes, event.dreamerId, event.kycId, event.documentProof, 'document', 'KYC_Documents');
             await this.addDocument(record, filesToDeletes, event.dreamerId, event.kycId, event.faceProof, 'face', 'KYC_Documents');
         } else {
             record.addKeyValue('KYC_Status', new Choice('Failed'));
             record.addKeyValue('KYC_Rejection_Reason', event.rejectionReason);
         }
-        let map: Map<string, any> = await this.zohoservice.updateRecord(event.dreamerId, record);
+        const map: Map<string, any> = await this.zohoservice.updateRecord(event.dreamerId, record);
 
         this.log.log(`Successfully updated user ${event.dreamerId} data`);
 
         return (map.get('id') as bigint).toString();
     }
 
-    async addDocument(record: Record, filesToDeletes: string[],  dreamerId: string, kycId:string, proof: string, name: string, field: string) {
-        if(proof) {
+    async addDocument(record: Record, filesToDeletes: string[], dreamerId: string, kycId: string, proof: string, name: string, field: string) {
+        if (proof) {
             const fileName = `${dreamerId}-${kycId}-${name}.jpg`;
             const fileLocation = path.join(os.tmpdir(), fileName);
             this.log.log(`File will be generated at ${fileLocation}`);
@@ -189,7 +192,7 @@ export class DreamerRepository {
             await promises.pipeline(got.stream(proof), createWriteStream(fileLocation));
 
             const streamWrapper = new StreamWrapper(undefined, undefined, fileLocation);
-            let map: Map<string, any> = await this.zohoservice.uploadAttachments(dreamerId, streamWrapper);
+            const map: Map<string, any> = await this.zohoservice.uploadAttachments(dreamerId, streamWrapper);
 
             const fileId = (map.get('id')).toString();
             this.log.log(`Attachment uploaded to the Zoho server ${fileId}`);
