@@ -5,7 +5,7 @@ import { Util } from 'src/config/util';
 @Controller('files')
 export class FileUploadController {
   constructor(private readonly fileUploadService: FileUploadService) { }
-  @Post('/image_upload')
+  @Post('/upload')
   @UseInterceptors(FileInterceptor('file'))
   async uploadFile(@UploadedFile() file: Express.Multer.File) {
     try {
