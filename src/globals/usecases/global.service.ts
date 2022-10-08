@@ -9,16 +9,29 @@ export class GlobalService {
         APPROVED: 'Approved',
         DISBURSED: 'Disbursed',
         NOT_QUALIFIED: 'Not Qualified',
+        FULLY_PAID: 'Fully Paid',
     }
 
     public readonly TRANSACTION_TYPE: any = {
         DEBIT_WING_WEI_LUY_TRANSFER_FEE: 'debit_wing_wei_luy_transfer_fee',
+        CREDIT_WING_WEI_LUY_TRANSFER_FEE: 'credit_wing_wei_luy_transfer_fee',
         CREDIT_DISBURSEMENT: 'credit_disbursement',
-        DREAM_POINT_COMMITMENT: 'dream_point_commitment'
+        DREAM_POINT_COMMITMENT: 'dream_point_commitment',
+        DREAM_POINT_EARNED: 'dream_point_earned',
+        CREDIT_REPAYMENT: 'credit_repayment',
+        FEE_PAYMENT: 'fee_payment',
+        PARTIAL_PAYMENT: 'partial_payment',
+        DREAM_POINT_REFUND: 'dream_point_refund',
     };
+
     public readonly WIRE_TRANSFER_TYPES: any = {
         MOBILE: 'mobile',
         ACCOUNT: 'account'
+    }
+
+    public readonly REPAYMENT_TRANSACTION_TYPE: any = {
+        CLIENT_CREDIT: 'client_credit',
+        DREAM_POINT_REFUND: 'dream_point_refund'
     }
 
     CALC_WING_WEI_LUY_TRANSFER_FEE(amount: number): number {
@@ -38,6 +51,9 @@ export class GlobalService {
         return 2.00;
     }
 
+    public readonly BASE_RETOOL_URL ="https://gojo.retool.com/apps/ed171e5c-250d-11ed-b962-9fea298077ce/CBS?_releaseVersion=latest";
 
+    public readonly DISBURSEMENT_TASK_ASSIGNEE="mohit.joshi@gojo.co";
+    public readonly PAYMENT_TASK_ASSIGNEE="mohit.joshi@gojo.co";
 
 }

@@ -18,7 +18,7 @@ const ZOHO = {
     SECRET: "f782b50389e59236c2c5ddef560af6d28dd46fa0c2",
     USER: "mohit.joshi@gojo.co",
     ID: "60015610290",
-    GRANT_TOKEN: "1000.9e925ea019d48cc36e2ca782fcffedd9.8ef89227b2dd07e0fe268b954e3e1d26"
+    GRANT_TOKEN: "1000.314781188b4353eb95e93c066a7d8f66.376d04186504cc3cc88d07dc8a06acf1"
 }
 
 @Module({
@@ -52,10 +52,10 @@ export class ZohoModule {
 
         //FILE PERSISTENCE STORE
         let tokenstore: DBStore = new DBBuilder()
-            .host('dreams-db.cgybhaewci9o.ap-southeast-1.rds.amazonaws.com')
+            .host('localhost')
             .databaseName('zohooauth')
-            .userName('dreamservice')
-            .password('BSE97FGdC')
+            .userName('root')
+            .password('mysql')
             .portNumber(3306)
             .build();
 

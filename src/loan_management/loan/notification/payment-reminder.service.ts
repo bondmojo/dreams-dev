@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Cron } from '@nestjs/schedule';
 import { CustomLogger } from 'src/custom_logger';
 import { Loan } from '../entities/loan.entity';
-import { Repository, In, Between } from 'typeorm';
+import { Repository, Not, LessThan } from 'typeorm';
 import { addDays, differenceInDays } from "date-fns";
 import { ClientReminderModel } from './reminder.model';
 import { ClientService } from '../../client/usecases/client.service';
@@ -65,6 +65,9 @@ export class PaymentReminderService {
       await this.sendNotification(now, today, -1, isMorning);
       await this.sendNotification(now, today, -2, isMorning);
       await this.sendNotification(now, today, -3, isMorning);
+      //If value is less than 3 scheduler sends notification to all remaining customers with date less than -3
+      await this.sendNotification(now, today, -4, isMorning);
+
     }
 
   }
@@ -76,8 +79,16 @@ export class PaymentReminderService {
     else
       this.log.log("Running DAY Schedule for remaining Days =" + remainingDays);
 
-    const remaining_days = addDays(today, remainingDays);
-    const loansPromise = await this.fetchCustomersByDueDate(remaining_days);
+    let loansPromise;
+
+    if(remainingDays >= -3){
+      const remaining_days = addDays(today, remainingDays);
+       loansPromise = await this.fetchCustomersByDueDate(remaining_days);
+    }
+    else{
+      const remaining_days = addDays(today, remainingDays+1);
+      loansPromise = await this.fetchOlderCustomers(remaining_days);
+    }
 
     if (!loansPromise || loansPromise.length == 0) {
       this.log.log("NO Customer Reminder to be sent");
@@ -85,15 +96,13 @@ export class PaymentReminderService {
     }
 
     loansPromise.forEach(loan => {
-      const modelArray = this.populateReminderModel(loan, today);
-      modelArray.then(reminderModel => {
-        this.log.log("REMINDER MODEL =" + JSON.stringify(reminderModel));
-        let flow = new RunFlowModel();
 
-        if (reminderModel.sendpulse_id) {
-          this.log.log("sendpulse ID =" + reminderModel.sendpulse_id);
-          flow.contact_id = reminderModel.sendpulse_id;
-          flow.external_data = reminderModel;
+        const sendpulseId = loan.client.sendpulse_id;
+        if (sendpulseId) {
+          let flow = new RunFlowModel();
+          this.log.log("sendNotification ->sendpulse ID =" + sendpulseId);
+          flow.contact_id = sendpulseId;
+          flow.external_data = {};
           switch (remainingDays) {
             case 23:
               flow.flow_id = "632c3a3f8de7ab098c2673d9";
@@ -137,62 +146,31 @@ export class PaymentReminderService {
             default:
               //FIXME: update flow ID
               if (remainingDays < -3)
-                flow.flow_id = "632c40021f206771792caf37";
+                flow.flow_id = "632c615064d2872411413292";
               break;
           }
           this.sendpulseService.runSendpulseFlow(flow);
         }
-      });
     });
   }
 
   async fetchCustomersByDueDate(dueDate: Date): Promise<Loan[] | null> {
     this.log.log("FETCHing Clients with Due date =" + dueDate);
     let loanPromise = await this.loanRepository.find({
-      where: { repayment_date: dueDate }
+      where: { repayment_date: dueDate, status: Not("Paid") },
+      relations: ['client']
     });
     this.log.log("repayment_date loans=" + JSON.stringify(loanPromise));
     return loanPromise;
   }
 
-  async populateReminderModel(loan: Loan, today: Date): Promise<ClientReminderModel> {
-    const reminderModel = new ClientReminderModel();
-    reminderModel.client_id = loan.client_id;
-    reminderModel.loan_id = loan.id;
-    reminderModel.loan_amount = "" + loan.amount;
-
-    const repayDate = new Date(loan.repayment_date);
-    const dueDays = differenceInDays(repayDate, today);
-    this.log.log("Due Days = " + dueDays);
-    reminderModel.due_days = "" + dueDays;
-
-    reminderModel.remaining_amount = "" + await this.calculateRemainingLoanAmount(loan.id, loan.amount);
-
-    const clientPromise = await this.getClientData(loan.client_id);
-    if (clientPromise) {
-      reminderModel.sendpulse_id = clientPromise.sendpulse_id;
-      reminderModel.first_name = clientPromise.first;
-
-    }
-
-    return reminderModel;
+  async fetchOlderCustomers(dueDate: Date): Promise<Loan[] | null> {
+    this.log.log("FETCHing Older Customers with Due date less than =" + dueDate);
+    let loanPromise = await this.loanRepository.find({
+      where: { repayment_date: LessThan(dueDate), status: Not("Paid") },
+      relations: ['client']
+    });
+    this.log.log("OLDER CUSTOMER loans=" + JSON.stringify(loanPromise));
+    return loanPromise;
   }
-
-  async calculateRemainingLoanAmount(loanId: string, loanAmount: number): Promise<number> {
-    //TODO
-    return (loanAmount - 0);
-  }
-
-  async getClientData(clientId: string): Promise<Client | null> {
-
-    const dto = new GetClientDto();
-    dto.id = clientId;
-    const client = await this.clientService.findbyId(clientId);
-    console.log("id =" + clientId + " client data =" + JSON.stringify(client));
-    const client1 = this.clientService.findOne(dto);
-    console.log("id =" + clientId + " client 1 =" + JSON.stringify(client1));
-
-    return client;
-  }
-
 }
