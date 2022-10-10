@@ -81,12 +81,12 @@ export class PaymentReminderService {
 
     let loansPromise;
 
-    if(remainingDays >= -3){
+    if (remainingDays >= -3) {
       const remaining_days = addDays(today, remainingDays);
-       loansPromise = await this.fetchCustomersByDueDate(remaining_days);
+      loansPromise = await this.fetchCustomersByDueDate(remaining_days);
     }
-    else{
-      const remaining_days = addDays(today, remainingDays+1);
+    else {
+      const remaining_days = addDays(today, remainingDays + 1);
       loansPromise = await this.fetchOlderCustomers(remaining_days);
     }
 
@@ -97,60 +97,60 @@ export class PaymentReminderService {
 
     loansPromise.forEach(loan => {
 
-        const sendpulseId = loan.client.sendpulse_id;
-        if (sendpulseId) {
-          let flow = new RunFlowModel();
-          this.log.log("sendNotification ->sendpulse ID =" + sendpulseId);
-          flow.contact_id = sendpulseId;
-          flow.external_data = {};
-          switch (remainingDays) {
-            case 23:
-              flow.flow_id = "632c3a3f8de7ab098c2673d9";
-              break;
-            case 16:
-              flow.flow_id = "632c3d8e123ab83d924cddc8";
-              break;
-            case 9:
-              flow.flow_id = "632c3f04c54feb769e5a4082";
-              break;
-            case 2:
-              flow.flow_id = "632c40021f206771792caf37";
-              break;
-            case 1:
-              flow.flow_id = "632c407d02efd900e2548dab";
-              break;
-            case 0:
-              if (isMorning)
-                flow.flow_id = "632c44a770b9686d4b564a39";
-              else
-                flow.flow_id = "632c44d8b14ebd4e7c09fd99";
-              break;
-            case -1:
-              if (isMorning)
-                flow.flow_id = "632c5a35415c9d1596763aa1";
-              else
-                flow.flow_id = "632c5c685033365c2a07a378";
-              break;
-            case -2:
-              if (isMorning)
-                flow.flow_id = "632c5cf8ffd93d3a4168adb0";
-              else
-                flow.flow_id = "632c5e8d5315aa0ef11404f5";
-              break;
-            case -3:
-              if (isMorning)
-                flow.flow_id = "632c5f2e48a0b42b26095073";
-              else
-                flow.flow_id = "632c615064d2872411413292";
-              break;
-            default:
-              //FIXME: update flow ID
-              if (remainingDays < -3)
-                flow.flow_id = "632c615064d2872411413292";
-              break;
-          }
-          this.sendpulseService.runSendpulseFlow(flow);
+      const sendpulseId = loan.client.sendpulse_id;
+      if (sendpulseId) {
+        let flow = new RunFlowModel();
+        this.log.log("sendNotification ->sendpulse ID =" + sendpulseId);
+        flow.contact_id = sendpulseId;
+        flow.external_data = {};
+        switch (remainingDays) {
+          case 23:
+            flow.flow_id = "632c3a3f8de7ab098c2673d9";
+            break;
+          case 16:
+            flow.flow_id = "632c3d8e123ab83d924cddc8";
+            break;
+          case 9:
+            flow.flow_id = "632c3f04c54feb769e5a4082";
+            break;
+          case 2:
+            flow.flow_id = "632c40021f206771792caf37";
+            break;
+          case 1:
+            flow.flow_id = "632c407d02efd900e2548dab";
+            break;
+          case 0:
+            if (isMorning)
+              flow.flow_id = "632c44a770b9686d4b564a39";
+            else
+              flow.flow_id = "632c44d8b14ebd4e7c09fd99";
+            break;
+          case -1:
+            if (isMorning)
+              flow.flow_id = "632c5a35415c9d1596763aa1";
+            else
+              flow.flow_id = "632c5c685033365c2a07a378";
+            break;
+          case -2:
+            if (isMorning)
+              flow.flow_id = "632c5cf8ffd93d3a4168adb0";
+            else
+              flow.flow_id = "632c5e8d5315aa0ef11404f5";
+            break;
+          case -3:
+            if (isMorning)
+              flow.flow_id = "632c5f2e48a0b42b26095073";
+            else
+              flow.flow_id = "632c615064d2872411413292";
+            break;
+          default:
+            //FIXME: update flow ID
+            if (remainingDays < -3)
+              flow.flow_id = "632c615064d2872411413292";
+            break;
         }
+        this.sendpulseService.runSendpulseReminderFlow(flow);
+      }
     });
   }
 
