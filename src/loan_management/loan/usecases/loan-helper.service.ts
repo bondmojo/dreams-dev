@@ -44,6 +44,7 @@ export class LoanHelperService {
         const disbursementTransactionDto = {
             loan_id: loan.id,
             amount: credit_disbursed_amount,
+            image: disbursedLoanDto.image,
             type: this.globalService.TRANSACTION_TYPE.CREDIT_DISBURSEMENT,
             note: disbursedLoanDto.note,
         }
@@ -59,6 +60,7 @@ export class LoanHelperService {
             const transactionDto = {
                 loan_id: loan.id,
                 amount: wing_wei_luy_transfer_fee,
+                image: disbursedLoanDto.image,
                 type: this.globalService.TRANSACTION_TYPE.DEBIT_WING_WEI_LUY_TRANSFER_FEE,
                 note: disbursedLoanDto.note,
             }
@@ -138,6 +140,7 @@ export class LoanHelperService {
         const transactionDto = {
             loan_id: loan.id,
             amount: credit_amount,
+            image: createRepaymentTransactionDto.image,
             type: this.globalService.TRANSACTION_TYPE.CREDIT_REPAYMENT,
             note: createRepaymentTransactionDto.note,
         }
@@ -149,6 +152,7 @@ export class LoanHelperService {
         const transactionDto = {
             loan_id: loan.id,
             amount: loan.loan_fee,
+            image: createRepaymentTransactionDto.image,
             type: this.globalService.TRANSACTION_TYPE.FEE_PAYMENT,
             note: createRepaymentTransactionDto.note,
         }
@@ -161,6 +165,7 @@ export class LoanHelperService {
             const transactionDto = {
                 loan_id: loan.id,
                 amount: loan.wing_wei_luy_transfer_fee,
+                image: createRepaymentTransactionDto.image,
                 type: this.globalService.TRANSACTION_TYPE.CREDIT_WING_WEI_LUY_TRANSFER_FEE,
                 note: createRepaymentTransactionDto.note,
             }
@@ -173,6 +178,7 @@ export class LoanHelperService {
         const transactionDto = {
             loan_id: loan.id,
             amount: loan.dream_point,
+            image: createRepaymentTransactionDto.image,
             type: this.globalService.TRANSACTION_TYPE.DREAM_POINT_EARNED,
             note: createRepaymentTransactionDto.note,
         }
@@ -216,6 +222,7 @@ export class LoanHelperService {
         const transactionDto = {
             loan_id: loan.id,
             amount: createRepaymentTransactionDto.amount,
+            image: createRepaymentTransactionDto.image,
             type: this.globalService.TRANSACTION_TYPE.PARTIAL_PAYMENT,
             note: createRepaymentTransactionDto.note,
         }
@@ -236,6 +243,7 @@ export class LoanHelperService {
         const transactionDto = {
             loan_id: loan.id,
             amount: createRepaymentTransactionDto.amount,
+            image: createRepaymentTransactionDto.image,
             type: this.globalService.TRANSACTION_TYPE.PARTIAL_PAYMENT,
             note: createRepaymentTransactionDto.note,
         }
@@ -269,6 +277,7 @@ export class LoanHelperService {
         const transactionDto = {
             loan_id: loan.id,
             amount: createRepaymentTransactionDto.amount,
+            image: createRepaymentTransactionDto.image,
             type: this.globalService.TRANSACTION_TYPE.DREAM_POINT_REFUND,
             note: createRepaymentTransactionDto.note,
         }

@@ -11,8 +11,8 @@ const Services = {
     provide: Services.S3_CLIENT,
     useValue: new S3({
       credentials: {
-        accessKeyId: process.env.SK_S3_ACCESS_ID ?? 'AKIA6L3THESLIAJO6RQ7',
-        secretAccessKey: process.env.SK_S3_SECRET_KEY ?? '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',
+        accessKeyId: process.env.SK_S3_ACCESS_ID ?? '',
+        secretAccessKey: process.env.SK_S3_SECRET_KEY ?? '',
       },
       region: process.env.SK_S3_REGION,
     }),
@@ -21,8 +21,8 @@ const Services = {
     provide: Services.S3_CLIENT,
     useValue: new S3({
       credentials: {
-        accessKeyId: process.env.SK_S3_ACCESS_ID ?? 'AKIA6L3THESLIAJO6RQ7',
-        secretAccessKey: process.env.SK_S3_SECRET_KEY ?? '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',
+        accessKeyId: process.env.SK_S3_ACCESS_ID ?? '',
+        secretAccessKey: process.env.SK_S3_SECRET_KEY ?? '',
       },
       region: process.env.SK_S3_REGION,
     }),

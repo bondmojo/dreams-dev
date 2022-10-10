@@ -33,6 +33,9 @@ export class Transaction {
   @Column({ nullable: true })
   note: string;
 
+  @Column({ nullable: true })
+  image: string;
+
   @CreateDateColumn()
   created_at: string;
 };
