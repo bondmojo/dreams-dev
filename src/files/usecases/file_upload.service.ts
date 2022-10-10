@@ -25,21 +25,16 @@ export class FileUploadService {
     ): Promise<PutObjectCommandOutput> {
 
         this.logger.log("STS Client Request Params =" + JSON.stringify(this.params));
-        const data = await this.stsClient.send(new AssumeRoleCommand(this.params));
-        this.logger.log("STS Client response =" + JSON.stringify(data));
-
-        const rolecreds = {
-            accessKeyId: data.Credentials?.AccessKeyId,
-            secretAccessKey: data.Credentials?.SecretAccessKey,
-            sessionToken: data.Credentials?.SessionToken,
-        };
+        /*         const data = await this.stsClient.send(new AssumeRoleCommand(this.params));
+                this.logger.log("STS Client response =" + JSON.stringify(data));
+        
+                const rolecreds = {
+                    accessKeyId: data.Credentials?.AccessKeyId,
+                    secretAccessKey: data.Credentials?.SecretAccessKey,
+                    sessionToken: data.Credentials?.SessionToken,
+                }; */
 
         const s3Client = new S3({
-            credentials: {
-                accessKeyId: rolecreds.accessKeyId ?? 'AKIA6L3THESLIAJO6RQ7',
-                secretAccessKey: rolecreds.secretAccessKey ?? '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',
-                sessionToken: rolecreds.sessionToken
-            },
             region: process.env.SK_S3_REGION,
         });
 
