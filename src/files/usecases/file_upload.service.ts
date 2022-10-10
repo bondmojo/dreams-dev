@@ -24,6 +24,7 @@ export class FileUploadService {
         file: Express.Multer.File
     ): Promise<PutObjectCommandOutput> {
 
+        this.logger.log("STS Client Request Params =" + JSON.stringify(this.params));
         const data = await this.stsClient.send(new AssumeRoleCommand(this.params));
         this.logger.log("STS Client response =" + JSON.stringify(data));
 
