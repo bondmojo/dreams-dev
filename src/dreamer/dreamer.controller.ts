@@ -27,7 +27,7 @@ export class DreamerController {
     return await this.createDreamerUsecase.create(createDreamerRequestDto);
   }
 
-  @Post('create_payment_recieved_task/:sendpulse_id')
+  @Post(':sendpulse_id/create_payment_recieved_task')
   async createTask(
     @Param('sendpulse_id') sendpulse_id: string) {
     this.logger.log(`Creating payment recieved task with request ${JSON.stringify(sendpulse_id)}`);
