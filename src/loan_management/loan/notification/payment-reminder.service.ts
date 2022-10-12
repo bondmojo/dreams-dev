@@ -149,7 +149,7 @@ export class PaymentReminderService {
               flow.flow_id = "632c615064d2872411413292";
             break;
         }
-        this.sendpulseService.runSendpulseReminderFlow(flow);
+        this.sendpulseService.runFlowV2(flow);
       }
     });
   }

@@ -42,7 +42,7 @@ export class SendpluseService {
 
     }
 
-    async runSendpulseReminderFlow(model: RunFlowModel) {
+    async runFlowV2(model: RunFlowModel) {
         await this.checkAndGenerateToken();
         try {
             const response = await firstValueFrom(this.httpService.post<SendPulseResponseDto<SendPulseContactDto>>(
@@ -54,9 +54,7 @@ export class SendpluseService {
             ));
             this.log.log(`Successfully initiated flow ${model.flow_id} with response ${response.statusText}`);
         } catch (ex) {
-            this.log.error("ERROR OCCURED WHILE RUNNING FLOW =" + JSON.stringify(ex));
-            this.log.log("ERROR OCCURED WHILE RUNNING FLOW =" + JSON.stringify(ex));
-
+            this.log.error("ERROR OCCURED WHILE RUNNING runFlowV2 =" + JSON.stringify(ex));
         }
     }
 
