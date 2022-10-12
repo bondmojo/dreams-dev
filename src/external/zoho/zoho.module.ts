@@ -18,7 +18,7 @@ const ZOHO = {
     SECRET: "f782b50389e59236c2c5ddef560af6d28dd46fa0c2",
     USER: "mohit.joshi@gojo.co",
     ID: "60015610290",
-    GRANT_TOKEN: "1000.314781188b4353eb95e93c066a7d8f66.376d04186504cc3cc88d07dc8a06acf1"
+    GRANT_TOKEN: "1000.4f947be801b70af225b77604c294f662.8504bcc27d0ad38bc0e0ba4648387e9c"
 }
 
 @Module({
