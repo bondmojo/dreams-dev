@@ -11,11 +11,12 @@ import { CalculationDto } from './dto/calculation.dto';
 import { SendpulseHelperService } from './sendpulse-helper.service';
 import { CalculationResultDto } from './dto/calculation-result.dto';
 import { id } from 'date-fns/locale';
+import { RunFlowModel } from './model/run-flow-model';
 
 @Controller('sendpulse')
 export class SendpulseController {
 
-  private readonly log = new CustomLogger(SendpluseService.name);
+  private readonly log = new CustomLogger(SendpulseController.name);
   private readonly SENDPULSE_MESSAGING_FLOWID = "62fc9cd35c6b0b21d713cdea";
   private readonly APPLICATION_STATUS = ["Approved", "Not Qualified", "Disbursed"]
 
@@ -35,6 +36,16 @@ export class SendpulseController {
   loanCalculator(@Body() calculateLoanDto: CalculateLoanDto): CalculationResultDto {
     this.log.log(`Received request to calculate loan ${JSON.stringify(calculateLoanDto)}`);
     return this.sendpulseHelperService.calculateLoan(calculateLoanDto);
+  }
+
+  @Post('/runFlowV1')
+  async runFlowV1(@Body() runFlowDto: RunFlowModel) {
+    this.log.log(JSON.stringify(runFlowDto));
+
+    let model = new DreamerModel();
+    model.externalId = runFlowDto.contact_id;
+    model.external_data = {};
+    return await this.sendpulseService.runFlow(model, runFlowDto.flow_id);
   }
 
   @Post('/sendMessage')
