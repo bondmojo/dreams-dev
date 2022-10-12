@@ -27,11 +27,11 @@ export class DreamerController {
     return await this.createDreamerUsecase.create(createDreamerRequestDto);
   }
 
-  @Post(':sendpulse_id/create_payment_recieved_task')
+  @Post(':id/create_payment_recieved_task')
   async createTask(
-    @Param('sendpulse_id') sendpulse_id: string) {
-    this.logger.log(`Creating payment recieved task with request ${JSON.stringify(sendpulse_id)}`);
-    return await this.createTaskUsecase.createPaymentRecievedTask(sendpulse_id);
+    @Param('id') id: string) {
+    this.logger.log(`Creating payment recieved task with request ${JSON.stringify(id)}`);
+    return await this.createTaskUsecase.createPaymentRecievedTask(id);
   }
 
   @Post(':dreamerId/additional_details')

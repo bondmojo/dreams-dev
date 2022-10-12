@@ -47,6 +47,12 @@ export class ClientService {
         return client;
     }
 
+    async findbyZohoId(id: string): Promise<Client[] | any> {
+        this.log.log("findbyZohoId =" + id);
+        const client = await this.clientRepository.findOneBy({ zoho_id: id });
+        return client;
+    }
+
     async findbyId(clientId: string): Promise<Client[] | any> {
         this.log.log("findbyId =" + clientId);
         const client = await this.clientRepository.findOneBy({ id: clientId });

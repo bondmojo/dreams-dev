@@ -16,8 +16,11 @@ export class CreateZohoTaskUsecase {
         private readonly clientService: ClientService,
         private readonly global: GlobalService) { }
 
-    async createPaymentRecievedTask(sendpulse_id: string): Promise<string> {
-        const client = await this.clientService.findbySendpulseId(sendpulse_id);
+    async createPaymentRecievedTask(zoho_id: string): Promise<string> {
+        const client = await this.clientService.findbyZohoId(zoho_id);
+        if (!client) {
+            return 'User Not Found For Current Zoho Id'
+        }
         const task = new ZohoTaskRequest();
         task.dreamservice_customer_id = client.id;
         task.due_date = new Date();
