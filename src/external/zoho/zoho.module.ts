@@ -1,16 +1,16 @@
-import {Module} from '@nestjs/common';
-import {ZohoService} from './zoho.service';
-import {ConfigModule, ConfigService} from '@nestjs/config';
-import {CustomLogger} from '../../custom_logger';
-import {UserSignature} from "@zohocrm/typescript-sdk-2.0/routes/user_signature"
-import {Levels, Logger} from "@zohocrm/typescript-sdk-2.0/routes/logger/logger"
-import {INDataCenter} from "@zohocrm/typescript-sdk-2.0/routes/dc/in_data_center"
-import {OAuthToken} from "@zohocrm/typescript-sdk-2.0/models/authenticator/oauth_token"
-import {OAuthBuilder} from "@zohocrm/typescript-sdk-2.0/models/authenticator/oauth_builder"
-import {DBStore} from "@zohocrm/typescript-sdk-2.0/models/authenticator/store/db_store"
-import {DBBuilder} from "@zohocrm/typescript-sdk-2.0/models/authenticator/store/db_builder";
-import {SDKConfigBuilder} from "@zohocrm/typescript-sdk-2.0/routes/sdk_config_builder";
-import {InitializeBuilder} from "@zohocrm/typescript-sdk-2.0/routes/initialize_builder"
+import { Module } from '@nestjs/common';
+import { ZohoService } from './zoho.service';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { CustomLogger } from '../../custom_logger';
+import { UserSignature } from "@zohocrm/typescript-sdk-2.0/routes/user_signature"
+import { Levels, Logger } from "@zohocrm/typescript-sdk-2.0/routes/logger/logger"
+import { INDataCenter } from "@zohocrm/typescript-sdk-2.0/routes/dc/in_data_center"
+import { OAuthToken } from "@zohocrm/typescript-sdk-2.0/models/authenticator/oauth_token"
+import { OAuthBuilder } from "@zohocrm/typescript-sdk-2.0/models/authenticator/oauth_builder"
+import { DBStore } from "@zohocrm/typescript-sdk-2.0/models/authenticator/store/db_store"
+import { DBBuilder } from "@zohocrm/typescript-sdk-2.0/models/authenticator/store/db_builder";
+import { SDKConfigBuilder } from "@zohocrm/typescript-sdk-2.0/routes/sdk_config_builder";
+import { InitializeBuilder } from "@zohocrm/typescript-sdk-2.0/routes/initialize_builder"
 import * as fs from "fs";
 
 const ZOHO = {
@@ -37,7 +37,7 @@ export class ZohoModule {
     constructor(private configService: ConfigService) {
         this.zohoLoggerFilePath = this.configService.get<string>('ZOHO_LOGGER_FILE_PATH');
         this.zohoResPath = this.configService.get<string>('ZOHO_RESOURCE_PATH');
-        if(!fs.existsSync(this.zohoResPath!)) fs.mkdirSync(this.zohoResPath!);
+        if (!fs.existsSync(this.zohoResPath!)) fs.mkdirSync(this.zohoResPath!);
         this.zohoFilePath = this.configService.get<string>('ZOHO_FILE_PATH');
         this.customLogger.log("*********res path =" + this.zohoLoggerFilePath);
         this.init();
@@ -45,22 +45,22 @@ export class ZohoModule {
 
 
     async init() {
-        var user = new UserSignature("mohit.joshi@gojo.co");
-        let environment = INDataCenter.PRODUCTION();
-        let sdkConfig = new SDKConfigBuilder().pickListValidation(false).autoRefreshFields(true).build();
-        let zoho_logger = Logger.getInstance(Levels.INFO, this.zohoLoggerFilePath!);
+        const user = new UserSignature("mohit.joshi@gojo.co");
+        const environment = INDataCenter.PRODUCTION();
+        const sdkConfig = new SDKConfigBuilder().pickListValidation(false).autoRefreshFields(true).build();
+        const zoho_logger = Logger.getInstance(Levels.INFO, this.zohoLoggerFilePath!);
 
         //FILE PERSISTENCE STORE
-        let tokenstore: DBStore = new DBBuilder()
-            .host('localhost')
+        const tokenstore: DBStore = new DBBuilder()
+            .host('' + process.env.DATABASE_HOST)
             .databaseName('zohooauth')
-            .userName('root')
-            .password('mysql')
+            .userName('' + process.env.DATABASE_USERNAME)
+            .password('' + process.env.DATABASE_PASSWORD)
             .portNumber(3306)
             .build();
 
         try {
-            let token: OAuthToken = new OAuthBuilder()
+            const token: OAuthToken = new OAuthBuilder()
                 .clientId(ZOHO.CLIENT_ID)
                 .clientSecret(ZOHO.SECRET)
                 .grantToken(ZOHO.GRANT_TOKEN)
