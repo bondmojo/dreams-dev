@@ -9,5 +9,8 @@ export class GetLoanResponse {
     paidAmount?: string;
     outstandingBalance?: string;
     membershipTier?: string;
+    lastTransactionAmount?: string;
+    dreamPointsEarned?: string;
+    nextLoanAmount?: string;
 }
 

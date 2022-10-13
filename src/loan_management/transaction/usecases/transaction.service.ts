@@ -24,6 +24,7 @@ export class TransactionService {
     async findOne(fields: GetTransactionDto): Promise<Transaction | null> {
         const transaction = await this.transactionRepository.findOne({
             where: fields,
+            order: { ['created_at']: 'DESC' }
         });
         return transaction;
     }

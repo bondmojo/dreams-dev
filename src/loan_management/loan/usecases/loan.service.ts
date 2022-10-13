@@ -52,7 +52,9 @@ export class LoanService {
         loanResponse.dueDate = "" + loan?.repayment_date;
         loanResponse.outstandingBalance = "" + loan?.outstanding_amount;
         loanResponse.membershipTier = client?.tier;
-
+        loanResponse.lastTransactionAmount = "" + await this.loanHelperService.getLoanLastPartialPaymentAmount(loan.id);
+        loanResponse.dreamPointsEarned = "" + client?.dream_points_earned;
+        loanResponse.nextLoanAmount = "" + this.globalService.TIER_AMOUNT[+client?.tier + 1];
         return loanResponse;
     }
 

@@ -38,6 +38,17 @@ export class GlobalService {
         DREAM_POINT_REFUND: 'dream_point_refund'
     }
 
+    public readonly TIER_AMOUNT: any = {
+        1: 50,
+        2: 75,
+        3: 100,
+        4: 125,
+        5: 200,
+        6: 300,
+        7: 400,
+        8: 500
+    }
+
     CALC_WING_WEI_LUY_TRANSFER_FEE(amount: number): number {
         if (amount >= 0 && amount <= 25) {
             return 0.38;
