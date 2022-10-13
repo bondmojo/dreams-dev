@@ -8,6 +8,7 @@ import { Inject } from '@nestjs/common';
 import { STSClient } from "@aws-sdk/client-sts";
 import { AssumeRoleCommand } from "@aws-sdk/client-sts"
 import { CustomLogger } from 'src/custom_logger';
+import { GlobalService } from "../../globals/usecases/global.service"
 
 @Injectable()
 export class FileUploadService {
@@ -19,12 +20,11 @@ export class FileUploadService {
         DurationSeconds: 900,
     };
 
-    constructor() { }
+    constructor(private readonly globalService: GlobalService) { }
     async upload(
         key: string,
         file: Express.Multer.File
-    ): Promise<PutObjectCommandOutput> {
-
+    ): Promise<any> {
         this.logger.log("Uploading File.");
         let s3ClientParams;
         if (process.env.NODE_ENV == 'local') {
@@ -61,6 +61,7 @@ export class FileUploadService {
             ContentType: file.mimetype,
         };
 
-        return await s3Client.putObject(bucketParams);
+        await s3Client.putObject(bucketParams);
+        return `${this.globalService.AWS_IMAGE_PREFIX_URLS.PAYMENT_REPCEIPTS}${key}`;
     }
 }

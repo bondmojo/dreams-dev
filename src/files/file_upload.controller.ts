@@ -16,8 +16,9 @@ export class FileUploadController {
   async uploadPaymentReceipt(@UploadedFile() file: Express.Multer.File) {
     try {
       const key = Util.getRandomAlphaNumericString(10, 'a');
-      const upload = await this.fileUploadService.upload(this.S3_PAYMENT_FOLDER + key + this.S3_PAYMENT_FILE_TYPE, file);
-      console.log(upload);
+      const response = await this.fileUploadService.upload(this.S3_PAYMENT_FOLDER + key + this.S3_PAYMENT_FILE_TYPE, file);
+      console.log(response);
+      return response;
       return key;
     } catch (err) {
       console.log('error :: ', err);
