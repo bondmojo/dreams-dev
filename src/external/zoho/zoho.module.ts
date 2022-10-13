@@ -12,6 +12,7 @@ import { DBBuilder } from "@zohocrm/typescript-sdk-2.0/models/authenticator/stor
 import { SDKConfigBuilder } from "@zohocrm/typescript-sdk-2.0/routes/sdk_config_builder";
 import { InitializeBuilder } from "@zohocrm/typescript-sdk-2.0/routes/initialize_builder"
 import * as fs from "fs";
+import e from 'express';
 
 const ZOHO = {
     CLIENT_ID: "1000.2MD0ZWQ43T23HPTFJGCCNNJS728OND",
@@ -46,7 +47,12 @@ export class ZohoModule {
 
     async init() {
         const user = new UserSignature("mohit.joshi@gojo.co");
-        const environment = INDataCenter.PRODUCTION();
+        let environment = INDataCenter.PRODUCTION();
+
+        /* if (process.env.NODE_ENV === 'local' || process.env.NODE_ENV === 'dev') {
+                    environment = INDataCenter.SANDBOX();
+            } */
+
         const sdkConfig = new SDKConfigBuilder().pickListValidation(false).autoRefreshFields(true).build();
         const zoho_logger = Logger.getInstance(Levels.INFO, this.zohoLoggerFilePath!);
 

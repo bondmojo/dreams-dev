@@ -16,6 +16,22 @@ export class CreateZohoTaskUsecase {
         private readonly clientService: ClientService,
         private readonly global: GlobalService) { }
 
+    async createTask(task: ZohoTaskRequest): Promise<string> {
+
+        if (task.retool_url_required && task.retool_url_required === "true") {
+            const client = await this.clientService.findbyZohoId(task.dreamer_id);
+            task.dreamservice_customer_id = client.id;
+        }
+
+        task.due_date = new Date();
+        if (!task.assign_to)
+            task.assign_to = this.global.DISBURSEMENT_TASK_ASSIGNEE;
+        task.status = "Not Started";
+        const id = await this.repository.createTask(task.dreamer_id, task);
+        return id;
+    }
+
+    //FIXME: Replace this with generic Task
     async createPaymentRecievedTask(zoho_id: string): Promise<string> {
         const client = await this.clientService.findbyZohoId(zoho_id);
         if (!client) {
@@ -23,7 +39,7 @@ export class CreateZohoTaskUsecase {
         }
         const task = new ZohoTaskRequest();
         task.dreamservice_customer_id = client.id;
-        task.due_date = new Date();
+        //task.due_date = new Date();
         task.assign_to = this.global.DISBURSEMENT_TASK_ASSIGNEE;
         task.subject = "Payment Recieved of " + client.full_en;
         task.status = "Not Started";
@@ -38,6 +54,8 @@ export class CreateZohoTaskUsecase {
         task.assign_to = this.global.DISBURSEMENT_TASK_ASSIGNEE;
         task.subject = "Disburse Loan to " + client.full_en;
         task.dreamservice_customer_id = client.id;
+
+        //FIXME: Add due date
         task.due_date = new Date();
         task.status = "Not Started";
         const id = await this.repository.createTask(client.zoho_id, task);
