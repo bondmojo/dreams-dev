@@ -60,7 +60,7 @@ export class DreamerRepository {
         if (taskDetails?.dreamservice_customer_id) {
             const retoolUrl = this.globalService.BASE_RETOOL_URL + "#customer_id=" + taskDetails?.dreamservice_customer_id;
             taskRecord.addFieldValue(Field.Tasks.DESCRIPTION, retoolUrl);
-            this.log.log(`createPaymentReceivedTask. Retool URL = ${retoolUrl}`);
+            this.log.log(`createTask. Retool URL = ${retoolUrl}`);
         }
 
         taskRecord.addFieldValue(Field.Tasks.DUE_DATE, taskDetails.due_date); //FIXME:: move outside

@@ -36,7 +36,7 @@ export class LoanService {
             where: fields,
             relations: ['client']
         });
-        this.log.log("LOAN DATA =" + loan);
+        this.log.log("LOAN DATA =" + JSON.stringify(loan));
 
         const loanResponse = new GetLoanResponse();
         if (!loan) {

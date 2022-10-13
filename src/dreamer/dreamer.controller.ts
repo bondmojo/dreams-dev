@@ -27,11 +27,19 @@ export class DreamerController {
     return await this.createDreamerUsecase.create(createDreamerRequestDto);
   }
 
+  //FIXME: Replace this with generic Task
   @Post(':id/create_payment_recieved_task')
-  async createTask(
+  async createPaymentTask(
     @Param('id') id: string) {
     this.logger.log(`Creating payment recieved task with request ${JSON.stringify(id)}`);
     return await this.createTaskUsecase.createPaymentRecievedTask(id);
+  }
+
+  @Post(':id/create_ticket')
+  async createTask(
+    @Body() zohoTask: ZohoTaskRequest) {
+    this.logger.log(`Creating zoho task with request ${JSON.stringify(zohoTask)}`);
+    return await this.createTaskUsecase.createTask(zohoTask);
   }
 
   @Post(':dreamerId/additional_details')

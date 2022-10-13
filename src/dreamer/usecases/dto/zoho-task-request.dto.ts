@@ -6,4 +6,5 @@ export class ZohoTaskRequest {
     assign_to: string;
     due_date: Date;
     status: string;
+    retool_url_required: string;
 }
