@@ -291,4 +291,15 @@ export class LoanHelperService {
         this.eventEmitter.emit('client.update', updateClientDto);
         return response;
     }
+
+    async getLoanLastPartialPaymentAmount(loan_id: string): Promise<any> {
+        const transaction = await this.transactionService.findOne({
+            loan_id: loan_id,
+            type: this.globalService.TRANSACTION_TYPE.PARTIAL_PAYMENT,
+        });
+        if (transaction) {
+            return transaction.amount;
+        }
+        return '';
+    }
 }

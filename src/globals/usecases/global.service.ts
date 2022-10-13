@@ -30,12 +30,23 @@ export class GlobalService {
     }
 
     public readonly AWS_IMAGE_PREFIX_URLS: any = {
-        PAYMENT_REPCEIPTS: 'https://dreams-dev-bucket.s3.ap-southeast-1.amazonaws.com/PaymentRepceipts/'
+        PAYMENT_REPCEIPTS: 'https://dreams-dev-bucket.s3.ap-southeast-1.amazonaws.com/'
     }
 
     public readonly REPAYMENT_TRANSACTION_TYPE: any = {
         CLIENT_CREDIT: 'client_credit',
         DREAM_POINT_REFUND: 'dream_point_refund'
+    }
+
+    public readonly TIER_AMOUNT: any = {
+        1: 50,
+        2: 75,
+        3: 100,
+        4: 125,
+        5: 200,
+        6: 300,
+        7: 400,
+        8: 500
     }
 
     CALC_WING_WEI_LUY_TRANSFER_FEE(amount: number): number {
