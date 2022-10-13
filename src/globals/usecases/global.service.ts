@@ -29,6 +29,10 @@ export class GlobalService {
         ACCOUNT: 'account'
     }
 
+    public readonly AWS_IMAGE_PREFIX_URLS: any = {
+        PAYMENT_REPCEIPTS: 'https://dreams-dev-bucket.s3.ap-southeast-1.amazonaws.com/PaymentRepceipts/'
+    }
+
     public readonly REPAYMENT_TRANSACTION_TYPE: any = {
         CLIENT_CREDIT: 'client_credit',
         DREAM_POINT_REFUND: 'dream_point_refund'
@@ -51,9 +55,9 @@ export class GlobalService {
         return 2.00;
     }
 
-    public readonly BASE_RETOOL_URL ="https://gojo.retool.com/apps/ed171e5c-250d-11ed-b962-9fea298077ce/CBS?_releaseVersion=latest";
+    public readonly BASE_RETOOL_URL = "https://gojo.retool.com/apps/ed171e5c-250d-11ed-b962-9fea298077ce/CBS?_releaseVersion=latest";
 
-    public readonly DISBURSEMENT_TASK_ASSIGNEE="mohit.joshi@gojo.co";
-    public readonly PAYMENT_TASK_ASSIGNEE="mohit.joshi@gojo.co";
+    public readonly DISBURSEMENT_TASK_ASSIGNEE = "mohit.joshi@gojo.co";
+    public readonly PAYMENT_TASK_ASSIGNEE = "mohit.joshi@gojo.co";
 
 }
