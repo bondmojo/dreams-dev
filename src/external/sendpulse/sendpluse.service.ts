@@ -8,6 +8,9 @@ import { SendPulseResponseDto } from "./dto/send-pulse-response.dto";
 import { DreamerModel } from "../../dreamer/usecases/model/dreamer.model";
 import { SetVariableRequestDto } from "./dto/set-variable-request.dto";
 import { RunFlowModel } from "./model/run-flow-model";
+import { OnEvent } from "@nestjs/event-emitter";
+import { Client } from "../../loan_management/client/entities/client.entity";
+
 
 @Injectable()
 export class SendpluseService {
@@ -91,6 +94,16 @@ export class SendpluseService {
             this.log.log("setVariable: Exception occured" + JSON.stringify(error));
             throw error;
         }
+    }
+
+    @OnEvent('loan.approved')
+    async createClientId(client: Client): Promise<string> {
+        this.log.log("Received Loan Approved EVENT: now CREATING CLIENT IN SENDPULSE =" + JSON.stringify(client));
+        const variableDto = new SetVariableRequestDto();
+        variableDto.variable_id = "6347ecf0ad118c34872233f6";
+        variableDto.variable_value = client.id;
+        variableDto.contact_id = client.sendpulse_id;
+        return this.setVariable(variableDto);
     }
 
     async checkAndGenerateToken(): Promise<string> {

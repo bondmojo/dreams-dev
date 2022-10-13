@@ -24,12 +24,13 @@ export class ClientService {
         const createClientDto: CreateClientDto = createClientAndLoanDto;
         createClientDto.id = createClientAndLoanDto.client_id = 'CL' + Math.floor(Math.random() * 100000000);
         const clientFromDb = await this.clientRepository.save(createClientDto);
+        const clientClone = { ...clientFromDb };
 
         // Create loan for client request object
         await this.loanService.create(createClientAndLoanDto);
-        //emitting loan approved event in  order to notify admin
-        this.eventEmitter.emit('loan.approved', clientFromDb);
 
+        //emitting loan approved event in  order to notify admin
+        this.eventEmitter.emit('loan.approved', (clientClone));
         return clientFromDb;
     }
 
