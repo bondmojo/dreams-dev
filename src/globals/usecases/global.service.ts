@@ -30,7 +30,7 @@ export class GlobalService {
     }
 
     public readonly AWS_IMAGE_PREFIX_URLS: any = {
-        PAYMENT_REPCEIPTS: 'https://dreams-dev-bucket.s3.ap-southeast-1.amazonaws.com/PaymentRepceipts/'
+        PAYMENT_REPCEIPTS: 'https://dreams-dev-bucket.s3.ap-southeast-1.amazonaws.com/'
     }
 
     public readonly REPAYMENT_TRANSACTION_TYPE: any = {
