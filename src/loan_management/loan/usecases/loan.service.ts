@@ -54,7 +54,7 @@ export class LoanService {
         loanResponse.membershipTier = client?.tier;
         loanResponse.lastTransactionAmount = "" + await this.loanHelperService.getLoanLastPartialPaymentAmount(loan.id);
         loanResponse.dreamPointsEarned = "" + client?.dream_points_earned;
-        loanResponse.nextLoanAmount = "" + this.globalService.TIER_AMOUNT[+client?.tier + 1];
+        loanResponse.nextLoanAmount = "" + this.globalService.TIER_AMOUNT[+client?.tier];
         return loanResponse;
     }
 
