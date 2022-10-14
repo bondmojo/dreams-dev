@@ -49,9 +49,14 @@ export class ZohoModule {
         const user = new UserSignature("mohit.joshi@gojo.co");
         let environment = INDataCenter.PRODUCTION();
 
-        /* if (process.env.NODE_ENV === 'local' || process.env.NODE_ENV === 'dev') {
-                    environment = INDataCenter.SANDBOX();
-            } */
+        if (process.env.NODE_ENV === 'local') {
+            this.customLogger.log("*****USING ZOHO SANDBOX ENV");
+            environment = INDataCenter.SANDBOX();
+        }
+        else {
+            this.customLogger.log("*****USING ZOHO PRODUCTION ENV");
+
+        }
 
         const sdkConfig = new SDKConfigBuilder().pickListValidation(false).autoRefreshFields(true).build();
         const zoho_logger = Logger.getInstance(Levels.INFO, this.zohoLoggerFilePath!);

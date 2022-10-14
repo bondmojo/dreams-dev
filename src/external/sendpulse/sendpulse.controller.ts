@@ -46,7 +46,7 @@ export class SendpulseController {
 
     let model = new DreamerModel();
     model.externalId = runFlowDto.contact_id;
-    model.external_data = {};
+    model.external_data = runFlowDto.external_data;
     return await this.sendpulseService.runFlow(model, runFlowDto.flow_id);
   }
 
@@ -54,37 +54,6 @@ export class SendpulseController {
   async updateApplicationStatus(@Body() reqData: UpdateApplicationStatusRequestDto) {
     this.log.log(JSON.stringify(reqData));
 
-    let flowId;
-    const applStatus = reqData.application_status;
-
-    switch (applStatus) {
-      case this.APPLICATION_STATUS[0]:
-        flowId = this.SENDPULSE_APPSTATUS_FLOWIDs.Approved;
-        break;
-      case this.APPLICATION_STATUS[1]:
-        flowId = this.SENDPULSE_APPSTATUS_FLOWIDs['Not Qualified'];
-        break;
-      case this.APPLICATION_STATUS[2]:
-        const transfertypeDto = new SetVariableRequestDto();
-        transfertypeDto.contact_id = reqData.sendpulse_user_id;
-        transfertypeDto.variable_name = "activeLoanId";
-        transfertypeDto.variable_id = "632ae8966a397f4a4c32c516";
-        transfertypeDto.variable_value = "" + reqData.loan_id;
-        await this.sendpulseService.setVariable(transfertypeDto);
-
-        flowId = this.SENDPULSE_APPSTATUS_FLOWIDs.Disbursed;
-        break;
-    }
-    if (flowId) {
-      const model = new DreamerModel();
-      model.externalId = reqData.sendpulse_user_id;
-      model.external_data = {};
-
-      this.log.log("Running " + applStatus + "Flow. FlowId =" + flowId);
-      return await this.sendpulseService.runFlow(model, flowId);
-    }
-
-    return HttpStatus.NOT_FOUND;
-
+    return this.sendpulseService.updateApplicationStatus(reqData);
   }
 }

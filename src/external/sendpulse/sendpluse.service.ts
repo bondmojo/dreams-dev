@@ -10,6 +10,8 @@ import { SetVariableRequestDto } from "./dto/set-variable-request.dto";
 import { RunFlowModel } from "./model/run-flow-model";
 import { OnEvent } from "@nestjs/event-emitter";
 import { Client } from "../../loan_management/client/entities/client.entity";
+import { UpdateApplicationStatusRequestDto } from './dto/update-application-status-request.dto';
+
 
 
 @Injectable()
@@ -18,6 +20,11 @@ export class SendpluseService {
     private readonly log = new CustomLogger(SendpluseService.name);
     private access_token_expiry_time = 0;
     private token: String;
+
+    private readonly SENDPULSE_APPSTATUS_FLOWIDs = {
+        "Disbursed": "62fc9cd35c6b0b21d713cdea", "Approved": "6343f1b75eba5c54cb644455", "Not Qualified": "6343f27a0674f62c693537b5"
+    };
+    private readonly APPLICATION_STATUS = ["Approved", "Not Qualified", "Disbursed"]
 
     constructor(private readonly httpService: HttpService) { }
 
@@ -99,11 +106,56 @@ export class SendpluseService {
     @OnEvent('loan.approved')
     async createClientId(client: Client): Promise<string> {
         this.log.log("Received Loan Approved EVENT: now CREATING CLIENT IN SENDPULSE =" + JSON.stringify(client));
+
         const variableDto = new SetVariableRequestDto();
         variableDto.variable_id = "6347ecf0ad118c34872233f6";
         variableDto.variable_value = client.id;
         variableDto.contact_id = client.sendpulse_id;
-        return this.setVariable(variableDto);
+
+        await this.setVariable(variableDto);
+
+        const applStatus = new UpdateApplicationStatusRequestDto();
+        applStatus.sendpulse_user_id = client.sendpulse_id;
+        applStatus.application_status = this.APPLICATION_STATUS[0];
+
+        return await this.updateApplicationStatus(applStatus);
+    }
+
+    async updateApplicationStatus(reqData: UpdateApplicationStatusRequestDto) {
+        this.log.log(`Running flow for sendpulse user ${reqData.sendpulse_user_id} with application status =` + reqData.application_status);
+
+        let flowId;
+        const applStatus = reqData.application_status;
+
+        switch (applStatus) {
+            case this.APPLICATION_STATUS[0]:
+                flowId = this.SENDPULSE_APPSTATUS_FLOWIDs.Approved;
+                break;
+            case this.APPLICATION_STATUS[1]:
+                flowId = this.SENDPULSE_APPSTATUS_FLOWIDs['Not Qualified'];
+                break;
+            case this.APPLICATION_STATUS[2]:
+                const transfertypeDto = new SetVariableRequestDto();
+                transfertypeDto.contact_id = reqData.sendpulse_user_id;
+                transfertypeDto.variable_name = "activeLoanId";
+                transfertypeDto.variable_id = "632ae8966a397f4a4c32c516";
+                transfertypeDto.variable_value = "" + reqData.loan_id;
+                await this.setVariable(transfertypeDto);
+
+                flowId = this.SENDPULSE_APPSTATUS_FLOWIDs.Disbursed;
+                break;
+        }
+        if (flowId) {
+            const model = new DreamerModel();
+            model.externalId = reqData.sendpulse_user_id;
+            model.external_data = {};
+
+            this.log.log("Running " + applStatus + "Flow. FlowId =" + flowId);
+            return await this.runFlow(model, flowId);
+        }
+
+        return HttpStatus.NOT_FOUND;
+
     }
 
     async checkAndGenerateToken(): Promise<string> {

@@ -97,6 +97,7 @@ export class DreamerRepository {
         const record = new Record();
         record.addKeyValue('Provider', new Choice(paymentDetails.preferredPaymentMethod));
         record.addKeyValue('Account_Number', paymentDetails.paymentAccountNumber);
+        record.addKeyValue('Payment_Via', paymentDetails.paymentVia);
 
         const map: Map<string, any> = await this.zohoservice.updateRecord(dreamerId, record);
 
