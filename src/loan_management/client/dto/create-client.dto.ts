@@ -14,6 +14,12 @@ export class CreateClientDto {
   acc_number: string;
   acc_note: string;
   summary_loanCycle: number;
+  street: string;
+  village: string;
+  commune: string; //User’s Commune (Current Living Location)
+  district: string;
+  province: string;
+  national_id: string;
   summary_has_loan_in_arrear: string;
   summary_membership_level: string;
   acc_update_date: string;

@@ -66,6 +66,24 @@ export class Client {
   @Column({ nullable: true, default: 50 })
   summary_membership_level: string;
 
+  @Column({ nullable: true })
+  street: string;
+
+  @Column({ nullable: true })
+  village: string;
+
+  @Column({ nullable: true })
+  commune: string;
+
+  @Column({ nullable: true })
+  district: string;
+
+  @Column({ nullable: true })
+  province: string;
+
+  @Column({ nullable: true })
+  national_id: string;
+
   @Column({ type: 'timestamp', nullable: true })
   acc_update_date: string;
 
