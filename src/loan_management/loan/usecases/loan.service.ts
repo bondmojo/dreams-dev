@@ -25,10 +25,28 @@ export class LoanService {
     async create(createLoanDto: any): Promise<Loan> {
         createLoanDto.id = 'LN' + Math.floor(Math.random() * 100000000);
         createLoanDto.loan_fee = this.globalService.LOAN_FEES;
+
+        // calculate outstanding balance & wing_wei_luy_transfer_fee
+        createLoanDto.wing_wei_luy_transfer_fee = 0;
+        createLoanDto.outstanding_amount = createLoanDto.amount + createLoanDto.loan_fee;
+        // if wire_transfer_type is mobile then calc wing_wei_luy_transfer_fee and add it into outstanding_amount
+        if (createLoanDto?.wire_transfer_type == this.globalService.WIRE_TRANSFER_TYPES.MOBILE) {
+            const disbursed_amount = createLoanDto.amount - createLoanDto.dream_point;
+            createLoanDto.wing_wei_luy_transfer_fee = this.globalService.CALC_WING_WEI_LUY_TRANSFER_FEE(disbursed_amount);
+            createLoanDto.outstanding_amount = createLoanDto.outstanding_amount + createLoanDto.wing_wei_luy_transfer_fee;
+        }
         const loanFromDb = await this.loanRepository.save(createLoanDto);
         //create transaction for dream_point_commited in database
         await this.loanHelperService.manageDreamPointCommitedAfterLoanCreation(createLoanDto);
         return loanFromDb;
+    }
+
+    async findOneForInternalUse(fields: object): Promise<any> {
+        const loan = await this.loanRepository.findOne({
+            where: fields,
+            order: { ['created_at']: 'DESC' }
+        });
+        return loan;
     }
 
     async findOne(fields: GetLoanDto): Promise<GetLoanResponse | null> {

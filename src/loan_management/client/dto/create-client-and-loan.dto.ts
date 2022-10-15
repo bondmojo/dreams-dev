@@ -18,6 +18,12 @@ export class CreateClientAndLoanDto {
   acc_update_date: string;
   dream_points_earned: number;
   dream_points_committed: number;
+  street: string;
+  village: string;
+  commune: string; //User’s Commune (Current Living Location)
+  district: string;
+  province: string;
+  national_id: string;
 
   // Loan Fields
   client_id: string;
@@ -28,4 +34,5 @@ export class CreateClientAndLoanDto {
   disbursed_date: Date;
   paid_date: Date;
   tenure_in_months: number;
+  wire_transfer_type: string;
 }
