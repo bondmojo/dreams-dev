@@ -101,6 +101,7 @@ export class ClientService {
             '&clientId=' + (client?.sendpulse_id ?? '');
 
         this.log.log(`JOTFORM_CONTRACT_URL ==> ${JOTFORM_CONTRACT_URL}`);
-        return { contract_form_url: JOTFORM_CONTRACT_URL };
+
+        return { contract_form_url: encodeURI(JOTFORM_CONTRACT_URL) };
     }
 }
