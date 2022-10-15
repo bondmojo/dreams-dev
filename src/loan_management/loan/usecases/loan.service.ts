@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from '@nestjs/typeorm';
-import { DisbursedLoanDto, GetLoanDto } from "../dto";
+import { DisbursedLoanDto, CreateRepaymentTransactionDto, GetLoanDto } from "../dto";
 import { CustomLogger } from "../../../custom_logger";
 import { Loan } from '../entities/loan.entity';
 import { LoanHelperService } from "./loan-helper.service";
@@ -27,8 +27,7 @@ export class LoanService {
         createLoanDto.loan_fee = this.globalService.LOAN_FEES;
         const loanFromDb = await this.loanRepository.save(createLoanDto);
         //create transaction for dream_point_commited in database
-        await this.loanHelperService.createTransactionForDreamPointCommited(createLoanDto);
-        await this.loanHelperService.updateClientCommittedDreamPoint(createLoanDto);
+        await this.loanHelperService.manageDreamPointCommitedAfterLoanCreation(createLoanDto);
         return loanFromDb;
     }
 
@@ -37,7 +36,7 @@ export class LoanService {
             where: fields,
             relations: ['client']
         });
-        this.log.log("LOAN DATA =" + loan);
+        this.log.log("LOAN DATA =" + JSON.stringify(loan));
 
         const loanResponse = new GetLoanResponse();
         if (!loan) {
@@ -53,21 +52,38 @@ export class LoanService {
         loanResponse.dueDate = "" + loan?.repayment_date;
         loanResponse.outstandingBalance = "" + loan?.outstanding_amount;
         loanResponse.membershipTier = client?.tier;
-
+        loanResponse.lastTransactionAmount = "" + await this.loanHelperService.getLoanLastPartialPaymentAmount(loan.id);
+        loanResponse.dreamPointsEarned = "" + client?.dream_points_earned;
+        loanResponse.nextLoanAmount = "" + this.globalService.TIER_AMOUNT[+client?.tier];
         return loanResponse;
     }
 
-    async disbursed(disbursedLoanDto: DisbursedLoanDto): Promise<Loan | undefined> {
-        const loan = await this.loanRepository.findOneBy({
-            id: disbursedLoanDto.loan_id,
+    async disbursed(disbursedLoanDto: DisbursedLoanDto): Promise<any> {
+        const disbursedResponse = { status: true };
+        const loan = await this.loanRepository.findOne({
+            where: { id: disbursedLoanDto.loan_id },
+            relations: ['client']
         });
-        if (!loan) {
-            return;
+
+        if (!loan || loan.status != this.globalService.LOAN_STATUS.APPROVED) {
+            disbursedResponse.status = false;
+            return disbursedResponse;
         }
         await this.loanHelperService.createCreditDisbursementTransaction(loan, disbursedLoanDto);
         await this.loanHelperService.checkAndCreateWingTransferFeeTransaction(loan, disbursedLoanDto);
         await this.loanHelperService.updateLoanDataAfterDisbursement(loan, disbursedLoanDto);
-        return loan;
+        return disbursedResponse;
     }
 
+    async createRepaymentTransaction(createRepaymentTransactionDto: CreateRepaymentTransactionDto): Promise<any> {
+        if (createRepaymentTransactionDto.type == this.globalService.REPAYMENT_TRANSACTION_TYPE.CLIENT_CREDIT) {
+            return await this.loanHelperService.handleClientCreditRepayments(createRepaymentTransactionDto);
+        }
+
+        if (createRepaymentTransactionDto.type == this.globalService.REPAYMENT_TRANSACTION_TYPE.DREAM_POINT_REFUND) {
+            return await this.loanHelperService.handleDreamPointRefundRepayments(createRepaymentTransactionDto);
+        }
+
+        return false;
+    }
 }

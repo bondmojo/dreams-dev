@@ -5,5 +5,6 @@ export class CreateTransactionDto {
   type: string;
   currency: string;
   note: string;
+  image: string;
   created_date: Date;
 }

@@ -31,7 +31,7 @@ export class ZohoService {
         return (this.extractResponse(response) as Record);
     }
 
-    async saveRecord(record: Record): Promise<Map<string, any>> {
+    async saveRecord(record: Record, moduleName: string): Promise<Map<string, any>> {
         let recordOperations = new RecordOperations();
         let request = new BodyWrapper();
         let recordsArray = [];
@@ -42,10 +42,14 @@ export class ZohoService {
         //Set the array to data in BodyWrapper instance
         request.setData(recordsArray);
 
-        this.log.log("Trying to post the record");
+//        this.log.log("record:" + JSON.stringify(record.re))
+        this.log.log("Trying to post the record: REQUEST=" + JSON.stringify(request));
 
         //Call createRecords method that takes BodyWrapper instance and moduleAPIName as parameters
-        let response = await recordOperations.createRecords('Leads', request);
+        let response = await recordOperations.createRecords(moduleName, request);
+
+        this.log.log(":" + JSON.stringify(response));
+
 
         const successResponse = this.extractResponse(response);
 

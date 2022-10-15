@@ -1,24 +1,25 @@
-import {Module} from '@nestjs/common';
-import {ZohoService} from './zoho.service';
-import {ConfigModule, ConfigService} from '@nestjs/config';
-import {CustomLogger} from '../../custom_logger';
-import {UserSignature} from "@zohocrm/typescript-sdk-2.0/routes/user_signature"
-import {Levels, Logger} from "@zohocrm/typescript-sdk-2.0/routes/logger/logger"
-import {INDataCenter} from "@zohocrm/typescript-sdk-2.0/routes/dc/in_data_center"
-import {OAuthToken} from "@zohocrm/typescript-sdk-2.0/models/authenticator/oauth_token"
-import {OAuthBuilder} from "@zohocrm/typescript-sdk-2.0/models/authenticator/oauth_builder"
-import {DBStore} from "@zohocrm/typescript-sdk-2.0/models/authenticator/store/db_store"
-import {DBBuilder} from "@zohocrm/typescript-sdk-2.0/models/authenticator/store/db_builder";
-import {SDKConfigBuilder} from "@zohocrm/typescript-sdk-2.0/routes/sdk_config_builder";
-import {InitializeBuilder} from "@zohocrm/typescript-sdk-2.0/routes/initialize_builder"
+import { Module } from '@nestjs/common';
+import { ZohoService } from './zoho.service';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { CustomLogger } from '../../custom_logger';
+import { UserSignature } from "@zohocrm/typescript-sdk-2.0/routes/user_signature"
+import { Levels, Logger } from "@zohocrm/typescript-sdk-2.0/routes/logger/logger"
+import { INDataCenter } from "@zohocrm/typescript-sdk-2.0/routes/dc/in_data_center"
+import { OAuthToken } from "@zohocrm/typescript-sdk-2.0/models/authenticator/oauth_token"
+import { OAuthBuilder } from "@zohocrm/typescript-sdk-2.0/models/authenticator/oauth_builder"
+import { DBStore } from "@zohocrm/typescript-sdk-2.0/models/authenticator/store/db_store"
+import { DBBuilder } from "@zohocrm/typescript-sdk-2.0/models/authenticator/store/db_builder";
+import { SDKConfigBuilder } from "@zohocrm/typescript-sdk-2.0/routes/sdk_config_builder";
+import { InitializeBuilder } from "@zohocrm/typescript-sdk-2.0/routes/initialize_builder"
 import * as fs from "fs";
+import e from 'express';
 
 const ZOHO = {
     CLIENT_ID: "1000.2MD0ZWQ43T23HPTFJGCCNNJS728OND",
     SECRET: "f782b50389e59236c2c5ddef560af6d28dd46fa0c2",
     USER: "mohit.joshi@gojo.co",
     ID: "60015610290",
-    GRANT_TOKEN: "1000.9e925ea019d48cc36e2ca782fcffedd9.8ef89227b2dd07e0fe268b954e3e1d26"
+    GRANT_TOKEN: "1000.4f947be801b70af225b77604c294f662.8504bcc27d0ad38bc0e0ba4648387e9c"
 }
 
 @Module({
@@ -37,7 +38,7 @@ export class ZohoModule {
     constructor(private configService: ConfigService) {
         this.zohoLoggerFilePath = this.configService.get<string>('ZOHO_LOGGER_FILE_PATH');
         this.zohoResPath = this.configService.get<string>('ZOHO_RESOURCE_PATH');
-        if(!fs.existsSync(this.zohoResPath!)) fs.mkdirSync(this.zohoResPath!);
+        if (!fs.existsSync(this.zohoResPath!)) fs.mkdirSync(this.zohoResPath!);
         this.zohoFilePath = this.configService.get<string>('ZOHO_FILE_PATH');
         this.customLogger.log("*********res path =" + this.zohoLoggerFilePath);
         this.init();
@@ -45,22 +46,32 @@ export class ZohoModule {
 
 
     async init() {
-        var user = new UserSignature("mohit.joshi@gojo.co");
+        const user = new UserSignature("mohit.joshi@gojo.co");
         let environment = INDataCenter.PRODUCTION();
-        let sdkConfig = new SDKConfigBuilder().pickListValidation(false).autoRefreshFields(true).build();
-        let zoho_logger = Logger.getInstance(Levels.INFO, this.zohoLoggerFilePath!);
+
+        if (process.env.NODE_ENV === 'local') {
+            this.customLogger.log("*****USING ZOHO SANDBOX ENV");
+            environment = INDataCenter.SANDBOX();
+        }
+        else {
+            this.customLogger.log("*****USING ZOHO PRODUCTION ENV");
+
+        }
+
+        const sdkConfig = new SDKConfigBuilder().pickListValidation(false).autoRefreshFields(true).build();
+        const zoho_logger = Logger.getInstance(Levels.INFO, this.zohoLoggerFilePath!);
 
         //FILE PERSISTENCE STORE
-        let tokenstore: DBStore = new DBBuilder()
-            .host('dreams-db.cgybhaewci9o.ap-southeast-1.rds.amazonaws.com')
+        const tokenstore: DBStore = new DBBuilder()
+            .host('' + process.env.DATABASE_HOST)
             .databaseName('zohooauth')
-            .userName('dreamservice')
-            .password('BSE97FGdC')
+            .userName('' + process.env.DATABASE_USERNAME)
+            .password('' + process.env.DATABASE_PASSWORD)
             .portNumber(3306)
             .build();
 
         try {
-            let token: OAuthToken = new OAuthBuilder()
+            const token: OAuthToken = new OAuthBuilder()
                 .clientId(ZOHO.CLIENT_ID)
                 .clientSecret(ZOHO.SECRET)
                 .grantToken(ZOHO.GRANT_TOKEN)

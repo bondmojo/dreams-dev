@@ -1,32 +1,41 @@
-import {Injectable} from "@nestjs/common";
-import {firstValueFrom} from "rxjs";
-import {CustomLogger} from "../../custom_logger";
-import {HttpService} from "@nestjs/axios";
-import {ShuftiResponseDto} from "./dto/shufti-response.dto";
-import {EventEmitter2} from "@nestjs/event-emitter";
-import {KycEventDto, KYCStatus} from "./dto/kyc-event.dto";
+import { Injectable } from "@nestjs/common";
+import { firstValueFrom } from "rxjs";
+import { CustomLogger } from "../../custom_logger";
+import { HttpService } from "@nestjs/axios";
+import { ShuftiResponseDto } from "./dto/shufti-response.dto";
+import { EventEmitter2 } from "@nestjs/event-emitter";
+import { KycEventDto, KYCStatus } from "./dto/kyc-event.dto";
 
 @Injectable()
 export class ShuftiService {
     private readonly url = 'https://api.shuftipro.com';
     private readonly clientId = 'aad4be30637892cd60e04ede36338a4da522c9fc57a237267de0007b160f2e3f';
     private readonly secret = '2C0yXdPyitNNQ5vlJ974sAqd9nVH4B6b';
-    private readonly registrationUrl = 'https://gojo.retool.com/embedded/public/228e6187-4a66-4a81-b430-a63a646f82b8';
+    //private readonly registrationUrl = 'https://gojo.retool.com/embedded/public/228e6187-4a66-4a81-b430-a63a646f82b8';
     private readonly callbackUrl = 'https://dev.api.gojo.co/dreams/v1';
+    private readonly TELEGRAM_BOT_URL = ["https://t.me/gojo_dreams_uat_bot", "https://t.me/dreams_cambodia_bot"]
 
     private readonly logger = new CustomLogger(ShuftiService.name);
-    constructor(private readonly httpService: HttpService, private eventEmitter: EventEmitter2) {}
-    
+    constructor(private readonly httpService: HttpService, private eventEmitter: EventEmitter2) { }
+
     async initiateKyc(dreamerId: string, kycId: string): Promise<string> {
         const request = structuredClone(this.TEMPLATE);
         request.reference = kycId;
         request.callback_url = this.callbackUrl + '/shufti/callback?dreamerId=' + dreamerId + "&kycId=" + kycId;
-        request.redirect_url = this.registrationUrl + "#leadId=" + dreamerId + "&kycId=" + kycId;
+        
+        if (process.env.NODE_ENV === "dev") {
+            request.redirect_url = this.TELEGRAM_BOT_URL[0];
+        }
+        else {
+            request.redirect_url = this.TELEGRAM_BOT_URL[1];
+        }
+
+        //request.redirect_url = this.registrationUrl + "#leadId=" + dreamerId + "&kycId=" + kycId;
         const response = await firstValueFrom(this.httpService.post<ShuftiResponseDto>(
             this.url,
             request,
             {
-                headers: {'Authorization': 'BASIC '+ btoa(this.clientId+':'+this.secret)}
+                headers: { 'Authorization': 'BASIC ' + btoa(this.clientId + ':' + this.secret) }
             }
         ));
         this.logger.log(`Received response from shufti ${response.statusText}`);
@@ -34,12 +43,12 @@ export class ShuftiService {
     }
 
     async fetchKycData(kycId: string): Promise<ShuftiResponseDto> {
-        const request = {reference: kycId};
+        const request = { reference: kycId };
         const response = await firstValueFrom(this.httpService.post<ShuftiResponseDto>(
-            this.url+'/status',
+            this.url + '/status',
             request,
             {
-                headers: {'Authorization': 'BASIC '+ btoa(this.clientId+':'+this.secret)}
+                headers: { 'Authorization': 'BASIC ' + btoa(this.clientId + ':' + this.secret) }
             }
         ));
         this.logger.log(`Received response from shufti ${response.statusText}`);
@@ -48,14 +57,14 @@ export class ShuftiService {
 
     async kycCallback(dreamerId: string, kycId: string, response: ShuftiResponseDto) {
         const event: KycEventDto = this.buildEvent(dreamerId, kycId, response);
-        if(response.event === 'verification.accepted') {
+        if (response.event === 'verification.accepted') {
             const data: ShuftiResponseDto = await this.fetchKycData(kycId);
             this.logger.log(`Verification accepted for ${dreamerId} with kyc id ${kycId}`);
             event.documentProof = data.proofs.document.proof;
             event.faceProof = data.proofs.face.proof;
             event.status = KYCStatus.SUCCESS;
             this.eventEmitter.emit('kyc.callback', event);
-        } else if(response.event === 'verification.declined' || response.event === 'verification.rejected') {
+        } else if (response.event === 'verification.declined' || response.event === 'verification.rejected') {
             const data: ShuftiResponseDto = await this.fetchKycData(kycId);
             this.logger.log(`Verification rejected for ${dreamerId} with kyc id ${kycId}`);
             event.documentProof = data.proofs?.document?.proof;
@@ -63,9 +72,9 @@ export class ShuftiService {
             event.status = KYCStatus.REJECTED;
             event.rejectionReason = data.declined_reason;
             this.eventEmitter.emit('kyc.callback', event);
-        } else if(response.event === 'request.timeout'|| response.event === 'verification.cancelled'){
+        } else if (response.event === 'request.timeout' || response.event === 'verification.cancelled') {
             this.logger.log(`Verification ${response.event} for ${dreamerId} with kyc id ${kycId}`);
-            event.status = response.event === 'request.timeout'? KYCStatus.TIMED_OUT : KYCStatus.CANCELED;
+            event.status = response.event === 'request.timeout' ? KYCStatus.TIMED_OUT : KYCStatus.CANCELED;
             event.rejectionReason = 'Verification either timed-out or cancelled by the user';
             this.eventEmitter.emit('kyc.callback', event);
         }
@@ -86,9 +95,9 @@ export class ShuftiService {
 
 
     private retrieveGender(gender: string) {
-        if(gender == null){
+        if (gender == null) {
             return 'Unknown';
-        } else if( gender === 'M'){
+        } else if (gender === 'M') {
             return 'MALE';
         } else {
             return 'FEMALE';
