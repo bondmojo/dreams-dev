@@ -33,6 +33,11 @@ export class GlobalService {
         PAYMENT_REPCEIPTS: 'https://dreams-dev-bucket.s3.ap-southeast-1.amazonaws.com/'
     }
 
+    public readonly JOTFORM_CONTRACT_URL: any = {
+        DEV: 'https://form.jotform.com/222818449520054',
+        PROD: 'https://form.jotform.com/222818449520054',
+    }
+
     public readonly REPAYMENT_TRANSACTION_TYPE: any = {
         CLIENT_CREDIT: 'client_credit',
         DREAM_POINT_REFUND: 'dream_point_refund'

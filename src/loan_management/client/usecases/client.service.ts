@@ -7,7 +7,7 @@ import { Repository } from 'typeorm';
 import { LoanService } from "../../loan/usecases/loan.service";
 import { OnEvent } from "@nestjs/event-emitter";
 import { EventEmitter2 } from "@nestjs/event-emitter";
-
+import { GlobalService } from "../../../globals/usecases/global.service"
 
 @Injectable()
 export class ClientService {
@@ -16,7 +16,8 @@ export class ClientService {
         @InjectRepository(Client)
         private readonly clientRepository: Repository<Client>,
         private readonly loanService: LoanService,
-        private eventEmitter: EventEmitter2
+        private eventEmitter: EventEmitter2,
+        private readonly globalService: GlobalService
     ) { }
 
     async create(createClientAndLoanDto: CreateClientAndLoanDto): Promise<Client> {
@@ -66,4 +67,40 @@ export class ClientService {
         await this.clientRepository.update(updateClientDto.id, updateClientDto);
     }
 
+    async getContracturl(clientId: string): Promise<Client[] | any> {
+        const client = await this.clientRepository.findOne({ where: { id: clientId }, });
+        const loan = await this.loanService.findOneForInternalUse({
+            client_id: clientId,
+            status: this.globalService.LOAN_STATUS.APPROVED
+        })
+        if (!loan) {
+            return 'No approved loan found for user!';
+        }
+        const now = new Date();
+
+        let JOTFORM_CONTRACT_URL = process.env.NODE_ENV === "production" ? this.globalService.JOTFORM_CONTRACT_URL.PROD : this.globalService.JOTFORM_CONTRACT_URL.DEV;
+        JOTFORM_CONTRACT_URL = JOTFORM_CONTRACT_URL +
+            '?date[month]=' + now.getMonth() +
+            '&date[day]=' + now.getDate() +
+            '&date[year]=' + now.getFullYear() +
+            '&todaysDate[month]=' + now.getMonth() +
+            '&todaysDate[day]=' + now.getDate() +
+            '&todaysDate[year]=' + now.getFullYear() +
+            '&name[first]=' + (client?.first ?? '') +
+            '&name[last]=' + (client?.last ?? '') +
+            '&streetAddress=' + (client?.street ?? '') +
+            '&village=' + (client?.village ?? '') +
+            '&commune=' + (client?.commune ?? '') +
+            '&district=' + (client?.district ?? '') +
+            '&province=' + (client?.province ?? '') +
+            '&borrowAmount=' + (loan.amount ?? '') +
+            '&repaymentAmount=' + (loan.outstanding_amount ?? '') +
+            '&repaymentDate=' + '' +
+            '&nationalId=' + (client?.national_id ?? '') +
+            '&phoneNumber=' + (client?.mobile ?? '') +
+            '&clientId=' + (client?.sendpulse_id ?? '');
+
+        this.log.log(`JOTFORM_CONTRACT_URL ==> ${JOTFORM_CONTRACT_URL}`);
+        return { contract_form_url: JOTFORM_CONTRACT_URL };
+    }
 }

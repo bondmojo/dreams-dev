@@ -22,4 +22,10 @@ export class ClientController {
     return await this.clientService.findOne({ id: id });
   }
 
+  @Get(':id/contracturl')
+  async contracturl(@Param('id') id: string) {
+    this.logger.log(`Getting contracturl for client with request ${+id}`);
+    return await this.clientService.getContracturl(id);
+  }
+
 }
