@@ -29,6 +29,8 @@ export class LoanService {
         // calculate outstanding balance & wing_wei_luy_transfer_fee
         createLoanDto.wing_wei_luy_transfer_fee = 0;
         createLoanDto.outstanding_amount = +createLoanDto.amount + +createLoanDto.loan_fee;
+        const today = new Date(); // current time
+        createLoanDto.repayment_date = add(today, { months: 1 }); // today + tenure_in_months
         // if wire_transfer_type is mobile then calc wing_wei_luy_transfer_fee and add it into outstanding_amount
         if (createLoanDto?.wire_transfer_type == this.globalService.WIRE_TRANSFER_TYPES.MOBILE) {
             const disbursed_amount = +createLoanDto.amount - +createLoanDto.dream_point;

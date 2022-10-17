@@ -70,14 +70,11 @@ export class LoanHelperService {
     }
 
     async updateLoanDataAfterDisbursement(loan: Loan, disbursedLoanDto: DisbursedLoanDto) {
-        const tenure_in_months = loan.tenure_in_months ? loan.tenure_in_months : 1; // default one month tenure
         const today = new Date(); // current time
-        const repayment_date = add(today, { months: tenure_in_months }); // today + tenure_in_months
 
         const fields_to_be_update: object = {
             wing_code: disbursedLoanDto.wing_code,
             disbursed_date: today,
-            repayment_date: repayment_date,
             status: this.globalService.LOAN_STATUS.DISBURSED,
         }
 

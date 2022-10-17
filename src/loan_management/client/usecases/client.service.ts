@@ -95,7 +95,7 @@ export class ClientService {
             '&province=' + (client?.province ?? '') +
             '&borrowAmount=' + (loan.amount ?? '') +
             '&repaymentAmount=' + (loan.outstanding_amount ?? '') +
-            '&repaymentDate=' + '' +
+            '&repaymentDate=' + (loan.repayment_date ?? '') +
             '&nationalId=' + (client?.national_id ?? '') +
             '&phoneNumber=' + (client?.mobile ?? '') +
             '&clientId=' + (client?.sendpulse_id ?? '');
