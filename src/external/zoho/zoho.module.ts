@@ -19,7 +19,7 @@ const ZOHO = {
     SECRET: "f782b50389e59236c2c5ddef560af6d28dd46fa0c2",
     USER: "mohit.joshi@gojo.co",
     ID: "60015610290",
-    GRANT_TOKEN: "1000.4f947be801b70af225b77604c294f662.8504bcc27d0ad38bc0e0ba4648387e9c"
+    GRANT_TOKEN: "1000.446f00be2cd3e9691d3c66add720cef0.a4136cb5b2fc0af688b2604ae4e35d03"
 }
 
 @Module({
@@ -47,19 +47,22 @@ export class ZohoModule {
 
     async init() {
         const user = new UserSignature("mohit.joshi@gojo.co");
-        let environment = INDataCenter.PRODUCTION();
+        let environment;
 
-        if (process.env.NODE_ENV === 'local') {
+        if (process.env.NODE_ENV === 'local' || process.env.NODE_ENV === 'dev') {
             this.customLogger.log("*****USING ZOHO SANDBOX ENV");
             environment = INDataCenter.SANDBOX();
         }
         else {
             this.customLogger.log("*****USING ZOHO PRODUCTION ENV");
-
+            environment = INDataCenter.PRODUCTION();
         }
 
         const sdkConfig = new SDKConfigBuilder().pickListValidation(false).autoRefreshFields(true).build();
         const zoho_logger = Logger.getInstance(Levels.INFO, this.zohoLoggerFilePath!);
+        ZOHO.GRANT_TOKEN = "" + process.env.ZOHO_GRANT_TOKEN;
+        this.customLogger.log("*****ZOHO GRANT TOKEN =" + ZOHO.GRANT_TOKEN);
+
 
         //FILE PERSISTENCE STORE
         const tokenstore: DBStore = new DBBuilder()

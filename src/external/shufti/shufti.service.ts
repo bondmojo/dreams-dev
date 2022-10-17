@@ -22,8 +22,8 @@ export class ShuftiService {
         const request = structuredClone(this.TEMPLATE);
         request.reference = kycId;
         request.callback_url = this.callbackUrl + '/shufti/callback?dreamerId=' + dreamerId + "&kycId=" + kycId;
-        
-        if (process.env.NODE_ENV === "dev") {
+
+        if (process.env.NODE_ENV === "dev" || process.env.NODE_ENV === "local") {
             request.redirect_url = this.TELEGRAM_BOT_URL[0];
         }
         else {
