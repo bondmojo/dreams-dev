@@ -49,7 +49,7 @@ export class ZohoModule {
         const user = new UserSignature("mohit.joshi@gojo.co");
         let environment;
 
-        if (process.env.NODE_ENV === 'local' || process.env.NODE_ENV === 'dev') {
+        if (process.env.NODE_ENV === 'local' /* || process.env.NODE_ENV === 'dev' */) {
             this.customLogger.log("*****USING ZOHO SANDBOX ENV");
             environment = INDataCenter.SANDBOX();
         }
