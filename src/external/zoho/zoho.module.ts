@@ -54,7 +54,7 @@ export class ZohoModule {
             environment = INDataCenter.SANDBOX();
         }
         else {
-            this.customLogger.log("*****USING ZOHO PRODUCTION ENV");
+            this.customLogger.log("*****USING ZOHO PRODUCTION ENV*****");
             environment = INDataCenter.PRODUCTION();
         }
 
