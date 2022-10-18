@@ -34,8 +34,8 @@ export class GlobalService {
     }
 
     public readonly JOTFORM_CONTRACT_URL: any = {
-        DEV: 'https://form.jotform.com/222818449520054',
-        PROD: 'https://form.jotform.com/222818449520054',
+        DEV: 'https://form.jotform.com/koh.terai/dev-loan-contract',
+        PROD: 'https://form.jotform.com/koh.terai/loan-contract',
     }
 
     public readonly REPAYMENT_TRANSACTION_TYPE: any = {
