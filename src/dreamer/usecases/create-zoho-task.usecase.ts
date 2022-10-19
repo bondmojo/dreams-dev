@@ -47,7 +47,7 @@ export class CreateZohoTaskUsecase {
         return id;
     }
 
-    @OnEvent('loan.approved')
+    // @OnEvent('loan.approved') // commenting here as we are creating it through zoho workflow rules when contract form submitted by the user.
     async createDisbursementTask(client: Client): Promise<string> {
         this.log.log("Received Loan Approved EVENT: now createDisbursementTask =" + JSON.stringify(client));
         const task = new ZohoTaskRequest();
