@@ -41,7 +41,7 @@ export class CreateZohoTaskUsecase {
         task.dreamservice_customer_id = client.id;
         //task.due_date = new Date();
         task.assign_to = this.global.DISBURSEMENT_TASK_ASSIGNEE;
-        task.subject = "Payment Recieved of " + client.full_en;
+        task.subject = "Action Required: Payment Received from " + client.full_en;
         task.status = "Not Started";
         const id = await this.repository.createTask(client.zoho_id, task);
         return id;
