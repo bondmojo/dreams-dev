@@ -11,6 +11,8 @@ import { Client } from 'src/loan_management/client/entities/client.entity';
 import { SendpluseService } from 'src/external/sendpulse/sendpluse.service';
 import { RunFlowModel } from 'src/external/sendpulse/model/run-flow-model';
 import { GetClientDto } from 'src/loan_management/client/dto';
+import { GlobalService } from "../../../globals/usecases/global.service";
+
 
 
 @Injectable()
@@ -21,7 +23,8 @@ export class PaymentReminderService {
     @InjectRepository(Loan)
     private readonly loanRepository: Repository<Loan>,
     private readonly clientService: ClientService,
-    private readonly sendpulseService: SendpluseService
+    private readonly sendpulseService: SendpluseService,
+    private readonly globalService: GlobalService
   ) { }
 
   async runCronApis(id: number) {
@@ -105,48 +108,48 @@ export class PaymentReminderService {
         flow.external_data = {};
         switch (remainingDays) {
           case 23:
-            flow.flow_id = "632c3a3f8de7ab098c2673d9";
+            flow.flow_id = this.globalService.SENDPULSE_FLOW.REMINDER_FLOW_ID['23_DAYS'];
             break;
           case 16:
-            flow.flow_id = "632c3d8e123ab83d924cddc8";
+            flow.flow_id = this.globalService.SENDPULSE_FLOW.REMINDER_FLOW_ID['16_DAYS'];
             break;
           case 9:
-            flow.flow_id = "632c3f04c54feb769e5a4082";
+            flow.flow_id = this.globalService.SENDPULSE_FLOW.REMINDER_FLOW_ID['9_DAYS'];
             break;
           case 2:
-            flow.flow_id = "632c40021f206771792caf37";
+            flow.flow_id = this.globalService.SENDPULSE_FLOW.REMINDER_FLOW_ID['2_DAYS'];
             break;
           case 1:
-            flow.flow_id = "632c407d02efd900e2548dab";
+            flow.flow_id = this.globalService.SENDPULSE_FLOW.REMINDER_FLOW_ID['1_DAY'];
             break;
           case 0:
             if (isMorning)
-              flow.flow_id = "632c44a770b9686d4b564a39";
+              flow.flow_id = this.globalService.SENDPULSE_FLOW.REMINDER_FLOW_ID['0_DAY_MORNING'];
             else
-              flow.flow_id = "632c44d8b14ebd4e7c09fd99";
+              flow.flow_id = this.globalService.SENDPULSE_FLOW.REMINDER_FLOW_ID['0_DAY_EVENING'];
             break;
           case -1:
             if (isMorning)
-              flow.flow_id = "632c5a35415c9d1596763aa1";
+              flow.flow_id = this.globalService.SENDPULSE_FLOW.REMINDER_FLOW_ID['-1_DAY_MORNING'];
             else
-              flow.flow_id = "632c5c685033365c2a07a378";
+              flow.flow_id = this.globalService.SENDPULSE_FLOW.REMINDER_FLOW_ID['-1_DAY_EVENING'];
             break;
           case -2:
             if (isMorning)
-              flow.flow_id = "632c5cf8ffd93d3a4168adb0";
+              flow.flow_id = this.globalService.SENDPULSE_FLOW.REMINDER_FLOW_ID['-2_DAYS_MORNING'];
             else
-              flow.flow_id = "632c5e8d5315aa0ef11404f5";
+              flow.flow_id = this.globalService.SENDPULSE_FLOW.REMINDER_FLOW_ID['-2_DAYS_EVENING'];
             break;
           case -3:
             if (isMorning)
-              flow.flow_id = "632c5f2e48a0b42b26095073";
+              flow.flow_id = this.globalService.SENDPULSE_FLOW.REMINDER_FLOW_ID['-3_DAYS_MORNING'];
             else
-              flow.flow_id = "632c615064d2872411413292";
+              flow.flow_id = this.globalService.SENDPULSE_FLOW.REMINDER_FLOW_ID['-3_DAYS_EVENING'];
             break;
           default:
             //FIXME: update flow ID
             if (remainingDays < -3)
-              flow.flow_id = "632c615064d2872411413292";
+              flow.flow_id = this.globalService.SENDPULSE_FLOW.REMINDER_FLOW_ID.OLDER_THAN_3DAYS;
             break;
         }
         this.sendpulseService.runFlowV2(flow);

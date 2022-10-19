@@ -11,6 +11,8 @@ import { RunFlowModel } from "./model/run-flow-model";
 import { OnEvent } from "@nestjs/event-emitter";
 import { Client } from "../../loan_management/client/entities/client.entity";
 import { UpdateApplicationStatusRequestDto } from './dto/update-application-status-request.dto';
+import { GlobalService } from "../../globals/usecases/global.service";
+
 
 
 
@@ -21,12 +23,9 @@ export class SendpluseService {
     private access_token_expiry_time = 0;
     private token: String;
 
-    private readonly SENDPULSE_APPSTATUS_FLOWIDs = {
-        "Disbursed": "62fc9cd35c6b0b21d713cdea", "Approved": "6343f1b75eba5c54cb644455", "Not Qualified": "6343f27a0674f62c693537b5"
-    };
     private readonly APPLICATION_STATUS = ["Approved", "Not Qualified", "Disbursed"]
 
-    constructor(private readonly httpService: HttpService) { }
+    constructor(private readonly httpService: HttpService, private readonly globalService: GlobalService) { }
 
     async getContact(id: string): Promise<SendPulseContactDto> {
         await this.checkAndGenerateToken();
@@ -108,7 +107,8 @@ export class SendpluseService {
         this.log.log("Received Loan Approved EVENT: now CREATING CLIENT IN SENDPULSE =" + JSON.stringify(client));
 
         const variableDto = new SetVariableRequestDto();
-        variableDto.variable_id = "6347ecf0ad118c34872233f6";
+        //Client ID Variable
+        variableDto.variable_id = this.globalService.SENDPULSE_VARIABLE_ID.CLIENT_ID;
         variableDto.variable_value = client.id;
         variableDto.contact_id = client.sendpulse_id;
 
@@ -129,20 +129,20 @@ export class SendpluseService {
 
         switch (applStatus) {
             case this.APPLICATION_STATUS[0]:
-                flowId = this.SENDPULSE_APPSTATUS_FLOWIDs.Approved;
+                flowId = this.globalService.SENDPULSE_FLOW.APPLICATION_STATUS_FLOW_ID.Approved;
                 break;
             case this.APPLICATION_STATUS[1]:
-                flowId = this.SENDPULSE_APPSTATUS_FLOWIDs['Not Qualified'];
+                flowId = this.globalService.SENDPULSE_FLOW.APPLICATION_STATUS_FLOW_ID['Not Qualified'];
                 break;
             case this.APPLICATION_STATUS[2]:
                 const transfertypeDto = new SetVariableRequestDto();
                 transfertypeDto.contact_id = reqData.sendpulse_user_id;
                 transfertypeDto.variable_name = "activeLoanId";
-                transfertypeDto.variable_id = "632ae8966a397f4a4c32c516";
+                transfertypeDto.variable_id = this.globalService.SENDPULSE_VARIABLE_ID.ACTIVE_LOAN_ID;
                 transfertypeDto.variable_value = "" + reqData.loan_id;
                 await this.setVariable(transfertypeDto);
 
-                flowId = this.SENDPULSE_APPSTATUS_FLOWIDs.Disbursed;
+                flowId = this.globalService.SENDPULSE_FLOW.APPLICATION_STATUS_FLOW_ID.Disbursed;
                 break;
         }
         if (flowId) {

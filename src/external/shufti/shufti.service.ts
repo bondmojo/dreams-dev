@@ -6,6 +6,7 @@ import { ShuftiResponseDto } from "./dto/shufti-response.dto";
 import { EventEmitter2 } from "@nestjs/event-emitter";
 import { KycEventDto, KYCStatus } from "./dto/kyc-event.dto";
 
+
 @Injectable()
 export class ShuftiService {
     private readonly url = 'https://api.shuftipro.com';
@@ -16,7 +17,8 @@ export class ShuftiService {
     private readonly TELEGRAM_BOT_URL = ["https://t.me/gojo_dreams_uat_bot", "https://t.me/dreams_cambodia_bot"]
 
     private readonly logger = new CustomLogger(ShuftiService.name);
-    constructor(private readonly httpService: HttpService, private eventEmitter: EventEmitter2) { }
+    constructor(private readonly httpService: HttpService,
+        private eventEmitter: EventEmitter2) { }
 
     async initiateKyc(dreamerId: string, kycId: string): Promise<string> {
         const request = structuredClone(this.TEMPLATE);
