@@ -54,7 +54,7 @@ export class LoanHelperService {
 
     async checkAndCreateWingTransferFeeTransaction(loan: Loan, disbursedLoanDto: DisbursedLoanDto): Promise<any> {
         // Verify this with Akash
-        if (disbursedLoanDto?.wire_transfer_type == this.globalService.WIRE_TRANSFER_TYPES.MOBILE) {
+        if (loan?.wire_transfer_type == this.globalService.WIRE_TRANSFER_TYPES.MOBILE) {
             const disbursed_amount = loan.amount - loan.dream_point;
             const wing_wei_luy_transfer_fee = this.globalService.CALC_WING_WEI_LUY_TRANSFER_FEE(disbursed_amount);
             const transactionDto = {
