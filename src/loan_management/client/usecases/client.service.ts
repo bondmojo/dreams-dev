@@ -77,13 +77,12 @@ export class ClientService {
             return 'No approved loan found for user!';
         }
         const now = new Date();
-
         let JOTFORM_CONTRACT_URL = process.env.NODE_ENV === "production" ? this.globalService.JOTFORM_CONTRACT_URL.PROD : this.globalService.JOTFORM_CONTRACT_URL.DEV;
         JOTFORM_CONTRACT_URL = JOTFORM_CONTRACT_URL +
-            '?date[month]=' + now.getMonth() +
+            '?date[month]=' + (now.getMonth() + 1) +
             '&date[day]=' + now.getDate() +
             '&date[year]=' + now.getFullYear() +
-            '&todaysDate[month]=' + now.getMonth() +
+            '&todaysDate[month]=' + (now.getMonth() + 1) +
             '&todaysDate[day]=' + now.getDate() +
             '&todaysDate[year]=' + now.getFullYear() +
             '&name[first]=' + (client?.first ?? '') +
