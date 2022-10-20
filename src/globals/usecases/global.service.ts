@@ -32,7 +32,7 @@ export class GlobalService {
     }
 
     public readonly AWS_IMAGE_PREFIX_URLS: any = {
-        PAYMENT_REPCEIPTS: 'https://dreams-dev-bucket.s3.ap-southeast-1.amazonaws.com/'
+        PAYMENT_REPCEIPTS: this.isDev ? 'https://dreams-dev-bucket.s3.ap-southeast-1.amazonaws.com/' : 'https://dreams-prod-bucket.s3.ap-southeast-1.amazonaws.com/'
     }
 
     public readonly JOTFORM_CONTRACT_URL: any = {
@@ -79,40 +79,40 @@ export class GlobalService {
     public readonly PAYMENT_TASK_ASSIGNEE = "mohit.joshi@gojo.co";
 
     public readonly SENDPULSE_FLOW: any = {
-        "KYC_FLOW": this.isDev ? '62be938d81768640cc494f34' : '',
+        "KYC_FLOW": this.isDev ? '62be938d81768640cc494f34' : '63502d36186d03250968943d',
         "APPLICATION_STATUS_FLOW_ID": {
-            "Disbursed": this.isDev ? "62fc9cd35c6b0b21d713cdea" : '',
-            "Approved": this.isDev ? "6343f1b75eba5c54cb644455" : '',
-            "Not Qualified": this.isDev ? "6343f27a0674f62c693537b5" : ''
+            "Disbursed": this.isDev ? "62fc9cd35c6b0b21d713cdea" : '63502d5e19b15a483a50d3a4',
+            "Approved": this.isDev ? "6343f1b75eba5c54cb644455" : '63502d056a996b64ec62e105',
+            "Not Qualified": this.isDev ? "6343f27a0674f62c693537b5" : '63502d18b91ed817db4f248c'
         },
         "REMINDER_FLOW_ID": {
-            "23_DAYS": this.isDev ? "632c3a3f8de7ab098c2673d9" : "",
-            "16_DAYS": this.isDev ? "632c3d8e123ab83d924cddc8" : "",
-            "9_DAYS": this.isDev ? "632c3f04c54feb769e5a4082" : "",
-            "2_DAYS": this.isDev ? "632c40021f206771792caf37" : "",
-            "1_DAY": this.isDev ? "632c407d02efd900e2548dab" : "",
-            "0_DAY_MORNING": this.isDev ? "632c44a770b9686d4b564a39" : "",
-            "0_DAY_EVENING": this.isDev ? "632c44d8b14ebd4e7c09fd99" : "",
-            "-1_DAY_MORNING": this.isDev ? "632c5a35415c9d1596763aa1" : "",
-            "-1_DAY_EVENING": this.isDev ? "632c5c685033365c2a07a378" : "",
-            "-2_DAYS_MORNING": this.isDev ? "632c5cf8ffd93d3a4168adb0" : "",
-            "-2_DAYS_EVENING": this.isDev ? "632c5e8d5315aa0ef11404f5" : "",
-            "-3_DAYS_MORNING": this.isDev ? "632c5f2e48a0b42b26095073" : "",
-            "-3_DAYS_EVENING": this.isDev ? "632c615064d2872411413292" : "",
+            "23_DAYS": this.isDev ? "632c3a3f8de7ab098c2673d9" : "63502e395b027f7bd405be68",
+            "16_DAYS": this.isDev ? "632c3d8e123ab83d924cddc8" : "63502e57f7c4133d887a03ee",
+            "9_DAYS": this.isDev ? "632c3f04c54feb769e5a4082" : "63502e6d6a996b64ec62e10d",
+            "2_DAYS": this.isDev ? "632c40021f206771792caf37" : "63502e816a996b64ec62e111",
+            "1_DAY": this.isDev ? "632c407d02efd900e2548dab" : "63502e99e4c17d77bf04b232",
+            "0_DAY_MORNING": this.isDev ? "632c44a770b9686d4b564a39" : "63502eae96540263f53be73f",
+            "0_DAY_EVENING": this.isDev ? "632c44d8b14ebd4e7c09fd99" : "63502ec4b0b67d734e02b295",
+            "-1_DAY_MORNING": this.isDev ? "632c5a35415c9d1596763aa1" : "63502ee01cfc4a2ec34697cf",
+            "-1_DAY_EVENING": this.isDev ? "632c5c685033365c2a07a378" : "63503b74b6b4857c2358aa13",
+            "-2_DAYS_MORNING": this.isDev ? "632c5cf8ffd93d3a4168adb0" : "63502ef4fefa2c383b77fca2",
+            "-2_DAYS_EVENING": this.isDev ? "632c5e8d5315aa0ef11404f5" : "63502f094423e44547440afd",
+            "-3_DAYS_MORNING": this.isDev ? "632c5f2e48a0b42b26095073" : "63502f1f8465d91bf91109b8",
+            "-3_DAYS_EVENING": this.isDev ? "632c615064d2872411413292" : "63502f34e4c17d77bf04b239",
             //FIXME: UPDATE FLOW ID
-            "OLDER_THAN_3DAYS": this.isDev ? "632c615064d2872411413292" : ""
+            "OLDER_THAN_3DAYS": this.isDev ? "632c615064d2872411413292" : "63502f34e4c17d77bf04b239"
         },
         //Contract_Form_Signed
-        "FLOW_4.8": this.isDev ? "634cf815b9e72911917483a3" : '',
+        "FLOW_4.8": this.isDev ? "634cf815b9e72911917483a3" : '63502db319b15a483a50d3aa',
         //Verification_call
-        "FLOW_4.7": this.isDev ? "6343d395bc32a404aa0f256a" : '',
+        "FLOW_4.7": this.isDev ? "6343d395bc32a404aa0f256a" : '63502d953159eb63ba30bead',
         // Payment Confirmation FLow
-        "FLOW_7.4": this.isDev ? "63440f377ad3c3223a5ea057" : ''
+        "FLOW_7.4": this.isDev ? "63440f377ad3c3223a5ea057" : '63502fb40f6f1901106bde54'
 
     }
     public readonly SENDPULSE_VARIABLE_ID = {
-        "ACTIVE_LOAN_ID": (process.env.NODE_ENV === 'local' || 'dev') ? "632ae8966a397f4a4c32c516" : "",
-        "CLIENT_ID": (process.env.NODE_ENV === 'local' || 'dev') ? "6347ecf0ad118c34872233f6" : "",
+        "ACTIVE_LOAN_ID": (process.env.NODE_ENV === 'local' || 'dev') ? "632ae8966a397f4a4c32c516" : "635033c02f07b52f43049e30",
+        "CLIENT_ID": (process.env.NODE_ENV === 'local' || 'dev') ? "6347ecf0ad118c34872233f6" : "6350345bd116f23137276bc6",
     }
 
 }
