@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { BadRequestException, Injectable } from "@nestjs/common";
 import { InjectRepository } from '@nestjs/typeorm';
 import { DisbursedLoanDto, CreateRepaymentTransactionDto, GetLoanDto } from "../dto";
 import { CustomLogger } from "../../../custom_logger";
@@ -86,8 +86,7 @@ export class LoanService {
         });
 
         if (!loan || loan.status != this.globalService.LOAN_STATUS.APPROVED) {
-            disbursedResponse.status = false;
-            return disbursedResponse;
+            throw new BadRequestException('Forbidden', 'No Approved loan found for loan id');
         }
         await this.loanHelperService.createCreditDisbursementTransaction(loan, disbursedLoanDto);
         await this.loanHelperService.checkAndCreateWingTransferFeeTransaction(loan, disbursedLoanDto);

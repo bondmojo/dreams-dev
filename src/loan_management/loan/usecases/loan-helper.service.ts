@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { BadRequestException, Injectable } from "@nestjs/common";
 import { InjectRepository } from '@nestjs/typeorm';
 import { CustomLogger } from "../../../custom_logger";
 import { Loan } from '../entities/loan.entity';
@@ -92,14 +92,11 @@ export class LoanHelperService {
         });
 
         if (!loan || !createRepaymentTransactionDto.amount || loan.status != this.globalService.LOAN_STATUS.DISBURSED) {
-            creditRepaymentResponse.status = false;
-            return creditRepaymentResponse;
+            throw new BadRequestException('Forbidden', 'Loan status is not disbursed');
         }
         if (createRepaymentTransactionDto.amount > loan.outstanding_amount) {
             // Case: ammount is greater then due ammount
-            creditRepaymentResponse.status = false;
-            creditRepaymentResponse.error = 'Amount is greater then outstanding balance.';
-            return creditRepaymentResponse;
+            throw new BadRequestException('Forbidden', 'Amount is greater then outstanding balance');
         }
 
         if (createRepaymentTransactionDto.amount == loan.outstanding_amount) {
@@ -245,16 +242,13 @@ export class LoanHelperService {
         });
 
         if (!loan || !createRepaymentTransactionDto.amount) {
-            response.status = false;
-            return response;
+            throw new BadRequestException('Forbidden', 'Amount is missing.');
         }
 
         const dream_points_earned = loan?.client?.dream_points_earned;
         if (dream_points_earned < createRepaymentTransactionDto.amount) {
             // Case: ammount is greater then due ammount
-            response.status = false;
-            response.error = 'Amount is Greater then Dream Point Balance.';
-            return response;
+            throw new BadRequestException('Forbidden', 'Amount is Greater then Dream Point Balance.');
         }
 
         // Create Dream Point Refund Transaction
