@@ -37,12 +37,12 @@ export class PaymentReminderService {
     }
   }
 
-  @Cron('0 16 * * *')
+  @Cron('30 10 * * *')
   async morningTimeScheduler() {
     await this.runPaymentScheduler(true);
   }
 
-  @Cron('0 21 * * *')
+  @Cron('30 15 * * *')
   async dayTimeScheduler() {
     await this.runPaymentScheduler(false);
   }
