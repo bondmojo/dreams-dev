@@ -69,16 +69,23 @@ export class SendpluseService {
 
     async runFlow(model: DreamerModel, flow: string): Promise<any> {
         await this.checkAndGenerateToken();
+        try {
+            const response = await firstValueFrom(this.httpService.post<SendPulseResponseDto<SendPulseContactDto>>(
+                this.url + '/telegram/flows/run',
+                { contact_id: model.externalId, flow_id: flow, external_data: model.external_data },
+                {
+                    headers: { 'Authorization': 'Bearer ' + this.token },
+                }
+            ));
+            this.log.log(`Successfully initiated flow ${flow} with response ${response.statusText}`);
+        } catch (ex) {
+            this.log.error("ERROR OCCURED WHILE RUNNING runFlow =" + JSON.stringify(ex));
+            throw new HttpException({
+                status: HttpStatus.BAD_REQUEST,
+                error: JSON.stringify(ex),
+            }, HttpStatus.BAD_REQUEST);
 
-        const response = await firstValueFrom(this.httpService.post<SendPulseResponseDto<SendPulseContactDto>>(
-            this.url + '/telegram/flows/run',
-            { contact_id: model.externalId, flow_id: flow, external_data: model.external_data },
-            {
-                headers: { 'Authorization': 'Bearer ' + this.token },
-            }
-        ));
-        this.log.log(`Successfully initiated flow ${flow} with response ${response.statusText}`);
-        return response.status;
+        }
     }
 
     async setVariable(variableDto: SetVariableRequestDto): Promise<string> {
