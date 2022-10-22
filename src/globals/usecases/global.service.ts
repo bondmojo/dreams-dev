@@ -118,8 +118,8 @@ export class GlobalService {
 
     }
     public readonly SENDPULSE_VARIABLE_ID = {
-        "ACTIVE_LOAN_ID": (process.env.NODE_ENV === 'local' || 'dev') ? "632ae8966a397f4a4c32c516" : "635033c02f07b52f43049e30",
-        "CLIENT_ID": (process.env.NODE_ENV === 'local' || 'dev') ? "6347ecf0ad118c34872233f6" : "6350345bd116f23137276bc6",
+        "ACTIVE_LOAN_ID": this.isDev ? "632ae8966a397f4a4c32c516" : "635033c02f07b52f43049e30",
+        "CLIENT_ID": this.isDev ? "6347ecf0ad118c34872233f6" : "6350345bd116f23137276bc6",
     }
 
     /* constructor(
