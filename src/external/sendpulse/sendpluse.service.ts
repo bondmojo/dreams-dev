@@ -69,6 +69,7 @@ export class SendpluseService {
 
     async runFlow(model: DreamerModel, flow: string): Promise<any> {
         await this.checkAndGenerateToken();
+        //this.globalService.logenv();
         try {
             const response = await firstValueFrom(this.httpService.post<SendPulseResponseDto<SendPulseContactDto>>(
                 this.url + '/telegram/flows/run',
