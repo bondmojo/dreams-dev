@@ -1,10 +1,15 @@
 import { Injectable } from "@nestjs/common";
+import { CustomLogger } from "../../custom_logger";
+
 
 
 @Injectable()
 export class GlobalService {
 
-    private isDev = (process.env.NODE_ENV === 'local' || 'dev');
+    private isDev = (process.env.NODE_ENV === 'local' || process.env.NODE_ENV === 'dev');
+    private readonly log = new CustomLogger(GlobalService.name);
+
+
     public readonly LOAN_FEES: number = 3;
 
     public readonly LOAN_STATUS: any = {
@@ -112,8 +117,19 @@ export class GlobalService {
 
     }
     public readonly SENDPULSE_VARIABLE_ID = {
-        "ACTIVE_LOAN_ID": (process.env.NODE_ENV === 'local' || 'dev') ? "632ae8966a397f4a4c32c516" : "635033c02f07b52f43049e30",
-        "CLIENT_ID": (process.env.NODE_ENV === 'local' || 'dev') ? "6347ecf0ad118c34872233f6" : "6350345bd116f23137276bc6",
+        "ACTIVE_LOAN_ID": this.isDev ? "632ae8966a397f4a4c32c516" : "635033c02f07b52f43049e30",
+        "CLIENT_ID": this.isDev ? "6347ecf0ad118c34872233f6" : "6350345bd116f23137276bc6",
     }
+
+    /* constructor(
+    ) { }
+
+    logenv() {
+        this.log.log("env =" + process.env.NODE_ENV);
+        this.log.log("GLOBAL Services Dev Environment =" + this.isDev);
+        this.log.log("Sendpulse flow IDs =" + JSON.stringify(this.SENDPULSE_FLOW));
+        this.log.log("Sendpulse Variable IDs =" + JSON.stringify(this.SENDPULSE_VARIABLE_ID));
+    } */
+
 
 }
