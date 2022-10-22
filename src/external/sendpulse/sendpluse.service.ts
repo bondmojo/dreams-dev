@@ -80,7 +80,7 @@ export class SendpluseService {
             this.log.log(`Successfully initiated flow ${flow} with response ${response.statusText}`);
         } catch (ex) {
             this.log.error("ERROR OCCURED WHILE RUNNING runFlow =" + JSON.stringify(ex));
-            throw new HttpException({
+            return new HttpException({
                 status: HttpStatus.BAD_REQUEST,
                 error: JSON.stringify(ex),
             }, HttpStatus.BAD_REQUEST);

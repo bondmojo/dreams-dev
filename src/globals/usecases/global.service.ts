@@ -1,10 +1,16 @@
 import { Injectable } from "@nestjs/common";
+import e from "express";
+import { CustomLogger } from "../../custom_logger";
+
 
 
 @Injectable()
 export class GlobalService {
 
-    private isDev = (process.env.NODE_ENV === 'local' || 'dev');
+    private isDev = (process.env.NODE_ENV === ('local' || 'dev'));
+    private readonly log = new CustomLogger(GlobalService.name);
+
+
     public readonly LOAN_FEES: number = 3;
 
     public readonly LOAN_STATUS: any = {
