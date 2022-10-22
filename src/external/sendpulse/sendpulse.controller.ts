@@ -34,6 +34,12 @@ export class SendpulseController {
     return this.sendpulseHelperService.convertToRomanNumber(id);
   }
 
+  @Get('/convertToKhmerNumber/:id')
+  convertToKhmerNumber(@Param('id') id: string) {
+    this.log.log(`convertToKhmerNumber request data ${id}`);
+    return this.sendpulseHelperService.convertToKhmerNumber(id);
+  }
+
 
   @Post('/calculator/loan')
   loanCalculator(@Body() calculateLoanDto: CalculateLoanDto): CalculationResultDto {

@@ -103,4 +103,21 @@ export class SendpulseHelperService {
         number = number.replace(/[^0-9-]/g, '');
         return number;
     }
+
+    convertToKhmerNumber(number: string): string {
+        // convert khmer to roman number 
+        number = number.replace(/0/g, "០");
+        number = number.replace(/1/g, "១");
+        number = number.replace(/2/g, "២");
+        number = number.replace(/3/g, "៣");
+        number = number.replace(/4/g, "៤");
+        number = number.replace(/5/g, "៥");
+        number = number.replace(/6/g, "៦");
+        number = number.replace(/7/g, "៧");
+        number = number.replace(/8/g, "៨");
+        number = number.replace(/9/g, "៩");
+        // Remove other characters from string
+        number = number.replace(/[^០១២៣៤៥៦៧៨៩]/g, '');
+        return number;
+    }
 }
