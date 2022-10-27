@@ -31,13 +31,13 @@ export class SendpulseController {
   @Get('/convertToRomanNumber/:id')
   convertToRomanNumber(@Param('id') id: string) {
     this.log.log(`convertToRomanNumber request data ${id}`);
-    return this.sendpulseHelperService.convertToRomanNumber(id);
+    return { number: this.sendpulseHelperService.convertToRomanNumber(id) };
   }
 
   @Get('/convertToKhmerNumber/:id')
   convertToKhmerNumber(@Param('id') id: string) {
     this.log.log(`convertToKhmerNumber request data ${id}`);
-    return this.sendpulseHelperService.convertToKhmerNumber(id);
+    return { number: this.sendpulseHelperService.convertToKhmerNumber(id) };
   }
 
 
