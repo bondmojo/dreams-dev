@@ -1,5 +1,4 @@
 import { Injectable } from "@nestjs/common";
-import e from "express";
 import { CustomLogger } from "../../custom_logger";
 
 
@@ -80,7 +79,7 @@ export class GlobalService {
         return 2.00;
     }
 
-    public readonly BASE_RETOOL_URL = "https://gojo.retool.com/apps/ed171e5c-250d-11ed-b962-9fea298077ce/CBS?_releaseVersion=latest";
+    public readonly BASE_RETOOL_URL = this.isDev ? "https://gojo.retool.com/apps/ed171e5c-250d-11ed-b962-9fea298077ce/CBS?_environment=staging&_releaseVersion=latest" : "https://gojo.retool.com/apps/ed171e5c-250d-11ed-b962-9fea298077ce/CBS?_environment=production&_releaseVersion=latest";
 
     public readonly DISBURSEMENT_TASK_ASSIGNEE = "mohit.joshi@gojo.co";
     public readonly PAYMENT_TASK_ASSIGNEE = "mohit.joshi@gojo.co";

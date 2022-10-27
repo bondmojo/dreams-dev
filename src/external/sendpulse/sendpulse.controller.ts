@@ -28,6 +28,19 @@ export class SendpulseController {
     return this.sendpulseHelperService.calculate(calculationDto);
   }
 
+  @Get('/convertToRomanNumber/:id')
+  convertToRomanNumber(@Param('id') id: string) {
+    this.log.log(`convertToRomanNumber request data ${id}`);
+    return this.sendpulseHelperService.convertToRomanNumber(id);
+  }
+
+  @Get('/convertToKhmerNumber/:id')
+  convertToKhmerNumber(@Param('id') id: string) {
+    this.log.log(`convertToKhmerNumber request data ${id}`);
+    return this.sendpulseHelperService.convertToKhmerNumber(id);
+  }
+
+
   @Post('/calculator/loan')
   loanCalculator(@Body() calculateLoanDto: CalculateLoanDto): CalculationResultDto {
     this.log.log(`Received request to calculate loan ${JSON.stringify(calculateLoanDto)}`);
