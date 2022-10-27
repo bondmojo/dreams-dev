@@ -34,9 +34,9 @@ export class ShuftiService {
             request.redirect_url = this.TELEGRAM_BOT_URL[1];
             request.country = "KH";
             request.language = "KM";
-            //FIXME: Uncomment before final production release.
-            //this.clientId = "aad4be30637892cd60e04ede36338a4da522c9fc57a237267de0007b160f2e3f";
-            //this.secret = "2C0yXdPyitNNQ5vlJ974sAqd9nVH4B6b";
+            //FIXME: Move all Shufti ENV Variables to Global Constants.
+            this.clientId = "DAHH086mH3cHVcODNiz8VFsCzUSndYIiZid5ZmtgmPriqBnb1h1642582024";
+            this.secret = "$2y$10$BnWZZO6Ix0Fwv7Kh1ljv0ucRtfqNMjdqs.yaqRJICPW.xzG3Cdxom";
         }
 
         //request.redirect_url = this.registrationUrl + "#leadId=" + dreamerId + "&kycId=" + kycId;
