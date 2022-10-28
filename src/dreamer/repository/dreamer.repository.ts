@@ -81,6 +81,7 @@ export class DreamerRepository {
         record.addFieldValue(Field.Leads.FULL_NAME, dreamer.name);
         record.addFieldValue(Field.Leads.COMPANY, this.COMPANY_NAME);
         record.addFieldValue(Field.Leads.CITY, 'default');
+        record.addFieldValue(Field.Leads.EMAIL, "mohit.joshi@gojo.co");
 
         record.addKeyValue('Lead_Source', new Choice('Telegram'));
         record.addKeyValue('Telegram_Chat_ID', dreamer.externalId);
