@@ -29,11 +29,13 @@ export class ShuftiService {
             request.redirect_url = this.TELEGRAM_BOT_URL[0];
             request.country = "KH";
             request.language = "KM";
+            request.ttl = 15;
         }
         else {
             request.redirect_url = this.TELEGRAM_BOT_URL[1];
             request.country = "KH";
             request.language = "KM";
+            request.ttl = 4320;
             //FIXME: Move all Shufti ENV Variables to Global Constants.
             this.clientId = "DAHH086mH3cHVcODNiz8VFsCzUSndYIiZid5ZmtgmPriqBnb1h1642582024";
             this.secret = "$2y$10$BnWZZO6Ix0Fwv7Kh1ljv0ucRtfqNMjdqs.yaqRJICPW.xzG3Cdxom";
