@@ -17,8 +17,13 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
-    "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json"
+    "test:debug": "node --inspect-brk -r ts  config-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
+    "test:e2e": "jest --config ./test/jest-e2e.json",
+    "typeorm": "env-cmd ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js",
+    "migration:run": "npm run typeorm -- --dataSource=src/config/database/data-source.ts migration:run",
+    "migration:revert": "npm run typeorm -- --dataSource=src/config/database/data-source.ts migration:revert",
+    "migration:create": "npm run typeorm -- migration:create",
+    "migration:generate": "npm run build && npm run typeorm -- --dataSource=src/config/database/data-source.ts migration:generate "
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.186.0",
@@ -38,6 +43,7 @@
     "@zohocrm/typescript-sdk-2.0": "^5.0.0",
     "config": "^3.3.7",
     "date-fns": "^2.29.2",
+    "env-cmd": "^10.1.0",
     "g": "^2.0.1",
     "moment": "^2.29.4",
     "mysql2": "^2.3.3",
