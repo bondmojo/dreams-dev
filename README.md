@@ -71,3 +71,16 @@ Nest is an MIT-licensed open source project. It can grow thanks to the sponsors 
 ## License
 
 Nest is [MIT licensed](LICENSE).
+
+<!-- -------------------------- Migration Generate command  ------------------->
+## Migration generate command step's
+# add your fields in entity file
+# then run command
+```bash
+$ npm run migration:generate -- addFieldInEntity
+```
+# above command will generate migration file then move migration file into migration folder and run below command 
+```bash
+$ npm run migration:run
+```
+<!-- ------------------------------------------------------------------------ -->

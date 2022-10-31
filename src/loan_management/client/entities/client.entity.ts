@@ -15,6 +15,9 @@ export class Client {
   @Column({ nullable: true })
   first: string;
 
+  @Column({ nullable: true })
+  migration_test: string;
+
   @OneToMany(() => Loan, loan => loan.client)
   loan: Loan
 

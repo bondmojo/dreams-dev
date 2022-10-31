@@ -81,6 +81,9 @@ export class DreamerRepository {
         record.addFieldValue(Field.Leads.FULL_NAME, dreamer.name);
         record.addFieldValue(Field.Leads.COMPANY, this.COMPANY_NAME);
         record.addFieldValue(Field.Leads.CITY, 'default');
+        record.addFieldValue(Field.Leads.EMAIL, "mohit.joshi@gojo.co");
+        record.addFieldValue(Field.Leads.LEAD_STATUS, new Choice('New'));
+
 
         record.addKeyValue('Lead_Source', new Choice('Telegram'));
         record.addKeyValue('Telegram_Chat_ID', dreamer.externalId);
@@ -144,6 +147,7 @@ export class DreamerRepository {
         const filesToDeletes: string[] = [];
         const record = new Record();
         record.addKeyValue('KYC_End_Time', new Date());
+        record.addFieldValue(Field.Leads.LEAD_STATUS, new Choice('KYC Submitted'));
         if (event.status == KYCStatus.SUCCESS || event.status == KYCStatus.REJECTED) {
 
             try {
