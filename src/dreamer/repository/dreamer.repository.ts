@@ -169,7 +169,7 @@ export class DreamerRepository {
             }
             record.addKeyValue('National_Id', event.documentNumber);
             record.addKeyValue('First_Name_On_Document', event.first);
-            record.addKeyValue('Last_Name_On_Document', event.first);
+            record.addKeyValue('Last_Name_On_Document', event.last);
             record.addKeyValue('DOB_On_Document', event.dob);
             record.addKeyValue('Name1', event.full);
             record.addKeyValue('Gender_On_Document', new Choice(event.gender));
