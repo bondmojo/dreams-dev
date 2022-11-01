@@ -6,7 +6,7 @@ import { CustomLogger } from "../../custom_logger";
 @Injectable()
 export class GlobalService {
 
-    private isDev = (process.env.NODE_ENV === 'local' || process.env.NODE_ENV === 'dev');
+    public isDev = (process.env.NODE_ENV === 'local' || process.env.NODE_ENV === 'dev');
     private readonly log = new CustomLogger(GlobalService.name);
 
 
