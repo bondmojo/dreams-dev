@@ -7,13 +7,10 @@ import { EventEmitter2 } from "@nestjs/event-emitter";
 import { KycEventDto, KYCStatus } from "./dto/kyc-event.dto";
 import { GlobalService } from "../../globals/usecases/global.service";
 
-
-
 @Injectable()
 export class ShuftiService {
     private readonly url = 'https://api.shuftipro.com';
     private readonly logger = new CustomLogger(ShuftiService.name);
-
 
     private clientId = this.globalService.isDev ? 'aad4be30637892cd60e04ede36338a4da522c9fc57a237267de0007b160f2e3f' : 'DAHH086mH3cHVcODNiz8VFsCzUSndYIiZid5ZmtgmPriqBnb1h1642582024';
     private secret = this.globalService.isDev ? '2C0yXdPyitNNQ5vlJ974sAqd9nVH4B6b' : '$2y$10$BnWZZO6Ix0Fwv7Kh1ljv0ucRtfqNMjdqs.yaqRJICPW.xzG3Cdxom';
@@ -23,11 +20,8 @@ export class ShuftiService {
     private readonly callbackUrl = this.globalService.isDev ? 'https://dev.api.gojo.co/dreams/v1' : 'https://nfjlmolsee.execute-api.ap-southeast-1.amazonaws.com/prod/v1';
     private readonly telegramBotUrl = this.globalService.isDev ? "https://t.me/gojo_dreams_uat_bot" : "https://t.me/dreams_cambodia_bot";
 
-
-
     constructor(private readonly httpService: HttpService,
         private eventEmitter: EventEmitter2, private readonly globalService: GlobalService) {
-
     }
 
     async initiateKyc(dreamerId: string, kycId: string): Promise<string> {
