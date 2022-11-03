@@ -35,12 +35,14 @@ export class ClientService {
         return clientFromDb;
     }
 
-    async findOne(fields: GetClientDto): Promise<Client | null> {
+    async get(fields: GetClientDto): Promise<any> {
         this.log.log("findOne =" + JSON.stringify(fields));
         const client = await this.clientRepository.findOne({
             where: fields,
         });
-        return client;
+        // appending max_credit_amount to client object
+        const max_credit_amount = this.globalService.TIER_AMOUNT[client.tier];
+        return { ...client, max_credit_amount: max_credit_amount };
     }
 
     async findbySendpulseId(id: string): Promise<Client[] | any> {
