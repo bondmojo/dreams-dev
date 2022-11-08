@@ -12,4 +12,7 @@ export class LoanRequest {
     amount: number;
     pointsAmount: number;
     purpose: string;
+    utmSorce: string;
+    utmMedium: string;
+    utmCampaign: string;
 }

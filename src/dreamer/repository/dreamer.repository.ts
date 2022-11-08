@@ -89,6 +89,10 @@ export class DreamerRepository {
         record.addKeyValue('Telegram_Chat_ID', dreamer.externalId);
         record.addKeyValue('Amount', dreamer.loanRequest.amount);
         record.addKeyValue('Points', dreamer.loanRequest.pointsAmount);
+        // UTM Params
+        record.addKeyValue('utm_Source', dreamer.loanRequest.utmSorce);
+        record.addKeyValue('utm_Medium', dreamer.loanRequest.utmMedium);
+        record.addKeyValue('utm_Campaign', dreamer.loanRequest.utmCampaign);
         const map: Map<string, any> = await this.zohoservice.saveRecord(record, 'Leads');
 
         this.log.log(`Successfully saved user ${dreamer.externalId} as ${map.get('id')}`);
