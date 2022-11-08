@@ -36,13 +36,14 @@ export class PaymentReminderService {
       await this.runPaymentScheduler(false);
     }
   }
-
-  @Cron('30 10 * * *')
+  // Combodia 9AM or UTC 2AM (combodia is 7 hour ahead of UTC)
+  @Cron('0 2 * * *')
   async morningTimeScheduler() {
     await this.runPaymentScheduler(true);
   }
 
-  @Cron('30 15 * * *')
+  // Combodia 2PM  or UTC 7AM
+  @Cron('0 7 * * *')
   async dayTimeScheduler() {
     await this.runPaymentScheduler(false);
   }
