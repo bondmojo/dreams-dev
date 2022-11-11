@@ -5,7 +5,7 @@ import { CreateLoanApplicationDto } from './usecases/dto/create-loan-appl.dto';
 import { UpdatePaymentDetailsUsecase } from "./usecases/update-payment-details.usecase";
 import { PaymentDetailsRequestDto } from "./dto/payment-details-request.dto";
 
-
+//FIXME: This file can be deleted in future. Kept it to create zoho loan using restAPI
 
 @Controller('dreamers/loanapplication')
 export class DreamerLoanApplController {

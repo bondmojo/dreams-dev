@@ -19,10 +19,11 @@ export class LoanController {
     return await this.loanService.create(createLoanDto);
   }
 
-  @Post('/status')
-  async updateLoanStatus(@Body() updateloanDto: UpdateLoanDto) {
+  @Post(':loanId/status')
+  async updateLoanStatus(@Param() params: any,
+    @Body() updateloanDto: UpdateLoanDto) {
     this.logger.log(`Updating loan Status. request ${JSON.stringify(updateloanDto)}`);
-    return await this.loanService.updateLoanStatus(updateloanDto);
+    return await this.loanService.updateLoanStatus(params.loanId, updateloanDto);
   }
 
 
