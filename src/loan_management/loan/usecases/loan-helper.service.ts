@@ -8,6 +8,7 @@ import { Repository } from 'typeorm';
 import { DisbursedLoanDto, CreateRepaymentTransactionDto } from '../dto';
 import { GlobalService } from "../../../globals/usecases/global.service"
 import { add } from 'date-fns';
+import { SendpluseService } from "src/external/sendpulse/sendpluse.service";
 
 
 @Injectable()
@@ -18,7 +19,8 @@ export class LoanHelperService {
         private readonly loanRepository: Repository<Loan>,
         private readonly transactionService: TransactionService,
         private eventEmitter: EventEmitter2,
-        private readonly globalService: GlobalService
+        private readonly globalService: GlobalService,
+        private readonly sendpulseService: SendpluseService
     ) { }
 
     async manageDreamPointCommitedAfterLoanCreation(createLoanDto: any): Promise<any> {
@@ -107,6 +109,7 @@ export class LoanHelperService {
             await this.checkAndCreateCreditWingTransferFeeTransaction(loan, createRepaymentTransactionDto);
             await this.createDreamPointEarnedTransaction(loan, createRepaymentTransactionDto);
             await this.updateLoanAfterFullyPaid(loan, createRepaymentTransactionDto);
+            await this.updateSendpulseFieldAfterFullyPaid(loan);
             await this.updateClientAfterFullyPaid(loan, createRepaymentTransactionDto);
         }
         else if (createRepaymentTransactionDto.amount < loan.outstanding_amount) {
@@ -197,6 +200,34 @@ export class LoanHelperService {
         }
         return;
     }
+
+    async updateSendpulseFieldAfterFullyPaid(loan: Loan): Promise<any> {
+
+        const new_tier = +loan?.client?.tier + 1;
+        const new_max_credit_amount = this.globalService.TIER_AMOUNT[new_tier];
+        const new_next_loan_amount = this.globalService.TIER_AMOUNT[new_tier + 1];
+
+        await this.sendpulseService.updateSendpulseVariable({
+            variable_name: 'Tier',
+            variable_id: this.globalService.SENDPULSE_VARIABLE_ID.TIER,
+            variable_value: '' + new_tier,
+            contact_id: loan.client.sendpulse_id,
+        });
+        await this.sendpulseService.updateSendpulseVariable({
+            variable_name: 'maxCreditAmount',
+            variable_id: this.globalService.SENDPULSE_VARIABLE_ID.MAX_CREDIT_AMOUNT,
+            variable_value: '' + new_max_credit_amount,
+            contact_id: loan.client.sendpulse_id,
+        });
+        await this.sendpulseService.updateSendpulseVariable({
+            variable_name: 'nextLoanAmount',
+            variable_id: this.globalService.SENDPULSE_VARIABLE_ID.NEXT_LOAN_AMOUNT,
+            variable_value: '' + new_next_loan_amount,
+            contact_id: loan.client.sendpulse_id,
+        });
+        return;
+    }
+
 
     async doProcessPartialPayment(loan: Loan, createRepaymentTransactionDto: CreateRepaymentTransactionDto): Promise<any> {
         // Create transaction for partial payment

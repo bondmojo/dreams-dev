@@ -120,6 +120,9 @@ export class GlobalService {
     public readonly SENDPULSE_VARIABLE_ID = {
         "ACTIVE_LOAN_ID": this.isDev ? "632ae8966a397f4a4c32c516" : "635033c02f07b52f43049e30",
         "CLIENT_ID": this.isDev ? "6347ecf0ad118c34872233f6" : "6350345bd116f23137276bc6",
+        "TIER": this.isDev ? "6333ce7e4abfcd3b000c14d7" : "635033fabb24cc18be46315d",
+        "MAX_CREDIT_AMOUNT": this.isDev ? "630f3559fc45bf34001312c7" : "6350317bcef5586a617e2b77",
+        "NEXT_LOAN_AMOUNT": this.isDev ? "6347ece53cfb19125f6d0b58" : "6350344b00bc7d0dfa140eeb",
     }
 
     /* constructor(

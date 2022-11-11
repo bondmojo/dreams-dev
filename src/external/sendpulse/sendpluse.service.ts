@@ -110,6 +110,11 @@ export class SendpluseService {
         }
     }
 
+    async updateSendpulseVariable(setVariableRequestDto: SetVariableRequestDto): Promise<string> {
+        this.log.log(`SENDPULSE :: Updating variable ${setVariableRequestDto?.variable_name}(${setVariableRequestDto?.variable_id}) with variable value =` + setVariableRequestDto.variable_value);
+        return await this.setVariable(setVariableRequestDto);
+    }
+
     async createClientId(client: Client): Promise<string> {
         this.log.log("Creating ClientID in Sendpulse =" + JSON.stringify(client));
 
