@@ -21,10 +21,10 @@ export class Client {
   @OneToMany(() => Loan, loan => loan.client)
   loan: Loan
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, unique: true })
   zoho_id: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, unique: true })
   sendpulse_id: string;
 
   @Column({ nullable: true })

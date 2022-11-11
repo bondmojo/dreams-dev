@@ -27,6 +27,9 @@ export class CreateDreamerUsecase {
         dreamer.loanRequest = new LoanRequest();
         dreamer.loanRequest.amount = Number(createDreamerDto.loanAmount);
         dreamer.loanRequest.pointsAmount = Number(createDreamerDto.pointsAmount);
+        dreamer.utmSorce = createDreamerDto.utmSorce;
+        dreamer.utmMedium = createDreamerDto.utmMedium;
+        dreamer.utmCampaign = createDreamerDto.utmCampaign;
     }
 
     private popluateSendPulseData(dreamer: DreamerModel, contact: SendPulseContactDto) {

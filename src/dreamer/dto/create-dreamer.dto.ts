@@ -4,4 +4,7 @@ export class CreateDreamerDto {
   pointsAmount: string;
   externalId: string;
   source: string;
+  utmSorce: string;
+  utmMedium: string;
+  utmCampaign: string;
 }

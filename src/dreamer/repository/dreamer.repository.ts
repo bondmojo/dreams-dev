@@ -127,12 +127,18 @@ export class DreamerRepository {
         user.setId(BigInt("408266000000551006"));
         record.addFieldValue(Field.Leads.OWNER, user);
 
-        record.addKeyValue('Lead_Source', new Choice('Telegram'));
-        record.addKeyValue('Telegram_Chat_ID', dreamer.externalId);
-
         //Moving this data to loan module
         //record.addKeyValue('Amount', dreamer.loanRequest.amount);
         //record.addKeyValue('Points', dreamer.loanRequest.pointsAmount);
+        record.addKeyValue('Lead_Source', new Choice('Telegram'));
+        record.addKeyValue('Telegram_Chat_ID', dreamer.externalId);
+        record.addKeyValue('Amount', dreamer.loanRequest.amount);
+        record.addKeyValue('Points', dreamer.loanRequest.pointsAmount);
+        // UTM Params
+        record.addKeyValue('utm_Source', dreamer.utmSorce);
+        record.addKeyValue('utm_Medium', dreamer.utmMedium);
+        record.addKeyValue('utm_Campaign', dreamer.utmCampaign);
+
         const map: Map<string, any> = await this.zohoservice.saveRecord(record, 'Leads');
 
         this.log.log(`Successfully saved user ${dreamer.externalId} as ${map.get('id')}`);
