@@ -109,7 +109,8 @@ export class LoanHelperService {
             await this.checkAndCreateCreditWingTransferFeeTransaction(loan, createRepaymentTransactionDto);
             await this.createDreamPointEarnedTransaction(loan, createRepaymentTransactionDto);
             await this.updateLoanAfterFullyPaid(loan, createRepaymentTransactionDto);
-            await this.updateSendpulseFieldAfterFullyPaid(loan);
+            const new_client_tier = +loan?.client?.tier + 1
+            await this.updateSendpulseFieldsAsPerClientTier(loan, new_client_tier);
             await this.updateClientAfterFullyPaid(loan, createRepaymentTransactionDto);
         }
         else if (createRepaymentTransactionDto.amount < loan.outstanding_amount) {
@@ -201,33 +202,6 @@ export class LoanHelperService {
         return;
     }
 
-    async updateSendpulseFieldAfterFullyPaid(loan: Loan): Promise<any> {
-
-        const new_tier = +loan?.client?.tier + 1;
-        const new_max_credit_amount = this.globalService.TIER_AMOUNT[new_tier];
-        const new_next_loan_amount = this.globalService.TIER_AMOUNT[new_tier + 1];
-
-        await this.sendpulseService.updateSendpulseVariable({
-            variable_name: 'Tier',
-            variable_id: this.globalService.SENDPULSE_VARIABLE_ID.TIER,
-            variable_value: '' + new_tier,
-            contact_id: loan.client.sendpulse_id,
-        });
-        await this.sendpulseService.updateSendpulseVariable({
-            variable_name: 'maxCreditAmount',
-            variable_id: this.globalService.SENDPULSE_VARIABLE_ID.MAX_CREDIT_AMOUNT,
-            variable_value: '' + new_max_credit_amount,
-            contact_id: loan.client.sendpulse_id,
-        });
-        await this.sendpulseService.updateSendpulseVariable({
-            variable_name: 'nextLoanAmount',
-            variable_id: this.globalService.SENDPULSE_VARIABLE_ID.NEXT_LOAN_AMOUNT,
-            variable_value: '' + new_next_loan_amount,
-            contact_id: loan.client.sendpulse_id,
-        });
-        return;
-    }
-
 
     async doProcessPartialPayment(loan: Loan, createRepaymentTransactionDto: CreateRepaymentTransactionDto): Promise<any> {
         // Create transaction for partial payment
@@ -291,6 +265,10 @@ export class LoanHelperService {
             note: createRepaymentTransactionDto.note,
         }
         await this.transactionService.create(transactionDto);
+
+        // SENPULSE:: When user refund dream point set update client tier to 1
+        await this.updateSendpulseFieldsAsPerClientTier(loan, 1);
+
         // Update Client Data
         const updateClientDto = {
             id: loan?.client?.id,
@@ -310,5 +288,32 @@ export class LoanHelperService {
             return transaction.amount;
         }
         return '';
+    }
+
+    async updateSendpulseFieldsAsPerClientTier(loan: Loan, tier: number): Promise<any> {
+
+        const new_tier = tier;
+        const new_max_credit_amount = this.globalService.TIER_AMOUNT[new_tier];
+        const new_next_loan_amount = this.globalService.TIER_AMOUNT[new_tier + 1];
+
+        await this.sendpulseService.updateSendpulseVariable({
+            variable_name: 'Tier',
+            variable_id: this.globalService.SENDPULSE_VARIABLE_ID.TIER,
+            variable_value: '' + new_tier,
+            contact_id: loan.client.sendpulse_id,
+        });
+        await this.sendpulseService.updateSendpulseVariable({
+            variable_name: 'maxCreditAmount',
+            variable_id: this.globalService.SENDPULSE_VARIABLE_ID.MAX_CREDIT_AMOUNT,
+            variable_value: '' + new_max_credit_amount,
+            contact_id: loan.client.sendpulse_id,
+        });
+        await this.sendpulseService.updateSendpulseVariable({
+            variable_name: 'nextLoanAmount',
+            variable_id: this.globalService.SENDPULSE_VARIABLE_ID.NEXT_LOAN_AMOUNT,
+            variable_value: '' + new_next_loan_amount,
+            contact_id: loan.client.sendpulse_id,
+        });
+        return;
     }
 }
