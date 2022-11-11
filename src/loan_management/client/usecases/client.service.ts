@@ -6,8 +6,8 @@ import { Client } from '../entities/client.entity';
 import { Repository } from 'typeorm';
 import { LoanService } from "../../loan/usecases/loan.service";
 import { OnEvent } from "@nestjs/event-emitter";
-import { EventEmitter2 } from "@nestjs/event-emitter";
 import { GlobalService } from "../../../globals/usecases/global.service"
+import { SendpluseService } from "src/external/sendpulse/sendpluse.service";
 
 @Injectable()
 export class ClientService {
@@ -16,8 +16,8 @@ export class ClientService {
         @InjectRepository(Client)
         private readonly clientRepository: Repository<Client>,
         private readonly loanService: LoanService,
-        private eventEmitter: EventEmitter2,
-        private readonly globalService: GlobalService
+        private readonly globalService: GlobalService,
+        private readonly sendpulseService: SendpluseService
     ) { }
 
     async create(createClientAndLoanDto: CreateClientAndLoanDto): Promise<Client> {
@@ -27,11 +27,11 @@ export class ClientService {
         const clientFromDb = await this.clientRepository.save(createClientDto);
         const clientClone = { ...clientFromDb };
 
+        //
+        this.sendpulseService.createClientId(clientClone);
+
         // Create loan for client request object
         await this.loanService.create(createClientAndLoanDto);
-
-        //emitting loan approved event in  order to notify admin
-        this.eventEmitter.emit('loan.approved', (clientClone));
         return clientFromDb;
     }
 
@@ -69,6 +69,8 @@ export class ClientService {
 
     async getContracturl(clientId: string): Promise<Client[] | any> {
         const client = await this.clientRepository.findOne({ where: { id: clientId }, });
+
+        //FIXME: Currently fetching only Approved Record. Considering there will only be one approved record in DB.
         const loan = await this.loanService.findOneForInternalUse({
             client_id: clientId,
             status: this.globalService.LOAN_STATUS.APPROVED
@@ -97,7 +99,8 @@ export class ClientService {
             '&repaymentDate=' + (loan.repayment_date ?? '') +
             '&nationalId=' + (client?.national_id ?? '') +
             '&phoneNumber=' + (client?.mobile ?? '') +
-            '&clientId=' + (client?.sendpulse_id ?? '');
+            '&clientId=' + (client?.zoho_id ?? '') +
+            '&lmsLoanId=' + (loan?.id ?? '');
 
         this.log.log(`JOTFORM_CONTRACT_URL ==> ${JOTFORM_CONTRACT_URL}`);
 

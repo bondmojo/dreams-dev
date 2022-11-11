@@ -12,9 +12,11 @@ import { KycCompletionUpdateUsecase } from "./usecases/kyc-completion-update.use
 import { GlobalModule } from "src/globals/global.module";
 import { CreateZohoTaskUsecase } from "./usecases/create-zoho-task.usecase";
 import { ClientModule } from "src/loan_management/client/client.module";
+import { CreateLoanApplicationUsecase } from "./usecases/create-loan-application.usecase";
+import { DreamerLoanApplController } from "./dreamer.loanappl.controller";
 @Module({
     imports: [SendpulseModule, ZohoModule, ShuftiModule, GlobalModule, ClientModule],
-    controllers: [DreamerController],
+    controllers: [DreamerController, DreamerLoanApplController],
     providers: [
         CreateDreamerUsecase,
         UpdatePaymentDetailsUsecase,
@@ -22,7 +24,9 @@ import { ClientModule } from "src/loan_management/client/client.module";
         CreateZohoTaskUsecase,
         InitiateKycUsecase,
         KycCompletionUpdateUsecase,
-        DreamerRepository]
+        DreamerRepository,
+        CreateLoanApplicationUsecase],
+    exports: [CreateLoanApplicationUsecase]
 })
 export class DreamerModule {
 }

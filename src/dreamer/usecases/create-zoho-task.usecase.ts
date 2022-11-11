@@ -1,10 +1,7 @@
 import { Injectable } from "@nestjs/common";
-import { SendpluseService } from "../../external/sendpulse/sendpluse.service";
 import { CustomLogger } from "../../custom_logger";
-import { SendPulseContactDto } from "../../external/sendpulse/dto/send-pulse-contact.dto";
 import { DreamerRepository } from "../repository/dreamer.repository";
 import { ZohoTaskRequest } from "./dto/zoho-task-request.dto";
-import { OnEvent } from "@nestjs/event-emitter";
 import { GlobalService } from "../../globals/usecases/global.service";
 import { Client } from "../../loan_management/client/entities/client.entity";
 import { ClientService } from "../../loan_management/client/usecases/client.service";

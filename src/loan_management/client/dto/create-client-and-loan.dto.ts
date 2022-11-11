@@ -35,4 +35,7 @@ export class CreateClientAndLoanDto {
   paid_date: Date;
   tenure_in_months: number;
   wire_transfer_type: string;
+
+  //other Fields
+  do_create_zoho_loan: boolean;
 }

@@ -1,28 +1,28 @@
-import {HttpException, HttpStatus, Injectable} from "@nestjs/common";
-import {CustomLogger} from "../../custom_logger";
-import {BodyWrapper} from "@zohocrm/typescript-sdk-2.0/core/com/zoho/crm/api/record/body_wrapper";
-import { BodyWrapper as FileBodyWrapper} from "@zohocrm/typescript-sdk-2.0/core/com/zoho/crm/api/file/body_wrapper";
+import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
+import { CustomLogger } from "../../custom_logger";
+import { BodyWrapper } from "@zohocrm/typescript-sdk-2.0/core/com/zoho/crm/api/record/body_wrapper";
+import { BodyWrapper as FileBodyWrapper } from "@zohocrm/typescript-sdk-2.0/core/com/zoho/crm/api/file/body_wrapper";
 import { FileBodyWrapper as AttachmentBodyWrapper } from "@zohocrm/typescript-sdk-2.0/core/com/zoho/crm/api/attachments/file_body_wrapper";
-import {RecordOperations} from "@zohocrm/typescript-sdk-2.0/core/com/zoho/crm/api/record/record_operations"
-import {FileOperations,GetFileParam,UploadFilesParam} from "@zohocrm/typescript-sdk-2.0/core/com/zoho/crm/api/file/file_operations";
-import {ActionHandler} from "@zohocrm/typescript-sdk-2.0/core/com/zoho/crm/api/record/action_handler";
-import {ActionWrapper} from '@zohocrm/typescript-sdk-2.0/core/com/zoho/crm/api/record/action_wrapper';
-import {APIException} from "@zohocrm/typescript-sdk-2.0/core/com/zoho/crm/api/fields/api_exception";
-import {ActionResponse} from "@zohocrm/typescript-sdk-2.0/core/com/zoho/crm/api/record/action_response";
-import {Record} from "@zohocrm/typescript-sdk-2.0/core/com/zoho/crm/api/record/record";
-import {SuccessResponse} from '@zohocrm/typescript-sdk-2.0/core/com/zoho/crm/api/record/success_response';
+import { RecordOperations } from "@zohocrm/typescript-sdk-2.0/core/com/zoho/crm/api/record/record_operations"
+import { FileOperations, GetFileParam, UploadFilesParam } from "@zohocrm/typescript-sdk-2.0/core/com/zoho/crm/api/file/file_operations";
+import { ActionHandler } from "@zohocrm/typescript-sdk-2.0/core/com/zoho/crm/api/record/action_handler";
+import { ActionWrapper } from '@zohocrm/typescript-sdk-2.0/core/com/zoho/crm/api/record/action_wrapper';
+import { APIException } from "@zohocrm/typescript-sdk-2.0/core/com/zoho/crm/api/fields/api_exception";
+import { ActionResponse } from "@zohocrm/typescript-sdk-2.0/core/com/zoho/crm/api/record/action_response";
+import { Record } from "@zohocrm/typescript-sdk-2.0/core/com/zoho/crm/api/record/record";
+import { SuccessResponse } from '@zohocrm/typescript-sdk-2.0/core/com/zoho/crm/api/record/success_response';
 import { APIResponse } from "@zohocrm/typescript-sdk-2.0/routes/controllers/api_response";
-import {StreamWrapper} from "@zohocrm/typescript-sdk-2.0/utils/util/stream_wrapper";
+import { StreamWrapper } from "@zohocrm/typescript-sdk-2.0/utils/util/stream_wrapper";
 import { ParameterMap } from "@zohocrm/typescript-sdk-2.0/routes/parameter_map";
 import { FieldsOperations } from "@zohocrm/typescript-sdk-2.0/core/com/zoho/crm/api/fields/fields_operations";
-import {AttachmentsOperations} from "@zohocrm/typescript-sdk-2.0/core/com/zoho/crm/api/attachments/attachments_operations"
+import { AttachmentsOperations } from "@zohocrm/typescript-sdk-2.0/core/com/zoho/crm/api/attachments/attachments_operations"
 import { HeaderMap } from "@zohocrm/typescript-sdk-2.0/routes/header_map";
 
 @Injectable()
 export class ZohoService {
     private readonly log = new CustomLogger(ZohoService.name);
 
-    async getRecord(dreamerId: string): Promise<Record> {
+    async getDreamerRecord(dreamerId: string): Promise<Record> {
         let recordOperations = new RecordOperations();
         let paramInstance: ParameterMap = new ParameterMap();
         let headerInstance: HeaderMap = new HeaderMap();
@@ -42,7 +42,7 @@ export class ZohoService {
         //Set the array to data in BodyWrapper instance
         request.setData(recordsArray);
 
-//        this.log.log("record:" + JSON.stringify(record.re))
+        //        this.log.log("record:" + JSON.stringify(record.re))
         this.log.log("Trying to post the record: REQUEST=" + JSON.stringify(request));
 
         //Call createRecords method that takes BodyWrapper instance and moduleAPIName as parameters
@@ -56,7 +56,7 @@ export class ZohoService {
         return (successResponse as SuccessResponse).getDetails();
     }
 
-    async updateRecord(dreamerId: string, record: Record) {
+    async updateRecord(dreamerId: string, record: Record, moduleName: string) {
         let recordOperations = new RecordOperations();
         let request = new BodyWrapper();
         let recordsArray = [];
@@ -70,7 +70,7 @@ export class ZohoService {
         this.log.log("Trying to update the record");
 
         //Call createRecords method that takes BodyWrapper instance and moduleAPIName as parameters
-        let response = await recordOperations.updateRecord(BigInt(dreamerId), 'Leads', request);
+        let response = await recordOperations.updateRecord(BigInt(dreamerId), moduleName, request);
 
         const successResponse = this.extractResponse(response);
 
@@ -85,7 +85,7 @@ export class ZohoService {
         return this.extractResponse(response);
     }
 
-    async uploadFile(dreamerId: string, streamWrapper: StreamWrapper){
+    async uploadFile(dreamerId: string, streamWrapper: StreamWrapper) {
         let fileOperations: FileOperations = new FileOperations();
         let request: FileBodyWrapper = new FileBodyWrapper();
         let paramInstance: ParameterMap = new ParameterMap();

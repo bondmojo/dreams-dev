@@ -76,6 +76,7 @@ export class ShuftiService {
     }
 
     async kycCallback(dreamerId: string, kycId: string, response: ShuftiResponseDto) {
+        this.logger.log("KYC Callback called response =" + JSON.stringify(response));
         const event: KycEventDto = this.buildEvent(dreamerId, kycId, response);
         if (response.event === 'verification.accepted') {
             const data: ShuftiResponseDto = await this.fetchKycData(kycId);

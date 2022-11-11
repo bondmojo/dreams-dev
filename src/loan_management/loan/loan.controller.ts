@@ -3,6 +3,7 @@ import { Body, Controller, Param, Post, Get } from '@nestjs/common';
 import { LoanService } from "./usecases/loan.service";
 import { CustomLogger } from "../../custom_logger";
 import { PaymentReminderService } from "./notification/payment-reminder.service";
+import { UpdateLoanDto } from './dto/update-loan.dto';
 
 @Controller('loan')
 export class LoanController {
@@ -17,6 +18,13 @@ export class LoanController {
     this.logger.log(`Creating loan with request ${JSON.stringify(createLoanDto)}`);
     return await this.loanService.create(createLoanDto);
   }
+
+  @Post('/status')
+  async updateLoanStatus(@Body() updateloanDto: UpdateLoanDto) {
+    this.logger.log(`Updating loan Status. request ${JSON.stringify(updateloanDto)}`);
+    return await this.loanService.updateLoanStatus(updateloanDto);
+  }
+
 
   @Post('disbursed')
   async disbursed(@Body() disbursedLoanDto: DisbursedLoanDto) {

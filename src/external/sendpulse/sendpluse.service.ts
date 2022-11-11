@@ -110,9 +110,8 @@ export class SendpluseService {
         }
     }
 
-    @OnEvent('loan.approved')
     async createClientId(client: Client): Promise<string> {
-        this.log.log("Received Loan Approved EVENT: now CREATING CLIENT IN SENDPULSE =" + JSON.stringify(client));
+        this.log.log("Creating ClientID in Sendpulse =" + JSON.stringify(client));
 
         const variableDto = new SetVariableRequestDto();
         //Client ID Variable
@@ -120,15 +119,10 @@ export class SendpluseService {
         variableDto.variable_value = client.id;
         variableDto.contact_id = client.sendpulse_id;
 
-        await this.setVariable(variableDto);
-
-        const applStatus = new UpdateApplicationStatusRequestDto();
-        applStatus.sendpulse_user_id = client.sendpulse_id;
-        applStatus.application_status = this.APPLICATION_STATUS[0];
-
-        return await this.updateApplicationStatus(applStatus);
+        return await this.setVariable(variableDto);
     }
 
+    @OnEvent('loan.status.changed')
     async updateApplicationStatus(reqData: UpdateApplicationStatusRequestDto) {
         this.log.log(`Running flow for sendpulse user ${reqData.sendpulse_user_id} with application status =` + reqData.application_status);
 

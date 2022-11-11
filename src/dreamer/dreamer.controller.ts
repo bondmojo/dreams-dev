@@ -9,6 +9,9 @@ import { InitiateKycUsecase } from "./usecases/initiate-kyc.usecase";
 import { CustomLogger } from "../custom_logger";
 import { ZohoTaskRequest } from 'src/dreamer/usecases/dto/zoho-task-request.dto';
 import { CreateZohoTaskUsecase } from './usecases/create-zoho-task.usecase';
+import { CreateLoanApplicationUsecase } from './usecases/create-loan-application.usecase';
+import { CreateLoanApplicationDto } from './usecases/dto/create-loan-appl.dto';
+import { DreamerModel } from './usecases/model/dreamer.model';
 
 @Controller('dreamers')
 export class DreamerController {
@@ -18,7 +21,7 @@ export class DreamerController {
     private readonly createTaskUsecase: CreateZohoTaskUsecase,
     private readonly updatePaymentDetailsUsecase: UpdatePaymentDetailsUsecase,
     private readonly updateAdditionalDetailsUsecase: UpdateAdditionalDetailsUsecase,
-    private readonly initateKycUsecase: InitiateKycUsecase
+    private readonly initateKycUsecase: InitiateKycUsecase,
   ) { }
 
   @Post()
@@ -60,7 +63,8 @@ export class DreamerController {
     @Body() request: PaymentDetailsRequestDto,
   ) {
     this.logger.log(`Updating payment details for request ${JSON.stringify(request)}`);
-    const updatedUserId = await this.updatePaymentDetailsUsecase.update(params.dreamerId, request);
+    //FIXME: Update Module name from GlobalService
+    const updatedUserId = await this.updatePaymentDetailsUsecase.update(params.dreamerId, request, "Leads");
     return {
       id: updatedUserId,
     };

@@ -9,6 +9,12 @@ import { GetLoanResponse } from "../dto/get-loan-response.dto";
 import { Repository, In, Between } from 'typeorm';
 import { Cron } from '@nestjs/schedule';
 import { add, addDays, endOfDay, format } from "date-fns";
+import { CreateLoanApplicationUsecase } from "src/dreamer/usecases/create-loan-application.usecase";
+import { CreateLoanApplicationDto } from "src/dreamer/usecases/dto/create-loan-appl.dto";
+import { EventEmitter2 } from "@nestjs/event-emitter";
+import { UpdateApplicationStatusRequestDto } from "src/external/sendpulse/dto/update-application-status-request.dto";
+import { UpdateLoanDto } from "../dto/update-loan.dto";
+
 
 
 @Injectable()
@@ -18,11 +24,15 @@ export class LoanService {
         @InjectRepository(Loan)
         private readonly loanRepository: Repository<Loan>,
         private readonly loanHelperService: LoanHelperService,
-        private readonly globalService: GlobalService
+        private readonly globalService: GlobalService,
+        private readonly dreamerCreateLoanService: CreateLoanApplicationUsecase,
+        private eventEmitter: EventEmitter2,
     ) { }
 
     // FIXME: Remove "any" Decorator from createLoanDto object
     async create(createLoanDto: any): Promise<Loan> {
+        this.log.log("Creating Loan in LMS. Zoho Loan Required =" + createLoanDto.do_create_zoho_loan);
+
         createLoanDto.id = 'LN' + Math.floor(Math.random() * 100000000);
         createLoanDto.loan_fee = this.globalService.LOAN_FEES;
 
@@ -38,9 +48,39 @@ export class LoanService {
             createLoanDto.outstanding_amount = +createLoanDto.outstanding_amount + +createLoanDto.wing_wei_luy_transfer_fee;
         }
         const loanFromDb = await this.loanRepository.save(createLoanDto);
+
+        if (createLoanDto.do_create_zoho_loan) {
+            await this.createLoanInZoho(createLoanDto);
+        }
+
+        //emitting loan approved event in  order to notify admin
+        if (createLoanDto.status === "Approved" || createLoanDto.status === "Not Qualified") {
+            const updateApplStatus = new UpdateApplicationStatusRequestDto();
+            updateApplStatus.sendpulse_user_id = createLoanDto.sendpulse_id;
+            updateApplStatus.application_status = createLoanDto.status;
+            this.eventEmitter.emit('loan.status.changed', (updateApplStatus));
+        }
+
         //create transaction for dream_point_commited in database
         await this.loanHelperService.manageDreamPointCommitedAfterLoanCreation(createLoanDto);
         return loanFromDb;
+    }
+
+    async createLoanInZoho(createLoanDto: any) {
+
+        const zohoLoanDto = new CreateLoanApplicationDto();
+        zohoLoanDto.lmsLoanId = createLoanDto.id;
+        zohoLoanDto.dreamPoints = createLoanDto.dream_point;
+        zohoLoanDto.dreamerId = createLoanDto.zoho_id;
+        zohoLoanDto.loanAmount = createLoanDto.amount;
+        //FIXME: STATUS Shall come from API body
+        zohoLoanDto.loanStatus = createLoanDto.status;
+        zohoLoanDto.paymentAccountNumber = createLoanDto.acc_number;
+        zohoLoanDto.preferredPaymentMethod = createLoanDto.acc_provider_type;
+        zohoLoanDto.paymentVia = createLoanDto.wire_transfer_type;
+        zohoLoanDto.membershipTier = createLoanDto.membership_tier;
+
+        await this.dreamerCreateLoanService.create(zohoLoanDto);
     }
 
     async findOneForInternalUse(fields: object): Promise<any> {
@@ -76,6 +116,20 @@ export class LoanService {
         loanResponse.dreamPointsEarned = "" + client?.dream_points_earned;
         loanResponse.nextLoanAmount = "" + this.globalService.TIER_AMOUNT[+client?.tier];
         return loanResponse;
+    }
+
+    async updateLoanStatus(updateLoanDto: UpdateLoanDto): Promise<any> {
+        updateLoanDto.status = (updateLoanDto.status === "Rejected") ? "Not Qualified" : updateLoanDto.status;
+
+        await this.loanRepository.update(updateLoanDto.id, { status: updateLoanDto.status });
+        if (updateLoanDto.status === "Approved" || updateLoanDto.status === "Rejected") {
+
+            const updateApplStatus = new UpdateApplicationStatusRequestDto();
+            updateApplStatus.sendpulse_user_id = updateLoanDto.sendpulse_user_id;
+            updateApplStatus.application_status = updateLoanDto.status;
+            this.eventEmitter.emit('loan.status.changed', (updateApplStatus));
+        }
+
     }
 
     async disbursed(disbursedLoanDto: DisbursedLoanDto): Promise<any> {

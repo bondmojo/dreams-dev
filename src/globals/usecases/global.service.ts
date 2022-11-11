@@ -85,6 +85,7 @@ export class GlobalService {
     public readonly PAYMENT_TASK_ASSIGNEE = "mohit.joshi@gojo.co";
 
     public readonly SENDPULSE_FLOW: any = {
+        //KYC Flow ID: Flow_4.4
         "KYC_FLOW": this.isDev ? '62be938d81768640cc494f34' : '63502d36186d03250968943d',
         "APPLICATION_STATUS_FLOW_ID": {
             "Disbursed": this.isDev ? "62fc9cd35c6b0b21d713cdea" : '63502d5e19b15a483a50d3a4',

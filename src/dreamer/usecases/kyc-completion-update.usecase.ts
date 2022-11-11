@@ -15,7 +15,7 @@ export class KycCompletionUpdateUsecase {
 
     @OnEvent('kyc.callback')
     async updateKycDetails(event: KycEventDto) {
-        const dreamer = await this.repository.get(event.dreamerId);
+        const dreamer = await this.repository.getDreamer(event.dreamerId);
         await this.repository.updatekycDetails(event);
         await this.sendpulse.runFlow(dreamer, this.globalService.SENDPULSE_FLOW.KYC_FLOW);
     }

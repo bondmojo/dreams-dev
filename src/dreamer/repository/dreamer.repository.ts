@@ -1,25 +1,23 @@
 import { Injectable } from "@nestjs/common";
-import { DreamerModel } from "../usecases/model/dreamer.model";
-import { ZohoService } from "../../external/zoho/zoho.service";
-import { Record } from "@zohocrm/typescript-sdk-2.0/core/com/zoho/crm/api/record/record";
 import { Field } from "@zohocrm/typescript-sdk-2.0/core/com/zoho/crm/api/record/field";
+import { Record } from "@zohocrm/typescript-sdk-2.0/core/com/zoho/crm/api/record/record";
+import { User } from "@zohocrm/typescript-sdk-2.0/core/com/zoho/crm/api/users/user";
 import { Choice } from "@zohocrm/typescript-sdk-2.0/utils/util/choice";
-import { CustomLogger } from "../../custom_logger";
-import { PaymentDetailsRequestDto } from "../dto/payment-details-request.dto";
-import { AdditionalDetailsRequestDto } from "../dto/additional-details-request.dto";
 import { StreamWrapper } from "@zohocrm/typescript-sdk-2.0/utils/util/stream_wrapper";
 import { createWriteStream } from "fs";
+import got from "got";
 import * as os from "os";
 import * as path from 'path';
-import got from "got";
-import { promises } from "stream";
-import { KycEventDto, KYCStatus } from "../../external/shufti/dto/kyc-event.dto";
-import { User } from "@zohocrm/typescript-sdk-2.0/core/com/zoho/crm/api/users/user";
-import { getMilliseconds } from "date-fns";
-import { LeadConverter } from "@zohocrm/typescript-sdk-2.0/core/com/zoho/crm/api/record/lead_converter";
-import { ZohoTaskRequest } from "../usecases/dto/zoho-task-request.dto";
 import { GlobalService } from "src/globals/usecases/global.service";
-import { ClientService } from "../../loan_management/client/usecases/client.service";
+import { promises } from "stream";
+import { CustomLogger } from "../../custom_logger";
+import { KycEventDto, KYCStatus } from "../../external/shufti/dto/kyc-event.dto";
+import { ZohoService } from "../../external/zoho/zoho.service";
+import { AdditionalDetailsRequestDto } from "../dto/additional-details-request.dto";
+import { PaymentDetailsRequestDto } from "../dto/payment-details-request.dto";
+import { CreateLoanApplicationDto } from "../usecases/dto/create-loan-appl.dto";
+import { ZohoTaskRequest } from "../usecases/dto/zoho-task-request.dto";
+import { DreamerModel } from "../usecases/model/dreamer.model";
 
 @Injectable()
 export class DreamerRepository {
@@ -28,14 +26,14 @@ export class DreamerRepository {
 
     constructor(private readonly zohoservice: ZohoService,
         private readonly globalService: GlobalService,
-        private readonly clientService: ClientService,
     ) { }
 
-    async get(dreamer: string): Promise<DreamerModel> {
+    async getDreamer(dreamer: string): Promise<DreamerModel> {
         const dreamerModel = new DreamerModel();
-        const record: Record = await this.zohoservice.getRecord(dreamer);
+        const record: Record = await this.zohoservice.getDreamerRecord(dreamer);
         dreamerModel.id = record.getKeyValue(Field.Leads.ID.getAPIName());
         dreamerModel.externalId = record.getKeyValue('Telegram_Chat_ID');
+        dreamerModel.name = record.getKeyValue(Field.Leads.FULL_NAME.getAPIName());
         //TODO: Map other values as required
         return dreamerModel;
     }
@@ -73,7 +71,47 @@ export class DreamerRepository {
         return (map.get('id') as bigint).toString();
     }
 
-    async save(dreamer: DreamerModel): Promise<string> {
+    async createLoanApplication(dreamerId: string, loanDto: CreateLoanApplicationDto): Promise<CreateLoanApplicationDto> {
+
+        const dreamerModel = this.getDreamer(dreamerId);
+
+        const record = new Record();
+        //Set dreamerId/leadid
+        const id = BigInt(dreamerId);
+        const dreamer = new Record();
+        dreamer.setId(id);
+
+        const user = new User();
+        //Assign Kalyana as lead owner
+        user.setId(BigInt("408266000000551006"));
+        record.addFieldValue(Field.Leads.OWNER, user);
+
+        record.addKeyValue("Dreamer_Name", dreamer);
+        record.addKeyValue("Name", loanDto.lmsLoanId);
+
+        record.addKeyValue("Loan_Ammount", Number(loanDto.loanAmount));
+        record.addKeyValue("Membership_Point", Number(loanDto.dreamPoints));
+
+        record.addKeyValue('Provider_Bank', loanDto.preferredPaymentMethod);
+        record.addKeyValue('Account_No', loanDto.paymentAccountNumber);
+        record.addKeyValue('Payment_Via', loanDto.paymentVia);
+
+        record.addKeyValue("Loan_Status", new Choice(loanDto.loanStatus));
+
+        if (!loanDto.membershipTier) {
+            this.log.log("no membership tier found. for =" + (await dreamerModel).name);
+            loanDto.membershipTier = "1";
+        }
+        record.addKeyValue("Loan_Tier_Membership", loanDto.membershipTier);
+
+        const map: Map<string, any> = await this.zohoservice.saveRecord(record, 'Loans');
+        this.log.log(`Successfully saved user loan for zoho user ${dreamerId} as ${map.get('id')}`);
+
+        loanDto.loanId = (map.get('id') as bigint).toString();
+        return loanDto;
+    }
+
+    async saveDreamer(dreamer: DreamerModel): Promise<string> {
         const record = new Record();
 
         record.addFieldValue(Field.Leads.LAST_NAME, dreamer.lastName);
@@ -84,11 +122,17 @@ export class DreamerRepository {
         record.addFieldValue(Field.Leads.EMAIL, "mohit.joshi@gojo.co");
         record.addFieldValue(Field.Leads.LEAD_STATUS, new Choice('New'));
 
+        const user = new User();
+        //Assign Kalyana as lead owner
+        user.setId(BigInt("408266000000551006"));
+        record.addFieldValue(Field.Leads.OWNER, user);
 
         record.addKeyValue('Lead_Source', new Choice('Telegram'));
         record.addKeyValue('Telegram_Chat_ID', dreamer.externalId);
-        record.addKeyValue('Amount', dreamer.loanRequest.amount);
-        record.addKeyValue('Points', dreamer.loanRequest.pointsAmount);
+
+        //Moving this data to loan module
+        //record.addKeyValue('Amount', dreamer.loanRequest.amount);
+        //record.addKeyValue('Points', dreamer.loanRequest.pointsAmount);
         const map: Map<string, any> = await this.zohoservice.saveRecord(record, 'Leads');
 
         this.log.log(`Successfully saved user ${dreamer.externalId} as ${map.get('id')}`);
@@ -96,15 +140,20 @@ export class DreamerRepository {
         return (map.get('id') as bigint).toString();
     }
 
-    async updatePaymentDetails(dreamerId: string, paymentDetails: PaymentDetailsRequestDto): Promise<string> {
+    async updatePaymentDetails(id: string, paymentDetails: PaymentDetailsRequestDto, moduleName: string): Promise<string> {
         const record = new Record();
-        record.addKeyValue('Provider', new Choice(paymentDetails.preferredPaymentMethod));
-        record.addKeyValue('Account_Number', paymentDetails.paymentAccountNumber);
+
+        record.addKeyValue('Account_No', paymentDetails.paymentAccountNumber);
         record.addKeyValue('Payment_Via', paymentDetails.paymentVia);
 
-        const map: Map<string, any> = await this.zohoservice.updateRecord(dreamerId, record);
+        if (moduleName === "Leads")
+            record.addKeyValue('Provider', new Choice(paymentDetails.preferredPaymentMethod));
+        else
+            record.addKeyValue('Provider_Bank', paymentDetails.preferredPaymentMethod);
 
-        this.log.log(`Successfully updated user ${dreamerId} data`);
+        const map: Map<string, any> = await this.zohoservice.updateRecord(id, record, moduleName);
+
+        this.log.log(`Successfully updated user ${id} data`);
 
         return (map.get('id') as bigint).toString();
     }
@@ -121,8 +170,8 @@ export class DreamerRepository {
         record.addKeyValue('Type', new Choice(additionalDetails.employmentType));
         record.addKeyValue('Lead_Status', new Choice("KYC Details Submitted-2"));
 
-
-        const map: Map<string, any> = await this.zohoservice.updateRecord(dreamerId, record);
+        //FIXME: Module name shall come from GlobalConstants
+        const map: Map<string, any> = await this.zohoservice.updateRecord(dreamerId, record, 'Leads');
 
         this.log.log(`Successfully updated user ${dreamerId} data`);
 
@@ -135,7 +184,8 @@ export class DreamerRepository {
         record.addKeyValue('Successful_KYC_Time', new Date());
         record.addKeyValue('KYC_Status', new Choice('Initiated'));
 
-        const map: Map<string, any> = await this.zohoservice.updateRecord(dreamerId, record);
+        //FIXME: Module name shall come from GlobalConstants
+        const map: Map<string, any> = await this.zohoservice.updateRecord(dreamerId, record, 'Leads');
 
         this.log.log(`Successfully updated user ${dreamerId} data`);
 
@@ -181,7 +231,8 @@ export class DreamerRepository {
             record.addKeyValue('KYC_Status', new Choice('Failed'));
             record.addKeyValue('KYC_Rejection_Reason', event.rejectionReason);
         }
-        const map: Map<string, any> = await this.zohoservice.updateRecord(event.dreamerId, record);
+        //FIXME: Module name shall come from GlobalConstants
+        const map: Map<string, any> = await this.zohoservice.updateRecord(event.dreamerId, record, 'Leads');
 
         this.log.log(`Successfully updated user ${event.dreamerId} data`);
 

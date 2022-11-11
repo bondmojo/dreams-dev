@@ -9,6 +9,12 @@ export class CreateLoanDto {
   disbursed_date: Date;
   paid_date: Date;
   tenure_in_months: number;
-  replayment_date: Date;
+  repayment_date: Date;
   wire_transfer_type: string;
+  do_create_zoho_loan: boolean;
+  sendpulse_id: string;
+  membership_tier: string;
+  acc_provider_type: string;
+  acc_number: string;
+  zoho_id: string;
 }

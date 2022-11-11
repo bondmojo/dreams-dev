@@ -72,4 +72,11 @@ export class Loan {
   @UpdateDateColumn()
   updated_at: Date;
 
+  @Column({ nullable: true, unique: true })
+  zoho_loan_id: string;
+
+  @Column({ nullable: true, unique: true })
+  tier: string;
+
+
 };
