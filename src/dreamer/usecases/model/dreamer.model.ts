@@ -9,6 +9,7 @@ export class DreamerModel {
     utmSorce: string;
     utmMedium: string;
     utmCampaign: string;
+    status: string;
 }
 
 export class LoanRequest {

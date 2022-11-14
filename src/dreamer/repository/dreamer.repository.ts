@@ -34,6 +34,7 @@ export class DreamerRepository {
         dreamerModel.id = record.getKeyValue(Field.Leads.ID.getAPIName());
         dreamerModel.externalId = record.getKeyValue('Telegram_Chat_ID');
         dreamerModel.name = record.getKeyValue(Field.Leads.FULL_NAME.getAPIName());
+        dreamerModel.status = record.getKeyValue(Field.Leads.LEAD_STATUS.getAPIName());
         //TODO: Map other values as required
         return dreamerModel;
     }
