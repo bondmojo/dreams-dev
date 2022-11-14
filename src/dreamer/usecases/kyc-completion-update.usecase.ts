@@ -17,14 +17,14 @@ export class KycCompletionUpdateUsecase {
     async updateKycDetails(event: KycEventDto) {
         const dreamer = await this.repository.getDreamer(event.dreamerId);
 
-        const validStatuses = ["New", "Loan Requested"];
-
-        if (!dreamer.status || validStatuses.includes(dreamer.status)) {
+        const validStatuses = ["None", "New", "Loan Requested"];
+        const status = dreamer.status.value;
+        if (!status || validStatuses.includes(dreamer.status.value)) {
             await this.repository.updatekycDetails(event);
             await this.sendpulse.runFlow(dreamer, this.globalService.SENDPULSE_FLOW.KYC_FLOW);
         }
         else {
-            this.log.error(`Invalid dreamer status ${dreamer.status} for dreamer details =` + dreamer.id);
+            this.log.error(`Invalid dreamer status ${status} for dreamer details =` + dreamer.id);
         }
     }
 }
