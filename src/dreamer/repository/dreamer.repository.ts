@@ -36,6 +36,7 @@ export class DreamerRepository {
         const record: Record = await this.zohoservice.getRecord(dreamer);
         dreamerModel.id = record.getKeyValue(Field.Leads.ID.getAPIName());
         dreamerModel.externalId = record.getKeyValue('Telegram_Chat_ID');
+        dreamerModel.status = record.getKeyValue(Field.Leads.ID.getAPIName());
         //TODO: Map other values as required
         return dreamerModel;
     }

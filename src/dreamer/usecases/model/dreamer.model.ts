@@ -6,6 +6,7 @@ export class DreamerModel {
     lastName: string;
     name: string;
     loanRequest: LoanRequest;
+    status: string;
 }
 
 export class LoanRequest {
