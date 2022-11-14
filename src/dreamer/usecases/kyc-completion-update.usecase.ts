@@ -24,7 +24,7 @@ export class KycCompletionUpdateUsecase {
             await this.sendpulse.runFlow(dreamer, this.globalService.SENDPULSE_FLOW.KYC_FLOW);
         }
         else {
-            this.log.error(`Invalid dreamer status ${dreamer.status} for dreamer details =` + JSON.stringify(dreamer));
+            this.log.error(`Invalid dreamer status ${dreamer.status} for dreamer details =` + dreamer.id);
         }
     }
 }
