@@ -6,6 +6,7 @@ import { CustomLogger } from "../../custom_logger";
 import { SendpluseService } from "../../external/sendpulse/sendpluse.service";
 import { GlobalService } from "../../globals/usecases/global.service";
 import { threadId } from "worker_threads";
+import { DreamerModel } from "./model/dreamer.model";
 
 
 @Injectable()
@@ -16,15 +17,16 @@ export class KycCompletionUpdateUsecase {
 
     @OnEvent('kyc.callback')
     async updateKycDetails(event: KycEventDto) {
-        const dreamer = await this.repository.get(event.dreamerId);
+        const dreamer: DreamerModel = await this.repository.get(event.dreamerId);
 
-        const validStatus = ["New", "Loan Requested"]
-        if (!dreamer.status || validStatus.includes(dreamer.status)) {
+        const validStatuses = ["None", "New", "Loan Requested"];
+        const status = dreamer.status.value;
+        if (!status || validStatuses.includes(dreamer.status.value)) {
             await this.repository.updatekycDetails(event);
             await this.sendpulse.runFlow(dreamer, this.globalService.SENDPULSE_FLOW.KYC_FLOW);
         }
         else {
-            this.log.error(`Invalid Dreamer Status ${dreamer.status} for dreamer: ` + JSON.stringify(dreamer));
+            this.log.error(`Not Handling KYC Callback as: Invalid dreamer status ${status} for dreamer details =` + dreamer.id);
         }
     }
 }
