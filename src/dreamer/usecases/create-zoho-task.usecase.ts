@@ -14,8 +14,12 @@ export class CreateZohoTaskUsecase {
         private readonly global: GlobalService) { }
 
     async createTask(task: ZohoTaskRequest): Promise<string> {
+        if (!task.dreamer_id && task.sendpulse_id) {
+            const client = await this.clientService.findbySendpulseId(task.sendpulse_id);
+            task.dreamer_id = client.zoho_id;
+        }
 
-        if (task.retool_url_required && task.retool_url_required === "true") {
+        if (task.retool_url_required && task.retool_url_required === "true" && task.dreamer_id) {
             const client = await this.clientService.findbyZohoId(task.dreamer_id);
             task.dreamservice_customer_id = client.id;
         }
