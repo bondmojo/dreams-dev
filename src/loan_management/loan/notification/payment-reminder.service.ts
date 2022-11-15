@@ -29,21 +29,24 @@ export class PaymentReminderService {
 
   async runCronApis(id: number) {
     if (id == 1) {
-      this.log.log("Running 9AM scheduler");
+      this.log.log("Running 9AM via API");
       await this.runPaymentScheduler(true);
     } else {
-      this.log.log("Running 2PM scheduler");
+      this.log.log("Running 2PM via API");
       await this.runPaymentScheduler(false);
     }
   }
-
-  @Cron('30 10 * * *')
+  // Combodia 9AM or UTC 2AM (combodia is 7 hour ahead of UTC)
+  @Cron('0 2 * * *')
   async morningTimeScheduler() {
+    this.log.log("Cron Running 9AM scheduler");
     await this.runPaymentScheduler(true);
   }
 
-  @Cron('30 15 * * *')
+  // Combodia 2PM  or UTC 7AM
+  @Cron('0 7 * * *')
   async dayTimeScheduler() {
+    this.log.log("Cron Running 2PM scheduler");
     await this.runPaymentScheduler(false);
   }
 

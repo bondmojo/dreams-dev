@@ -19,7 +19,7 @@ export class ClientController {
   @Get(':id')
   async findOne(@Param('id') id: string) {
     this.logger.log(`Getting client with request ${+id}`);
-    return await this.clientService.findOne({ id: id });
+    return await this.clientService.get({ id: id });
   }
 
   @Get(':id/contracturl')

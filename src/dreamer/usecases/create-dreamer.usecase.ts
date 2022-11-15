@@ -1,15 +1,15 @@
-import {Injectable} from "@nestjs/common";
-import {CreateDreamerDto} from "../dto/create-dreamer.dto";
-import {DreamerModel, LoanRequest} from "./model/dreamer.model";
-import {SendpluseService} from "../../external/sendpulse/sendpluse.service";
-import {CustomLogger} from "../../custom_logger";
-import {SendPulseContactDto} from "../../external/sendpulse/dto/send-pulse-contact.dto";
-import {DreamerRepository} from "../repository/dreamer.repository";
+import { Injectable } from "@nestjs/common";
+import { CreateDreamerDto } from "../dto/create-dreamer.dto";
+import { DreamerModel, LoanRequest } from "./model/dreamer.model";
+import { SendpluseService } from "../../external/sendpulse/sendpluse.service";
+import { CustomLogger } from "../../custom_logger";
+import { SendPulseContactDto } from "../../external/sendpulse/dto/send-pulse-contact.dto";
+import { DreamerRepository } from "../repository/dreamer.repository";
 
 @Injectable()
 export class CreateDreamerUsecase {
     private readonly log = new CustomLogger(CreateDreamerUsecase.name);
-    constructor(private readonly sendpulseService: SendpluseService, private readonly repository: DreamerRepository) {}
+    constructor(private readonly sendpulseService: SendpluseService, private readonly repository: DreamerRepository) { }
 
     async create(createDreamerDto: CreateDreamerDto): Promise<DreamerModel> {
         let dreamer = new DreamerModel();
@@ -27,12 +27,15 @@ export class CreateDreamerUsecase {
         dreamer.loanRequest = new LoanRequest();
         dreamer.loanRequest.amount = Number(createDreamerDto.loanAmount);
         dreamer.loanRequest.pointsAmount = Number(createDreamerDto.pointsAmount);
+        dreamer.utmSorce = createDreamerDto.utmSorce;
+        dreamer.utmMedium = createDreamerDto.utmMedium;
+        dreamer.utmCampaign = createDreamerDto.utmCampaign;
     }
 
     private popluateSendPulseData(dreamer: DreamerModel, contact: SendPulseContactDto) {
         const data = contact.channel_data;
         dreamer.name = data.name;
         dreamer.firstName = data.first_name;
-        dreamer.lastName = data.last_name? data.last_name: '-';
+        dreamer.lastName = data.last_name ? data.last_name : '-';
     }
 }
