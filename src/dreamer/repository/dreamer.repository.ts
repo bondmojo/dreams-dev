@@ -262,4 +262,18 @@ export class DreamerRepository {
         }
     }
 
+    async updateFieldsOnZoho(id: string, zohoKeyValuePairs: any, moduleName: string): Promise<string> {
+        // zohoDataKeyValuePair should be key value pair
+        const record = new Record();
+        Object.keys(zohoKeyValuePairs).forEach(key => {
+            record.addKeyValue(key, zohoKeyValuePairs[key]);
+        });
+
+        const map: Map<string, any> = await this.zohoservice.updateRecord(id, record, moduleName);
+
+        console.log(`Zoho Fields Successfully updated = Modue: ${moduleName} , UserModuleId:  ${id}, Fields ${JSON.stringify(zohoKeyValuePairs)}`);
+
+        return (map.get('id') as bigint).toString();
+    }
+
 }

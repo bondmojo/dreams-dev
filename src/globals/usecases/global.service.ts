@@ -19,6 +19,14 @@ export class GlobalService {
         FULLY_PAID: 'Fully Paid',
     }
 
+    public readonly ZOHO_LOAN_STATUS: any = {
+        APPROVED: 'Approved',
+        DISBURSED: 'Disbursed',
+        NOT_QUALIFIED: 'Not Qualified',
+        FULLY_PAID: 'Fully Paid',
+        PARTIAL_PAID: 'Partial Paid'
+    }
+
     public readonly TRANSACTION_TYPE: any = {
         DEBIT_WING_WEI_LUY_TRANSFER_FEE: 'debit_wing_wei_luy_transfer_fee',
         CREDIT_WING_WEI_LUY_TRANSFER_FEE: 'credit_wing_wei_luy_transfer_fee',
@@ -43,6 +51,12 @@ export class GlobalService {
     public readonly JOTFORM_CONTRACT_URL: any = {
         DEV: 'https://form.jotform.com/dreams_international/dev-loan-contract',
         PROD: 'https://form.jotform.com/dreams_international/loan-contract',
+    }
+
+    public readonly ZOHO_MODULES: any = {
+        DEAMER: 'Leads',
+        LOAN: 'Loans',
+        TASK: 'Tasks',
     }
 
     public readonly REPAYMENT_TRANSACTION_TYPE: any = {

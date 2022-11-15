@@ -14,7 +14,7 @@ import { CreateLoanApplicationDto } from "src/dreamer/usecases/dto/create-loan-a
 import { EventEmitter2 } from "@nestjs/event-emitter";
 import { UpdateApplicationStatusRequestDto } from "src/external/sendpulse/dto/update-application-status-request.dto";
 import { UpdateLoanDto } from "../dto/update-loan.dto";
-
+import { ZohoLoanHelperService } from "./zoho-loan-helper.service";
 
 
 @Injectable()
@@ -26,6 +26,7 @@ export class LoanService {
         private readonly loanHelperService: LoanHelperService,
         private readonly globalService: GlobalService,
         private readonly dreamerCreateLoanService: CreateLoanApplicationUsecase,
+        private readonly zohoLoanHelperService: ZohoLoanHelperService,
         private eventEmitter: EventEmitter2,
     ) { }
 
@@ -146,6 +147,8 @@ export class LoanService {
         await this.loanHelperService.checkAndCreateWingTransferFeeTransaction(loan, disbursedLoanDto);
         await this.loanHelperService.updateLoanDataAfterDisbursement(loan, disbursedLoanDto);
         await this.loanHelperService.triggerSendpulseUpdateApplicationStatus(loan, disbursedLoanDto);
+
+        await this.zohoLoanHelperService.updateZohoLoanStatus(loan.zoho_loan_id, this.globalService.ZOHO_LOAN_STATUS.DISBURSED, this.globalService.ZOHO_MODULES.LOAN);
         return disbursedResponse;
     }
 

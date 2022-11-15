@@ -9,6 +9,7 @@ import { DisbursedLoanDto, CreateRepaymentTransactionDto } from '../dto';
 import { GlobalService } from "../../../globals/usecases/global.service"
 import { add } from 'date-fns';
 import { SendpluseService } from "src/external/sendpulse/sendpluse.service";
+import { ZohoLoanHelperService } from "./zoho-loan-helper.service";
 
 
 @Injectable()
@@ -20,7 +21,8 @@ export class LoanHelperService {
         private readonly transactionService: TransactionService,
         private eventEmitter: EventEmitter2,
         private readonly globalService: GlobalService,
-        private readonly sendpulseService: SendpluseService
+        private readonly sendpulseService: SendpluseService,
+        private readonly zohoLoanHelperService: ZohoLoanHelperService
     ) { }
 
     async manageDreamPointCommitedAfterLoanCreation(createLoanDto: any): Promise<any> {
@@ -126,10 +128,16 @@ export class LoanHelperService {
             const new_client_tier = +loan?.client?.tier + 1
             await this.updateSendpulseFieldsAsPerClientTier(loan, new_client_tier);
             await this.updateClientAfterFullyPaid(loan, createRepaymentTransactionDto);
+            // Mark Loan Fully Paid on Zoho Loan Module
+            await this.zohoLoanHelperService.updateZohoLoanStatus(loan.zoho_loan_id, this.globalService.ZOHO_LOAN_STATUS.FULLY_PAID, this.globalService.ZOHO_MODULES.LOAN);
+
         }
         else if (createRepaymentTransactionDto.amount < loan.outstanding_amount) {
             // Case: Partial payment
             await this.doProcessPartialPayment(loan, createRepaymentTransactionDto);
+            // Mark Loan Partial Paid on Zoho Loan Module
+            await this.zohoLoanHelperService.updateZohoLoanStatus(loan.zoho_loan_id, this.globalService.ZOHO_LOAN_STATUS.PARTIAL_PAID, this.globalService.ZOHO_MODULES.LOAN);
+
         }
         return creditRepaymentResponse;
     }

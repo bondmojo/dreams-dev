@@ -14,6 +14,7 @@ import { CreateZohoTaskUsecase } from "./usecases/create-zoho-task.usecase";
 import { ClientModule } from "src/loan_management/client/client.module";
 import { CreateLoanApplicationUsecase } from "./usecases/create-loan-application.usecase";
 import { DreamerLoanApplController } from "./dreamer.loanappl.controller";
+import { UpdateFieldsOnZohoUsecase } from './usecases/update-fields-on-zoho.usecase';
 @Module({
     imports: [SendpulseModule, ZohoModule, ShuftiModule, GlobalModule, ClientModule],
     controllers: [DreamerController, DreamerLoanApplController],
@@ -25,8 +26,10 @@ import { DreamerLoanApplController } from "./dreamer.loanappl.controller";
         InitiateKycUsecase,
         KycCompletionUpdateUsecase,
         DreamerRepository,
-        CreateLoanApplicationUsecase],
-    exports: [CreateLoanApplicationUsecase]
+        CreateLoanApplicationUsecase,
+        UpdateFieldsOnZohoUsecase
+    ],
+    exports: [CreateLoanApplicationUsecase, UpdateFieldsOnZohoUsecase]
 })
 export class DreamerModule {
 }
