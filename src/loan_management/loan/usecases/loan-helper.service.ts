@@ -85,6 +85,20 @@ export class LoanHelperService {
         return;
     }
 
+    async triggerSendpulseUpdateApplicationStatus(loan: Loan, disbursedLoanDto: DisbursedLoanDto) {
+        const update_application_status_request_dto: any = {
+            sendpulse_user_id: loan.client.sendpulse_id,
+            loan_amount: loan.amount,
+            application_status: this.globalService.LOAN_STATUS.DISBURSED,
+            loan_id: loan.id,
+            wire_transfer_type: loan.wire_transfer_type,
+        }
+
+        this.log.log(`After Disbursement: Updating Applicatio Status with${JSON.stringify(update_application_status_request_dto)}`);
+        await this.sendpulseService.updateApplicationStatus(update_application_status_request_dto);
+        return;
+    }
+
     /** -----------------------   Create Repayment Transaction: status client_credit functions     ---------------------------- */
     async handleClientCreditRepayments(createRepaymentTransactionDto: CreateRepaymentTransactionDto): Promise<any> {
         const creditRepaymentResponse = { status: true, error: '' };

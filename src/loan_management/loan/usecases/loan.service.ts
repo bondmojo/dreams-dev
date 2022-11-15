@@ -145,6 +145,7 @@ export class LoanService {
         await this.loanHelperService.createCreditDisbursementTransaction(loan, disbursedLoanDto);
         await this.loanHelperService.checkAndCreateWingTransferFeeTransaction(loan, disbursedLoanDto);
         await this.loanHelperService.updateLoanDataAfterDisbursement(loan, disbursedLoanDto);
+        await this.loanHelperService.triggerSendpulseUpdateApplicationStatus(loan, disbursedLoanDto);
         return disbursedResponse;
     }
 
