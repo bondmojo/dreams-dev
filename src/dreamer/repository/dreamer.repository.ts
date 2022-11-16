@@ -62,6 +62,12 @@ export class DreamerRepository {
             this.log.log(`createTask. Retool URL = ${retoolUrl}`);
         }
 
+        if (taskDetails?.sendpulse_url_required && taskDetails?.sendpulse_id) {
+            const sendpulseUrl = this.globalService.BASE_SENDPULSE_URL + taskDetails?.sendpulse_id;
+            taskRecord.addFieldValue(Field.Tasks.DESCRIPTION, sendpulseUrl);
+            this.log.log(`createTask. Sendpulse URL = ${sendpulseUrl}`);
+        }
+
         taskRecord.addFieldValue(Field.Tasks.DUE_DATE, taskDetails.due_date); //FIXME:: move outside
 
         taskRecord.addKeyValue("$se_module", "Leads");

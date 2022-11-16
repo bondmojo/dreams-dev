@@ -7,4 +7,6 @@ export class ZohoTaskRequest {
     due_date: Date;
     status: string;
     retool_url_required: string;
+    sendpulse_url_required: string;
+    type: string;
 }
