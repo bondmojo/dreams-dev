@@ -10,7 +10,7 @@ import { Repository, In, Between } from 'typeorm';
 import { Cron } from '@nestjs/schedule';
 import { add, addDays, endOfDay, format } from "date-fns";
 import { CreateLoanApplicationUsecase } from "src/dreamer/usecases/create-loan-application.usecase";
-import { CreateLoanApplicationDto } from "src/dreamer/usecases/dto/create-loan-appl.dto";
+import { CreateZohoLoanApplicationDto } from "src/dreamer/usecases/dto/create-loan-appl.dto";
 import { EventEmitter2 } from "@nestjs/event-emitter";
 import { UpdateApplicationStatusRequestDto } from "src/external/sendpulse/dto/update-application-status-request.dto";
 import { UpdateLoanDto } from "../dto/update-loan.dto";
@@ -48,12 +48,20 @@ export class LoanService {
             createLoanDto.wing_wei_luy_transfer_fee = +this.globalService.CALC_WING_WEI_LUY_TRANSFER_FEE(disbursed_amount);
             createLoanDto.outstanding_amount = +createLoanDto.outstanding_amount + +createLoanDto.wing_wei_luy_transfer_fee;
         }
+        //Step 1; Create Loan in Dreams DB
         const loanFromDb = await this.loanRepository.save(createLoanDto);
 
         if (createLoanDto.do_create_zoho_loan) {
-            await this.createLoanInZoho(createLoanDto);
+            //Step 2: Create Loan in Zoho
+            const zohoLoanDto: CreateZohoLoanApplicationDto = await this.createLoanInZoho(createLoanDto);
+
+            //Step 3: Update Zoho loan ID in Dreams DB
+            //once loan is created in zoho, update zohoLoanID in our DB for future reference.
+            // Haven't put "await" here as this action can happen be in parallel.
+            this.loanHelperService.updateZohoLoanId(createLoanDto.id, zohoLoanDto.loanId);
         }
 
+        //Step 4: Emit Loan Status 
         //emitting loan approved event in  order to notify admin
         if (createLoanDto.status === "Approved" || createLoanDto.status === "Not Qualified") {
             const updateApplStatus = new UpdateApplicationStatusRequestDto();
@@ -62,6 +70,7 @@ export class LoanService {
             this.eventEmitter.emit('loan.status.changed', (updateApplStatus));
         }
 
+        //Step 5: Create transactions in Dreams DB
         //create transaction for dream_point_commited in database
         await this.loanHelperService.manageDreamPointCommitedAfterLoanCreation(createLoanDto);
         return loanFromDb;
@@ -69,7 +78,7 @@ export class LoanService {
 
     async createLoanInZoho(createLoanDto: any) {
 
-        const zohoLoanDto = new CreateLoanApplicationDto();
+        const zohoLoanDto = new CreateZohoLoanApplicationDto();
         zohoLoanDto.lmsLoanId = createLoanDto.id;
         zohoLoanDto.dreamPoints = createLoanDto.dream_point;
         zohoLoanDto.dreamerId = createLoanDto.zoho_id;
@@ -81,7 +90,7 @@ export class LoanService {
         zohoLoanDto.paymentVia = createLoanDto.wire_transfer_type;
         zohoLoanDto.membershipTier = createLoanDto.membership_tier;
 
-        await this.dreamerCreateLoanService.create(zohoLoanDto);
+        return await this.dreamerCreateLoanService.create(zohoLoanDto);
     }
 
     async findOneForInternalUse(fields: object): Promise<any> {

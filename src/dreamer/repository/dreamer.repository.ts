@@ -15,7 +15,7 @@ import { KycEventDto, KYCStatus } from "../../external/shufti/dto/kyc-event.dto"
 import { ZohoService } from "../../external/zoho/zoho.service";
 import { AdditionalDetailsRequestDto } from "../dto/additional-details-request.dto";
 import { PaymentDetailsRequestDto } from "../dto/payment-details-request.dto";
-import { CreateLoanApplicationDto } from "../usecases/dto/create-loan-appl.dto";
+import { CreateZohoLoanApplicationDto } from "../usecases/dto/create-loan-appl.dto";
 import { ZohoTaskRequest } from "../usecases/dto/zoho-task-request.dto";
 import { DreamerModel } from "../usecases/model/dreamer.model";
 
@@ -72,7 +72,7 @@ export class DreamerRepository {
         return (map.get('id') as bigint).toString();
     }
 
-    async createLoanApplication(dreamerId: string, loanDto: CreateLoanApplicationDto): Promise<CreateLoanApplicationDto> {
+    async createLoanApplication(dreamerId: string, loanDto: CreateZohoLoanApplicationDto): Promise<CreateZohoLoanApplicationDto> {
 
         const dreamerModel = this.getDreamer(dreamerId);
 

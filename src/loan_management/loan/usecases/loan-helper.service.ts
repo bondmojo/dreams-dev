@@ -5,7 +5,7 @@ import { Loan } from '../entities/loan.entity';
 import { TransactionService } from "../../transaction/usecases/transaction.service";
 import { EventEmitter2 } from "@nestjs/event-emitter";
 import { Repository } from 'typeorm';
-import { DisbursedLoanDto, CreateRepaymentTransactionDto } from '../dto';
+import { DisbursedLoanDto, CreateRepaymentTransactionDto, CreateLoanDto } from '../dto';
 import { GlobalService } from "../../../globals/usecases/global.service"
 import { add } from 'date-fns';
 import { SendpluseService } from "src/external/sendpulse/sendpluse.service";
@@ -85,6 +85,15 @@ export class LoanHelperService {
         this.log.log(`Updating loan with data ${JSON.stringify(fields_to_be_update)}`);
         await this.loanRepository.update(loan.id, fields_to_be_update);
         return;
+    }
+
+    //The Zoho loan ID is updated, once loan is created in zoho 
+    async updateZohoLoanId(lmsLoanId: string, zohoLoanId: string): Promise<any> {
+        const updateObj = {
+            zoho_loan_id: zohoLoanId
+        };
+        await this.loanRepository.update(lmsLoanId, updateObj);
+        return false;
     }
 
     async triggerSendpulseUpdateApplicationStatus(loan: Loan, disbursedLoanDto: DisbursedLoanDto) {

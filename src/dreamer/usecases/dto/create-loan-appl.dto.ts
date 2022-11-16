@@ -1,4 +1,4 @@
-export class CreateLoanApplicationDto {
+export class CreateZohoLoanApplicationDto {
   loanId: string;
   dreamerId: string;
   loanAmount: string;

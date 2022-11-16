@@ -10,7 +10,7 @@ import { CustomLogger } from "../custom_logger";
 import { ZohoTaskRequest } from 'src/dreamer/usecases/dto/zoho-task-request.dto';
 import { CreateZohoTaskUsecase } from './usecases/create-zoho-task.usecase';
 import { CreateLoanApplicationUsecase } from './usecases/create-loan-application.usecase';
-import { CreateLoanApplicationDto } from './usecases/dto/create-loan-appl.dto';
+import { CreateZohoLoanApplicationDto } from './usecases/dto/create-loan-appl.dto';
 import { DreamerModel } from './usecases/model/dreamer.model';
 
 @Controller('dreamers')

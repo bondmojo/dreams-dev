@@ -1,7 +1,7 @@
 import { Body, Controller, Param, Post } from '@nestjs/common';
 import { CustomLogger } from "../custom_logger";
 import { CreateLoanApplicationUsecase } from './usecases/create-loan-application.usecase';
-import { CreateLoanApplicationDto } from './usecases/dto/create-loan-appl.dto';
+import { CreateZohoLoanApplicationDto } from './usecases/dto/create-loan-appl.dto';
 import { UpdatePaymentDetailsUsecase } from "./usecases/update-payment-details.usecase";
 import { PaymentDetailsRequestDto } from "./dto/payment-details-request.dto";
 
@@ -17,7 +17,7 @@ export class DreamerLoanApplController {
 
 
   @Post()
-  async create(@Body() loanDto: CreateLoanApplicationDto) {
+  async create(@Body() loanDto: CreateZohoLoanApplicationDto) {
     this.logger.log(`Creating Loan for dreamer ${JSON.stringify(loanDto)}`);
     return await this.createLoanApplUsecase.create(loanDto);
   }
