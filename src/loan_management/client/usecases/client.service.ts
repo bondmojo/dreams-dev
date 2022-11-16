@@ -80,6 +80,12 @@ export class ClientService {
         if (!loan) {
             return 'No approved loan found for user!';
         }
+
+        const has_successfully_paid_loan = (await this.loanService.findOneForInternalUse({
+            client_id: clientId,
+            status: this.globalService.LOAN_STATUS.FULLY_PAID
+        })) ? true : false;
+
         const now = new Date();
         let JOTFORM_CONTRACT_URL = process.env.NODE_ENV === "production" ? this.globalService.JOTFORM_CONTRACT_URL.PROD : this.globalService.JOTFORM_CONTRACT_URL.DEV;
         JOTFORM_CONTRACT_URL = JOTFORM_CONTRACT_URL +
@@ -102,6 +108,8 @@ export class ClientService {
             '&nationalId=' + (client?.national_id ?? '') +
             '&phoneNumber=' + (client?.mobile ?? '') +
             '&clientId=' + (client?.zoho_id ?? '') +
+            '&clientId=' + (client?.zoho_id ?? '') +
+            '&hasSuccessfullyPaidLoan=' + (has_successfully_paid_loan ?? '') +
             '&lmsLoanId=' + (loan?.id ?? '');
 
         this.log.log(`JOTFORM_CONTRACT_URL ==> ${JOTFORM_CONTRACT_URL}`);
