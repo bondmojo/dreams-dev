@@ -5,13 +5,19 @@ import { ZohoTaskRequest } from "./dto/zoho-task-request.dto";
 import { GlobalService } from "../../globals/usecases/global.service";
 import { Client } from "../../loan_management/client/entities/client.entity";
 import { ClientService } from "../../loan_management/client/usecases/client.service";
+import { DreamerModel } from '../usecases/model/dreamer.model';
+import { SendpluseService } from '../../external/sendpulse/sendpluse.service';
 
 @Injectable()
 export class CreateZohoTaskUsecase {
     private readonly log = new CustomLogger(CreateZohoTaskUsecase.name);
+    private readonly TASK_TYPE = { RECEIVED_VIDEO: 'received_video' };
+
     constructor(private readonly repository: DreamerRepository,
         private readonly clientService: ClientService,
-        private readonly global: GlobalService) { }
+        private readonly global: GlobalService,
+        private readonly sendpluseService: SendpluseService
+    ) { }
 
     async createTask(task: ZohoTaskRequest): Promise<string> {
         if (!task.dreamer_id && task.sendpulse_id) {
@@ -29,6 +35,14 @@ export class CreateZohoTaskUsecase {
             task.assign_to = this.global.DISBURSEMENT_TASK_ASSIGNEE;
         task.status = "Not Started";
         const id = await this.repository.createTask(task.dreamer_id, task);
+
+        // Do other actions on behalf of type
+        if (task?.type) {
+            switch (task.type) {
+                case this.TASK_TYPE.RECEIVED_VIDEO:
+                    this.triggerSendpulseFlow(task, this.global.SENDPULSE_FLOW['FLOW_4.9']);
+            }
+        }
         return id;
     }
 
@@ -61,5 +75,12 @@ export class CreateZohoTaskUsecase {
         task.status = "Not Started";
         const id = await this.repository.createTask(client.zoho_id, task);
         return id;
+    }
+
+    async triggerSendpulseFlow(task: ZohoTaskRequest, flow_id: string) {
+        const model = new DreamerModel();
+        model.externalId = task.sendpulse_id;
+        this.log.log("Running Sendpulse Flow " + " flow_id =" + flow_id);
+        return await this.sendpluseService.runFlow(model, flow_id);
     }
 }
