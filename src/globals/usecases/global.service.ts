@@ -131,7 +131,10 @@ export class GlobalService {
         // Payment Confirmation FLow
         "FLOW_7.4": this.isDev ? "63440f377ad3c3223a5ea057" : '63502fb40f6f1901106bde54',
         // Video Received Confirmation Flow
-        "FLOW_4.9": this.isDev ? '63722b1c383fae7ce1107fa4' : ''
+        "FLOW_4.9": this.isDev ? '63722b1c383fae7ce1107fa4' : '',
+        // Send Video Message Flow
+        "FLOW_4.6": this.isDev ? '6372277f3431f37834181fcd' : ''
+
 
     }
     public readonly SENDPULSE_VARIABLE_ID = {

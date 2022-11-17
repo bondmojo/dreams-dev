@@ -15,6 +15,7 @@ import { EventEmitter2 } from "@nestjs/event-emitter";
 import { UpdateApplicationStatusRequestDto } from "src/external/sendpulse/dto/update-application-status-request.dto";
 import { UpdateLoanDto } from "../dto/update-loan.dto";
 import { ZohoLoanHelperService } from "./zoho-loan-helper.service";
+import { SendpulseLoanHelperService } from "./sendpulse-loan-helper.service";
 
 
 @Injectable()
@@ -27,6 +28,7 @@ export class LoanService {
         private readonly globalService: GlobalService,
         private readonly dreamerCreateLoanService: CreateLoanApplicationUsecase,
         private readonly zohoLoanHelperService: ZohoLoanHelperService,
+        private readonly sendpulseLoanHelperService: SendpulseLoanHelperService,
         private eventEmitter: EventEmitter2,
     ) { }
 
@@ -67,6 +69,7 @@ export class LoanService {
             this.log.log("Loan Updated in zoho. " + zohoLoanDto.dreamerId);
         }
 
+        this.sendpulseLoanHelperService.triggerVideoVerificationFlowIfClientHasSuccessfullyPaidLoan(createLoanDto);
         //Step 4: Emit Loan Status 
         //emitting loan approved event in  order to notify admin
         if (createLoanDto.status === "Approved" || createLoanDto.status === "Not Qualified") {
