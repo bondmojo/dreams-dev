@@ -165,7 +165,6 @@ export class LoanService {
         await this.loanHelperService.createCreditDisbursementTransaction(loan, disbursedLoanDto);
         await this.loanHelperService.checkAndCreateWingTransferFeeTransaction(loan, disbursedLoanDto);
         await this.loanHelperService.updateLoanDataAfterDisbursement(loan, disbursedLoanDto);
-        await this.loanHelperService.triggerSendpulseUpdateApplicationStatus(loan, disbursedLoanDto);
 
         await this.zohoLoanHelperService.updateZohoLoanStatus(loan.zoho_loan_id, this.globalService.ZOHO_LOAN_STATUS.DISBURSED, this.globalService.ZOHO_MODULES.LOAN);
         return disbursedResponse;
