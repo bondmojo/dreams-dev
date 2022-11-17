@@ -141,10 +141,10 @@ export class LoanService {
         return loanResponse;
     }
 
-    async updateLoanStatus(loanId: string, updateLoanDto: UpdateLoanDto): Promise<any> {
+    async updateLoanStatus(updateLoanDto: UpdateLoanDto): Promise<any> {
         updateLoanDto.status = (updateLoanDto.status === "Rejected") ? "Not Qualified" : updateLoanDto.status;
 
-        await this.loanRepository.update(loanId, { status: updateLoanDto.status });
+        await this.loanRepository.update(updateLoanDto.id, { status: updateLoanDto.status });
         if (updateLoanDto.status === "Approved" || updateLoanDto.status === "Rejected") {
 
             const updateApplStatus = new UpdateApplicationStatusRequestDto();
