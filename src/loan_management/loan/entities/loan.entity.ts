@@ -75,8 +75,6 @@ export class Loan {
   @Column({ nullable: true, unique: true })
   zoho_loan_id: string;
 
-  @Column({ nullable: true, unique: true })
+  @Column({ nullable: true, unique: false })
   tier: string;
-
-
 };

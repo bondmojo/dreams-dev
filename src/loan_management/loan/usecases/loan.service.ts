@@ -30,7 +30,10 @@ export class LoanService {
         private eventEmitter: EventEmitter2,
     ) { }
 
-    // FIXME: Remove "any" Decorator from createLoanDto object
+    //FIXME: Remove "any" Decorator from createLoanDto object
+    //FIXME2: Atomic property is critical here. we are performing multiple actions here.
+    //Even, If one Query/Insert in DB fails. all Insertion needs to be reverted. TODO later on
+    //FIXME3: Error Handling needs to be done.
     async create(createLoanDto: any): Promise<Loan> {
         this.log.log("Creating Loan in LMS. Zoho Loan Required =" + createLoanDto.do_create_zoho_loan);
 
@@ -50,15 +53,18 @@ export class LoanService {
         }
         //Step 1; Create Loan in Dreams DB
         const loanFromDb = await this.loanRepository.save(createLoanDto);
+        this.log.log("Loan Created in LMS. " + loanFromDb.loan_id);
 
         if (createLoanDto.do_create_zoho_loan) {
             //Step 2: Create Loan in Zoho
             const zohoLoanDto: CreateZohoLoanApplicationDto = await this.createLoanInZoho(createLoanDto);
+            this.log.log("Loan Created in zoho. " + zohoLoanDto.dreamerId);
 
             //Step 3: Update Zoho loan ID in Dreams DB
             //once loan is created in zoho, update zohoLoanID in our DB for future reference.
             // Haven't put "await" here as this action can happen be in parallel.
             this.loanHelperService.updateZohoLoanId(createLoanDto.id, zohoLoanDto.loanId);
+            this.log.log("Loan Updated in zoho. " + zohoLoanDto.dreamerId);
         }
 
         //Step 4: Emit Loan Status 
@@ -68,11 +74,15 @@ export class LoanService {
             updateApplStatus.sendpulse_user_id = createLoanDto.sendpulse_id;
             updateApplStatus.application_status = createLoanDto.status;
             this.eventEmitter.emit('loan.status.changed', (updateApplStatus));
+            this.log.log("emit:loan.status.changed");
+
         }
 
         //Step 5: Create transactions in Dreams DB
         //create transaction for dream_point_commited in database
         await this.loanHelperService.manageDreamPointCommitedAfterLoanCreation(createLoanDto);
+        this.log.log("Created Transaction");
+
         return loanFromDb;
     }
 
