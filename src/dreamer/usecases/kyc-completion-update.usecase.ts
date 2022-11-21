@@ -20,11 +20,12 @@ export class KycCompletionUpdateUsecase {
         const validStatuses = ["None", "New", "Loan Requested"];
         const status = dreamer.status.value;
         if (!status || validStatuses.includes(dreamer.status.value)) {
+            this.log.log(`KYC Callback Valid dreamer status ${status} for dreamer details =${dreamer.id} : updating zoho with details`);
             await this.repository.updatekycDetails(event);
             await this.sendpulse.runFlow(dreamer, this.globalService.SENDPULSE_FLOW.KYC_FLOW);
         }
         else {
-            this.log.error(`Invalid dreamer status ${status} for dreamer details =` + dreamer.id);
+            this.log.error(`KYC Callback: Invalid dreamer status ${status} for dreamer details =` + dreamer.id);
         }
     }
 }
