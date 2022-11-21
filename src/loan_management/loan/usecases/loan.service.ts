@@ -55,7 +55,7 @@ export class LoanService {
         }
         //Step 1; Create Loan in Dreams DB
         const loanFromDb = await this.loanRepository.save(createLoanDto);
-        this.log.log("Loan Created in LMS. " + loanFromDb.loan_id);
+        this.log.log("Loan Created in LMS. " + loanFromDb.id);
 
         if (createLoanDto.do_create_zoho_loan) {
             //Step 2: Create Loan in Zoho
@@ -112,6 +112,16 @@ export class LoanService {
             order: { ['created_at']: 'DESC' }
         });
         return loan;
+    }
+
+    async findAll(client_id: string): Promise<Loan[]> {
+
+        const loans = await this.loanRepository.findBy(
+            {
+                'client_id': client_id
+            },
+        );
+        return loans;
     }
 
     async findOne(fields: GetLoanDto): Promise<GetLoanResponse | null> {

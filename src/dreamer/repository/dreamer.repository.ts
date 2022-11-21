@@ -49,6 +49,8 @@ export class DreamerRepository {
         const id = BigInt(dreamerId);
         const whatId = new Record();
         whatId.setId(id);
+        //whatId.addKeyValue("name", "LN3990696");
+
         taskRecord.addFieldValue(Field.Tasks.WHAT_ID, whatId);
 
         taskRecord.addFieldValue(Field.Tasks.SUBJECT, taskDetails.subject);
