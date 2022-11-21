@@ -37,5 +37,12 @@ export class SendpulseLoanHelperService {
         return;
     }
 
+    async triggerFlow(sendpulse_id: string, flow_id: string): Promise<any> {
+        const model = new DreamerModel();
+        model.externalId = sendpulse_id;
+        this.log.log("Running Sendpulse Flow " + " flow_id =" + flow_id);
+        return await this.sendpluseService.runFlow(model, flow_id);
+    }
+
 
 }

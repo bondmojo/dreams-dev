@@ -14,6 +14,7 @@ export class GlobalService {
 
     public readonly LOAN_STATUS: any = {
         APPROVED: 'Approved',
+        REQUESTED: 'Requested',
         DISBURSED: 'Disbursed',
         NOT_QUALIFIED: 'Not Qualified',
         FULLY_PAID: 'Fully Paid',
@@ -24,7 +25,8 @@ export class GlobalService {
         DISBURSED: 'Disbursed',
         NOT_QUALIFIED: 'Not Qualified',
         FULLY_PAID: 'Fully Paid',
-        PARTIAL_PAID: 'Partial Paid'
+        PARTIAL_PAID: 'Partial Paid',
+        VIDEO_REQUEST_SUBMITTED: 'Video Request Submitted',
     }
 
     public readonly TRANSACTION_TYPE: any = {

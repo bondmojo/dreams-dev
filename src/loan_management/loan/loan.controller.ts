@@ -1,16 +1,19 @@
-import { DisbursedLoanDto, CreateLoanDto, CreateRepaymentTransactionDto } from './dto';
+import { DisbursedLoanDto, CreateLoanDto, CreateRepaymentTransactionDto, VideoReceivedCallbackDto } from './dto';
 import { Body, Controller, Param, Post, Get } from '@nestjs/common';
 import { LoanService } from "./usecases/loan.service";
 import { CustomLogger } from "../../custom_logger";
 import { PaymentReminderService } from "./notification/payment-reminder.service";
 import { UpdateLoanDto } from './dto/update-loan.dto';
-
+import { ClientService } from '../client/usecases/client.service';
+import { GlobalService } from 'src/globals/usecases/global.service';
 @Controller('loan')
 export class LoanController {
   private readonly logger = new CustomLogger(LoanController.name);
   constructor(
     private readonly loanService: LoanService,
+    private readonly clientService: ClientService,
     private readonly paymentReminderService: PaymentReminderService,
+    private readonly globalService: GlobalService,
   ) { }
 
   @Post()
@@ -24,10 +27,7 @@ export class LoanController {
     @Body() updateloanDto: UpdateLoanDto) {
     this.logger.log(`Updating loan Status. request ${JSON.stringify(updateloanDto)}`);
     return await this.loanService.updateLoanStatus(updateloanDto);
-
-
   }
-
 
   @Post('disbursed')
   async disbursed(@Body() disbursedLoanDto: DisbursedLoanDto) {
@@ -52,6 +52,22 @@ export class LoanController {
   async findOne(@Param('id') id: string) {
     this.logger.log('Getting loan with request id =' + id);
     return await this.loanService.findOne({ id: id });
+  }
+
+  @Post('videoReceivedCallback')
+  async videoReceivedCallback(
+    @Body() videoReceivedCallbackDto: VideoReceivedCallbackDto) {
+    if (!videoReceivedCallbackDto.sendpulse_id) {
+      return;
+    }
+    const client = await this.clientService.findbySendpulseId(videoReceivedCallbackDto.sendpulse_id);
+    if (!client) {
+      return;
+    }
+    videoReceivedCallbackDto.client_id = client.id;
+
+    this.logger.log(`Handle Video Received Callback: request payload = ${JSON.stringify(videoReceivedCallbackDto)}`);
+    return await this.loanService.videoReceivedCallback(videoReceivedCallbackDto);
   }
 
 }

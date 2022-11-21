@@ -2,9 +2,11 @@ import { CreateLoanDto } from './create-loan.dto';
 import { GetLoanDto } from './get-loan.dto';
 import { DisbursedLoanDto } from './disbursed-loan.dto';
 import { CreateRepaymentTransactionDto } from './create-repayment-transaction.dto';
+import { VideoReceivedCallbackDto } from './video-received-callback.dto';
 export {
   CreateLoanDto,
   GetLoanDto,
   DisbursedLoanDto,
-  CreateRepaymentTransactionDto
+  CreateRepaymentTransactionDto,
+  VideoReceivedCallbackDto
 };

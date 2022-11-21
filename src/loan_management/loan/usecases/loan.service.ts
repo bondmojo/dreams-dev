@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { InjectRepository } from '@nestjs/typeorm';
-import { DisbursedLoanDto, CreateRepaymentTransactionDto, GetLoanDto } from "../dto";
+import { DisbursedLoanDto, CreateRepaymentTransactionDto, GetLoanDto, VideoReceivedCallbackDto } from "../dto";
 import { CustomLogger } from "../../../custom_logger";
 import { Loan } from '../entities/loan.entity';
 import { LoanHelperService } from "./loan-helper.service";
@@ -184,4 +184,26 @@ export class LoanService {
 
         return false;
     }
+
+    async videoReceivedCallback(videoReceivedCallbackDto: VideoReceivedCallbackDto): Promise<any> {
+        // FIXME: handle if requested loans are more then one
+        const loan = await this.loanRepository.findOne({
+            where: {
+                client_id: videoReceivedCallbackDto.client_id,
+                status: this.globalService.LOAN_STATUS.REQUESTED
+            },
+            order: { ['created_at']: 'DESC' }
+        });
+
+        if (!loan) {
+            this.log.log(`Requested Loan not found for ${videoReceivedCallbackDto.client_id}`);
+            throw new BadRequestException('Forbidden', `No Requested loan found for client id ${videoReceivedCallbackDto.client_id}`);
+        }
+
+        await this.zohoLoanHelperService.updateZohoLoanStatus(loan.zoho_loan_id, this.globalService.ZOHO_LOAN_STATUS.VIDEO_REQUEST_SUBMITTED, this.globalService.ZOHO_MODULES.LOAN);
+        await this.sendpulseLoanHelperService.triggerFlow(videoReceivedCallbackDto.sendpulse_id, this.globalService.SENDPULSE_FLOW['FLOW_4.9']);
+        return true;
+    }
+
+
 }
