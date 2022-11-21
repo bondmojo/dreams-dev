@@ -133,9 +133,9 @@ export class GlobalService {
         // Payment Confirmation FLow
         "FLOW_7.4": this.isDev ? "637b3068f4f6fb4873206fcb" : '63502fb40f6f1901106bde54',
         // Video Received Confirmation Flow
-        "FLOW_4.9": this.isDev ? '63722b1c383fae7ce1107fa4' : '',
+        "FLOW_4.9": this.isDev ? '63722b1c383fae7ce1107fa4' : '637b687dbaff8b1f2208d173',
         // Send Video Message Flow
-        "FLOW_4.6": this.isDev ? '6372277f3431f37834181fcd' : ''
+        "FLOW_4.6": this.isDev ? '6372277f3431f37834181fcd' : '637b67e282e795597a04e5a9'
 
 
     }
