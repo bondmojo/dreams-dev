@@ -19,7 +19,7 @@ export class KycCompletionUpdateUsecase {
                 const validStatuses = ["None", "New", "Loan Requested"];
                 const status = dreamer.status.value;
 
-                this.log.log(`KYC Callback: Dreamer details =` + JSON.stringify(dreamer));
+                this.log.log(`KYC Callback: Dreamer status =` + dreamer.status);
                 if (!status || validStatuses.includes(dreamer.status.value)) {
                         this.log.log(`KYC Callback Valid dreamer status ${status} for dreamer details =${dreamer.id} : updating zoho with details`);
                         await this.repository.updatekycDetails(event);
