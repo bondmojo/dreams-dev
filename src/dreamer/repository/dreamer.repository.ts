@@ -133,7 +133,8 @@ export class DreamerRepository {
 
         const user = new User();
         //Assign Kalyana as lead owner
-        user.setId(BigInt("408266000000551006"));
+        //FIXME: Set from ENV or Global Services
+        user.setId(BigInt("364346000001112048"));
         record.addFieldValue(Field.Leads.OWNER, user);
 
         //Moving this data to loan module
