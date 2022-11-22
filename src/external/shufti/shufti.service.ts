@@ -48,7 +48,7 @@ export class ShuftiService {
                 headers: { 'Authorization': 'BASIC ' + this.shuftiAuth }
             }
         ));
-        this.logger.log(`Received response from shufti ${response.statusText}`);
+        this.logger.log(`Received response from shufti for zoho ID =${dreamerId}  Status = ${JSON.stringify(response.statusText)} and URL = ${response.data.verification_url}`);
         return response.data.verification_url;
     }
 

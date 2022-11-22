@@ -6,10 +6,10 @@ export class DreamerModel {
     lastName: string;
     name: string;
     loanRequest: LoanRequest;
+    status: any;
     utmSorce: string;
     utmMedium: string;
     utmCampaign: string;
-    status: any;
 }
 
 export class LoanRequest {
