@@ -91,8 +91,8 @@ export class DreamerRepository {
         dreamer.setId(id);
 
         const user = new User();
-        //Assign Kalyana as lead owner
-        user.setId(BigInt("364346000001112048"));
+        //Assign to lead owner(Kalyana)
+        user.setId(BigInt(process.env.ZOHO_LEAD_OWNER_ID));
         record.addFieldValue(Field.Leads.OWNER, user);
 
         record.addKeyValue("Dreamer_Name", dreamer);
@@ -132,9 +132,8 @@ export class DreamerRepository {
         record.addFieldValue(Field.Leads.LEAD_STATUS, new Choice('New'));
 
         const user = new User();
-        //Assign Kalyana as lead owner
-        //FIXME: Set from ENV or Global Services
-        user.setId(BigInt("364346000001112048"));
+        //Assign to lead owner(Kalyana)
+        user.setId(BigInt(process.env.ZOHO_LEAD_OWNER_ID));
         record.addFieldValue(Field.Leads.OWNER, user);
 
         //Moving this data to loan module
