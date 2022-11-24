@@ -21,4 +21,9 @@ export class ZohoLoanHelperService {
         return false;
     }
 
+    async updateZohoFields(module_id: string, zohoKeyValuePairs: object, module_name: string): Promise<any> {
+        this.updateFieldsOnZohoUsecase.update(module_id, zohoKeyValuePairs, module_name);
+        return false;
+    }
+
 }

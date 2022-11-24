@@ -16,7 +16,7 @@ import { UpdateApplicationStatusRequestDto } from "src/external/sendpulse/dto/up
 import { UpdateLoanDto } from "../dto/update-loan.dto";
 import { ZohoLoanHelperService } from "./zoho-loan-helper.service";
 import { SendpulseLoanHelperService } from "./sendpulse-loan-helper.service";
-
+import { Choice } from "@zohocrm/typescript-sdk-2.0/utils/util/choice";
 
 @Injectable()
 export class LoanService {
@@ -178,8 +178,12 @@ export class LoanService {
         await this.loanHelperService.createCreditDisbursementTransaction(loan, disbursedLoanDto);
         await this.loanHelperService.checkAndCreateWingTransferFeeTransaction(loan, disbursedLoanDto);
         await this.loanHelperService.updateLoanDataAfterDisbursement(loan, disbursedLoanDto);
-
-        await this.zohoLoanHelperService.updateZohoLoanStatus(loan.zoho_loan_id, this.globalService.ZOHO_LOAN_STATUS.DISBURSED, this.globalService.ZOHO_MODULES.LOAN);
+        const zohoKeyValuePairs = {
+            Loan_Status: new Choice(this.globalService.ZOHO_LOAN_STATUS.DISBURSED),
+            Disbursal_Date: new Date(loan.disbursed_date),
+            Repayment_Date: new Date(loan.repayment_date)
+        };
+        await this.zohoLoanHelperService.updateZohoFields(loan.zoho_loan_id, zohoKeyValuePairs, this.globalService.ZOHO_MODULES.LOAN);
         return disbursedResponse;
     }
 

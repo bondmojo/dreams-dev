@@ -10,7 +10,8 @@ import { GlobalService } from "../../../globals/usecases/global.service"
 import { add } from 'date-fns';
 import { SendpluseService } from "src/external/sendpulse/sendpluse.service";
 import { ZohoLoanHelperService } from "./zoho-loan-helper.service";
-
+import { Choice } from "@zohocrm/typescript-sdk-2.0/utils/util/choice";
+import { differenceInCalendarDays } from "date-fns"
 
 @Injectable()
 export class LoanHelperService {
@@ -124,7 +125,12 @@ export class LoanHelperService {
             await this.updateSendpulseFieldsAsPerClientTier(loan, new_client_tier);
             await this.updateClientAfterFullyPaid(loan, createRepaymentTransactionDto);
             // Mark Loan Fully Paid on Zoho Loan Module
-            await this.zohoLoanHelperService.updateZohoLoanStatus(loan.zoho_loan_id, this.globalService.ZOHO_LOAN_STATUS.FULLY_PAID, this.globalService.ZOHO_MODULES.LOAN);
+            const zohoKeyValuePairs = {
+                Loan_Status: new Choice(this.globalService.ZOHO_LOAN_STATUS.FULLY_PAID),
+                Repaid_Date: new Date(loan.paid_date),
+                Days_Repaid_in: differenceInCalendarDays(new Date(loan.paid_date), new Date(loan.disbursed_date)),
+            };
+            await this.zohoLoanHelperService.updateZohoFields(loan.zoho_loan_id, zohoKeyValuePairs, this.globalService.ZOHO_MODULES.LOAN);
 
         }
         else if (createRepaymentTransactionDto.amount < loan.outstanding_amount) {
