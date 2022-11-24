@@ -8,7 +8,7 @@ import { LoanService } from "../../loan/usecases/loan.service";
 import { OnEvent } from "@nestjs/event-emitter";
 import { GlobalService } from "../../../globals/usecases/global.service"
 import { SendpluseService } from "src/external/sendpulse/sendpluse.service";
-
+import { format } from 'date-fns'
 @Injectable()
 export class ClientService {
     private readonly log = new CustomLogger(ClientService.name);
@@ -42,7 +42,8 @@ export class ClientService {
         });
         // appending max_credit_amount to client object
         const max_credit_amount = this.globalService.TIER_AMOUNT[client.tier];
-        return { ...client, max_credit_amount: max_credit_amount };
+        const today_date = format(new Date(), 'qo MMMM yyyy')
+        return { ...client, max_credit_amount: max_credit_amount, today_date: today_date };
     }
 
     async findbySendpulseId(id: string): Promise<Client[] | any> {
