@@ -82,6 +82,9 @@ export class Client {
   district: string;
 
   @Column({ nullable: true })
+  house_no: string;
+
+  @Column({ nullable: true })
   province: string;
 
   @Column({ nullable: true })

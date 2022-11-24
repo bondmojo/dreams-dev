@@ -24,7 +24,7 @@ export class CreateClientAndLoanDto {
   district: string;
   province: string;
   national_id: string;
-
+  house_no: string;
   // Loan Fields
   client_id: string;
   amount: number;

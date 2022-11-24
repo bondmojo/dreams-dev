@@ -19,6 +19,7 @@ export class CreateClientDto {
   commune: string; //User’s Commune (Current Living Location)
   district: string;
   province: string;
+  house_no: string;
   national_id: string;
   summary_has_loan_in_arrear: string;
   summary_membership_level: string;
