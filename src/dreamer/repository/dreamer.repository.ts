@@ -174,6 +174,7 @@ export class DreamerRepository {
     }
 
     async updateAdditionalDetails(dreamerId: string, additionalDetails: AdditionalDetailsRequestDto): Promise<string> {
+        // FIXME :: replace with updateFieldsOnZoho
         const record = new Record();
         record.addKeyValue('Address_Line_1', additionalDetails.addressLine1);
         record.addKeyValue('Address_Line_2', additionalDetails.addressLine2);
@@ -194,6 +195,7 @@ export class DreamerRepository {
     }
 
     async saveKycInitialDetails(dreamerId: string, kycId: string): Promise<string> {
+        // FIXME :: replace with updateFieldsOnZoho
         const record = new Record();
         record.addKeyValue('KYC_Id', kycId);
         record.addKeyValue('Successful_KYC_Time', new Date());
@@ -270,6 +272,7 @@ export class DreamerRepository {
         }
     }
 
+    // This function should be use for all future update implementations.
     async updateFieldsOnZoho(id: string, zohoKeyValuePairs: any, moduleName: string): Promise<string> {
         // zohoDataKeyValuePair should be key value pair
         const record = new Record();
