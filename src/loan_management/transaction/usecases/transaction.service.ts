@@ -4,6 +4,7 @@ import { GetTransactionDto } from "../dto";
 import { CustomLogger } from "../../../custom_logger";
 import { Transaction } from '../entities/transaction.entity';
 import { Repository } from 'typeorm';
+import { GlobalService } from "../../../globals/usecases/global.service";
 
 @Injectable()
 export class TransactionService {
@@ -12,6 +13,7 @@ export class TransactionService {
     constructor(
         @InjectRepository(Transaction)
         private readonly transactionRepository: Repository<Transaction>,
+        private readonly globalService: GlobalService,
     ) { }
 
     async create(createTransactionDto: any): Promise<Transaction> {
@@ -27,6 +29,14 @@ export class TransactionService {
             order: { ['created_at']: 'DESC' }
         });
         return transaction;
+    }
+
+    async getTotalPaidAmount(loan_id: string): Promise<number> {
+        const total_paid_amount = (await this.transactionRepository.find({
+            where: { loan_id: loan_id, type: this.globalService.TRANSACTION_TYPE.PARTIAL_PAYMENT },
+        })).reduce((acc, item) => acc = acc + item.amount, 0);
+        return total_paid_amount;
+
     }
 
 }

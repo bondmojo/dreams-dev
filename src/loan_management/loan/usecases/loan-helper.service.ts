@@ -104,6 +104,7 @@ export class LoanHelperService {
             where: { id: createRepaymentTransactionDto.loan_id },
             relations: ['client']
         });
+        let zohoKeyValuePairs: any = {};
 
         if (!loan || !createRepaymentTransactionDto.amount || loan.status != this.globalService.LOAN_STATUS.DISBURSED) {
             throw new BadRequestException('Forbidden', 'Loan status is not disbursed');
@@ -125,21 +126,25 @@ export class LoanHelperService {
             await this.updateSendpulseFieldsAsPerClientTier(loan, new_client_tier);
             await this.updateClientAfterFullyPaid(loan, createRepaymentTransactionDto);
             // Mark Loan Fully Paid on Zoho Loan Module
-            const zohoKeyValuePairs = {
+            zohoKeyValuePairs = {
                 Loan_Status: new Choice(this.globalService.ZOHO_LOAN_STATUS.FULLY_PAID),
                 Repaid_Date: new Date(),
                 Days_Repaid_in: differenceInCalendarDays(new Date(), new Date(loan.disbursed_date)),
             };
-            await this.zohoLoanHelperService.updateZohoFields(loan.zoho_loan_id, zohoKeyValuePairs, this.globalService.ZOHO_MODULES.LOAN);
 
         }
         else if (createRepaymentTransactionDto.amount < loan.outstanding_amount) {
             // Case: Partial payment
             await this.doProcessPartialPayment(loan, createRepaymentTransactionDto);
             // Mark Loan Partial Paid on Zoho Loan Module
-            await this.zohoLoanHelperService.updateZohoLoanStatus(loan.zoho_loan_id, this.globalService.ZOHO_LOAN_STATUS.PARTIAL_PAID, this.globalService.ZOHO_MODULES.LOAN);
-
+            zohoKeyValuePairs = {
+                Loan_Status: new Choice(this.globalService.ZOHO_LOAN_STATUS.PARTIAL_PAID),
+            };
         }
+
+        zohoKeyValuePairs.Paid_Amount = await this.transactionService.getTotalPaidAmount(createRepaymentTransactionDto.loan_id);
+        zohoKeyValuePairs.Outstanding_Balance = loan.outstanding_amount - createRepaymentTransactionDto.amount;
+        await this.zohoLoanHelperService.updateZohoFields(loan.zoho_loan_id, zohoKeyValuePairs, this.globalService.ZOHO_MODULES.LOAN);
         return creditRepaymentResponse;
     }
 
