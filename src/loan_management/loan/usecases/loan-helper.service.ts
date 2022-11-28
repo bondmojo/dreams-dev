@@ -144,7 +144,7 @@ export class LoanHelperService {
 
         zohoKeyValuePairs.Paid_Amount = await this.transactionService.getTotalPaidAmount(createRepaymentTransactionDto.loan_id);
         zohoKeyValuePairs.Outstanding_Balance = loan.outstanding_amount - createRepaymentTransactionDto.amount;
-        await this.zohoLoanHelperService.updateZohoFields(loan.zoho_loan_id, zohoKeyValuePairs, this.globalService.ZOHO_MODULES.LOAN);
+        this.zohoLoanHelperService.updateZohoFields(loan.zoho_loan_id, zohoKeyValuePairs, this.globalService.ZOHO_MODULES.LOAN);
         return creditRepaymentResponse;
     }
 
