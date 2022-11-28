@@ -127,8 +127,7 @@ export class LoanHelperService {
             // Mark Loan Fully Paid on Zoho Loan Module
             const zohoKeyValuePairs = {
                 Loan_Status: new Choice(this.globalService.ZOHO_LOAN_STATUS.FULLY_PAID),
-                // FIXME :: Repaid date is giving invalid data error.
-                // Repaid_Date: new Date(),
+                Repaid_Date: new Date(),
                 Days_Repaid_in: differenceInCalendarDays(new Date(), new Date(loan.disbursed_date)),
             };
             await this.zohoLoanHelperService.updateZohoFields(loan.zoho_loan_id, zohoKeyValuePairs, this.globalService.ZOHO_MODULES.LOAN);
