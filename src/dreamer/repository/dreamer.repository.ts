@@ -99,7 +99,12 @@ export class DreamerRepository {
         record.addKeyValue("Name", loanDto.lmsLoanId);
 
         record.addKeyValue("Loan_Ammount", Number(loanDto.loanAmount));
+        record.addKeyValue('Outstanding_Balance', Number(loanDto.outstanding_amount));
         record.addKeyValue("Membership_Point", Number(loanDto.dreamPoints));
+
+        record.addKeyValue('Sendpulse_URL', loanDto.sendpulse_url);
+        record.addKeyValue('Retool_URL', loanDto.retool_url);
+
 
         record.addKeyValue('Provider_Bank', loanDto.preferredPaymentMethod);
         record.addKeyValue('Account_No', loanDto.paymentAccountNumber);
@@ -111,8 +116,7 @@ export class DreamerRepository {
             this.log.log("no membership tier found. for =" + (await dreamerModel).name);
             loanDto.membershipTier = "1";
         }
-        record.addKeyValue("Loan_Tier_Membership", loanDto.membershipTier);
-
+        record.addKeyValue("Loan_Tier_Membership", '' + loanDto.membershipTier);
         const map: Map<string, any> = await this.zohoservice.saveRecord(record, 'Loans');
         this.log.log(`Successfully saved user loan for zoho user ${dreamerId} as ${map.get('id')}`);
 

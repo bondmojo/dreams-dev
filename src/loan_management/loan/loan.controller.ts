@@ -19,6 +19,8 @@ export class LoanController {
   @Post()
   async createLoan(@Body() createLoanDto: CreateLoanDto) {
     this.logger.log(`Creating loan with request ${JSON.stringify(createLoanDto)}`);
+    const client = await this.clientService.findbyId(createLoanDto.client_id);
+    createLoanDto.sendpulse_id = client.sendpulse_id;
     return await this.loanService.create(createLoanDto);
   }
 

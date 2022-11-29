@@ -102,7 +102,9 @@ export class LoanService {
         zohoLoanDto.preferredPaymentMethod = createLoanDto.acc_provider_type;
         zohoLoanDto.paymentVia = createLoanDto.wire_transfer_type;
         zohoLoanDto.membershipTier = createLoanDto.membership_tier;
-
+        zohoLoanDto.outstanding_amount = createLoanDto.outstanding_amount;
+        zohoLoanDto.sendpulse_url = this.globalService.BASE_SENDPULSE_URL + createLoanDto?.sendpulse_id;;
+        zohoLoanDto.retool_url = this.globalService.BASE_RETOOL_URL + "#customer_id=" + createLoanDto?.client_id;;
         return await this.dreamerCreateLoanService.create(zohoLoanDto);
     }
 

@@ -8,6 +8,9 @@ export class CreateZohoLoanApplicationDto {
   preferredPaymentMethod: string;
   paymentAccountNumber: string;
   paymentVia: string;
+  outstanding_amount: number;
+  sendpulse_url: string;
+  retool_url: string;
   //loanOwner: string;
   lmsLoanId: string;
 

@@ -4,6 +4,7 @@ export class CreateLoanDto {
   amount: number;
   currency: string;
   dream_point: number;
+  outstanding_balance?: number;
   status: string;
   created_date: Date;
   disbursed_date: Date;
