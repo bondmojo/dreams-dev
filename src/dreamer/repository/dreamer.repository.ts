@@ -143,6 +143,8 @@ export class DreamerRepository {
         record.addKeyValue('Telegram_Chat_ID', dreamer.externalId);
         record.addKeyValue('Amount', dreamer.loanRequest.amount);
         record.addKeyValue('Points', dreamer.loanRequest.pointsAmount);
+        record.addKeyValue('Sendpulse_URL', dreamer.sendpulse_url);
+
         // UTM Params
         record.addKeyValue('utm_Source', dreamer.utmSorce);
         record.addKeyValue('utm_Medium', dreamer.utmMedium);

@@ -7,6 +7,7 @@ export class DreamerModel {
     name: string;
     loanRequest: LoanRequest;
     status: any;
+    sendpulse_url: string;
     utmSorce: string;
     utmMedium: string;
     utmCampaign: string;
