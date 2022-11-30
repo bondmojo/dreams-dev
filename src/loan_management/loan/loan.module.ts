@@ -12,6 +12,7 @@ import { LoanController } from './loan.controller';
 import { PaymentReminderService } from './notification/payment-reminder.service';
 import { LoanHelperService } from './usecases/loan-helper.service';
 import { LoanService } from './usecases/loan.service';
+import { LoanMigrationService } from './usecases/loan-migration.service';
 import { ZohoLoanHelperService } from './usecases/zoho-loan-helper.service';
 import { SendpulseLoanHelperService } from './usecases/sendpulse-loan-helper.service';
 
@@ -19,7 +20,7 @@ import { SendpulseLoanHelperService } from './usecases/sendpulse-loan-helper.ser
   imports: [forwardRef(() => ClientModule), forwardRef(() => DreamerModule), TransactionModule, TypeOrmModule.forFeature([Loan]), SendpulseModule, GlobalModule],
   controllers: [LoanController],
   providers: [
-    LoanService, LoanHelperService, PaymentReminderService, ZohoLoanHelperService, SendpulseLoanHelperService],
+    LoanService, LoanMigrationService, LoanHelperService, PaymentReminderService, ZohoLoanHelperService, SendpulseLoanHelperService],
   exports: [LoanService, LoanHelperService, PaymentReminderService]
 })
 export class LoanModule { }

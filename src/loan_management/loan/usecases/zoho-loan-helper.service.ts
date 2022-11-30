@@ -17,12 +17,12 @@ export class ZohoLoanHelperService {
         const zohoKeyValuePairs = {
             Loan_Status: new Choice(status)
         };
-        this.updateFieldsOnZohoUsecase.update(zoho_loan_id, zohoKeyValuePairs, module);
+        await this.updateFieldsOnZohoUsecase.update(zoho_loan_id, zohoKeyValuePairs, module);
         return false;
     }
 
     async updateZohoFields(module_id: string, zohoKeyValuePairs: object, module_name: string): Promise<any> {
-        this.updateFieldsOnZohoUsecase.update(module_id, zohoKeyValuePairs, module_name);
+        await this.updateFieldsOnZohoUsecase.update(module_id, zohoKeyValuePairs, module_name);
         return false;
     }
 

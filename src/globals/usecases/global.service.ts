@@ -56,7 +56,7 @@ export class GlobalService {
     }
 
     public readonly ZOHO_MODULES: any = {
-        DEAMER: 'Leads',
+        DREAMER: 'Leads',
         LOAN: 'Loans',
         TASK: 'Tasks',
     }

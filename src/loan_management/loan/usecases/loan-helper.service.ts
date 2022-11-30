@@ -128,8 +128,8 @@ export class LoanHelperService {
             // Mark Loan Fully Paid on Zoho Loan Module
             zohoKeyValuePairs = {
                 Loan_Status: new Choice(this.globalService.ZOHO_LOAN_STATUS.FULLY_PAID),
-                Repaid_Date: new Date(),
-                Days_Repaid_in: differenceInCalendarDays(new Date(), new Date(loan.disbursed_date)),
+                Last_Repaid_Date: new Date(),
+                Days_Fully_Paid: differenceInCalendarDays(new Date(), new Date(loan.disbursed_date)),
             };
 
         }
@@ -139,6 +139,7 @@ export class LoanHelperService {
             // Mark Loan Partial Paid on Zoho Loan Module
             zohoKeyValuePairs = {
                 Loan_Status: new Choice(this.globalService.ZOHO_LOAN_STATUS.PARTIAL_PAID),
+                Last_Repaid_Date: new Date(),
             };
         }
 
