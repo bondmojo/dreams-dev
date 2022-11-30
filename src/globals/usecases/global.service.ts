@@ -96,7 +96,7 @@ export class GlobalService {
     }
 
     public readonly BASE_RETOOL_URL = this.isDev ? "https://gojo.retool.com/apps/ed171e5c-250d-11ed-b962-9fea298077ce/CBS?_environment=staging&_releaseVersion=latest" : "https://gojo.retool.com/apps/ed171e5c-250d-11ed-b962-9fea298077ce/CBS?_environment=production&_releaseVersion=latest";
-    public readonly BASE_SENDPULSE_URL = this.isDev ? "https://login.sendpulse.com/messengers/chats/62bad9dd3ceed143a323bc5f/contacts/open/" : "https://login.sendpulse.com/messengers/chats/63087d88e330bc7fb767d166/contacts/open/";
+    public readonly BASE_SENDPULSE_URL = this.isDev ? "https://login.sendpulse.com/messengers/chats/62bad9dd3ceed143a323bc5f/contacts/all/" : "https://login.sendpulse.com/messengers/chats/63087d88e330bc7fb767d166/contacts/all/";
 
     public readonly DISBURSEMENT_TASK_ASSIGNEE = "mohit.joshi@gojo.co";
     public readonly PAYMENT_TASK_ASSIGNEE = "mohit.joshi@gojo.co";
