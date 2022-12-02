@@ -46,7 +46,7 @@ export class Loan {
   wing_code: string;
 
   @Column({ type: 'float', default: 0 })
-  wing_wei_luy_transfer_fee: number; // storing in DB bcz if the value change in future then it will lead to misscalculations.
+  wing_wei_luy_transfer_fee: number; // storing in DB bcz if the value change in future then it will lead to miscalculation.
 
   @Column({ nullable: true })
   status: string;
@@ -77,4 +77,10 @@ export class Loan {
 
   @Column({ nullable: true, unique: false })
   tier: string;
+
+  @Column({ nullable: true })
+  payment_status: string;
+
+  @Column({ type: 'float', default: 0 })
+  late_fee: number;
 };
