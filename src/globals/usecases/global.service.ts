@@ -29,6 +29,13 @@ export class GlobalService {
         VIDEO_REQUEST_SUBMITTED: 'Video Request Submitted',
     }
 
+    public readonly LOAN_PAYMENT_STATUS: any = {
+        PAID_ON_TIME: 'Paid On Time',
+        PAID_LATE: 'Paid Late',
+        PAYMENT_DUE: 'Payment Due',
+        PAYMENT_RESCHEDULED: 'Payment Rescheduled'
+    }
+
     public readonly TRANSACTION_TYPE: any = {
         DEBIT_WING_WEI_LUY_TRANSFER_FEE: 'debit_wing_wei_luy_transfer_fee',
         CREDIT_WING_WEI_LUY_TRANSFER_FEE: 'credit_wing_wei_luy_transfer_fee',

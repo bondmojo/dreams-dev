@@ -1,9 +1,10 @@
-import { DisbursedLoanDto, CreateLoanDto, CreateRepaymentTransactionDto, VideoReceivedCallbackDto } from './dto';
+import { DisbursedLoanDto, CreateLoanDto, CreateRepaymentTransactionDto, VideoReceivedCallbackDto, HandlePaymentDueLoansDto } from './dto';
 import { Body, Controller, Param, Post, Get } from '@nestjs/common';
 import { LoanService } from "./usecases/loan.service";
 import { LoanMigrationService } from "./usecases/loan-migration.service";
 import { CustomLogger } from "../../custom_logger";
 import { PaymentReminderService } from "./notification/payment-reminder.service";
+import { HandleLatePaymentService } from "./usecases/handle-late-payment.service";
 import { UpdateLoanDto } from './dto/update-loan.dto';
 import { ClientService } from '../client/usecases/client.service';
 import { GlobalService } from 'src/globals/usecases/global.service';
@@ -15,7 +16,8 @@ export class LoanController {
     private readonly clientService: ClientService,
     private readonly paymentReminderService: PaymentReminderService,
     private readonly globalService: GlobalService,
-    private readonly loanMigrationService: LoanMigrationService
+    private readonly loanMigrationService: LoanMigrationService,
+    private readonly handleLatePaymentService: HandleLatePaymentService,
   ) { }
 
   @Post()
@@ -78,5 +80,11 @@ export class LoanController {
   async migrateData() {
     this.logger.log(`Migrating Zoho Loan data with Database Loan Data `);
     return await this.loanMigrationService.migrateData();
+  }
+
+  @Post('runHandlePaymentDueLoansCron')
+  async runHandlePaymentDueLoansCron(@Body() handlePaymentDueLoansDto: HandlePaymentDueLoansDto) {
+    this.logger.log(`Marking Loan Payment Status to Payment Due  ${JSON.stringify(handlePaymentDueLoansDto)}`);
+    return await this.handleLatePaymentService.runHandlePaymentDueLoansCron(handlePaymentDueLoansDto);
   }
 }
