@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Cron } from '@nestjs/schedule';
 import { CustomLogger } from 'src/custom_logger';
 import { Loan } from '../entities/loan.entity';
-import { Repository, Not, LessThan, Between } from 'typeorm';
+import { Repository, Not, LessThanOrEqual, Between, In, IsNull } from 'typeorm';
 import { addDays, subDays, differenceInDays, startOfDay, endOfDay, format } from "date-fns";
 import { GlobalService } from "../../../globals/usecases/global.service";
 import { ZohoLoanHelperService } from "./zoho-loan-helper.service";
@@ -53,10 +53,16 @@ export class HandleLatePaymentService {
   async fetchCustomersByDueDate(dueDate: Date): Promise<Loan[] | null> {
     this.log.log("FETCHing Clients with Due date =" + dueDate);
     const loansPromise = await this.loanRepository.find({
-      where: {
-        repayment_date: Between(startOfDay(dueDate), endOfDay(dueDate)),
-        status: Not("Fully Paid")
-      },
+      where: [{
+        repayment_date: LessThanOrEqual(dueDate),
+        status: In([this.globalService.LOAN_STATUS.DISBURSED]),
+        payment_status: Not(this.globalService.LOAN_PAYMENT_STATUS.PAYMENT_DUE),
+      }, {
+        repayment_date: LessThanOrEqual(dueDate),
+        status: In([this.globalService.LOAN_STATUS.DISBURSED]),
+        payment_status: IsNull(),
+      }
+      ],
       relations: ['client']
     });
     this.log.log("Due Date loans=" + JSON.stringify(loansPromise) + dueDate);
