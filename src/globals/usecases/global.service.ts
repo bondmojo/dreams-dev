@@ -11,6 +11,7 @@ export class GlobalService {
 
 
     public readonly LOAN_FEES: number = 3;
+    public readonly LOAN_LATE_FEE_EACH_MONTH: number = 3;
 
     public readonly LOAN_STATUS: any = {
         APPROVED: 'Approved',

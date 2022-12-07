@@ -1,4 +1,4 @@
-import { DisbursedLoanDto, CreateLoanDto, CreateRepaymentTransactionDto, VideoReceivedCallbackDto, HandlePaymentDueLoansDto } from './dto';
+import { DisbursedLoanDto, CreateLoanDto, CreateRepaymentTransactionDto, VideoReceivedCallbackDto, HandlePaymentDueLoansDto, UpdateRepaymentDateDto } from './dto';
 import { Body, Controller, Param, Post, Get } from '@nestjs/common';
 import { LoanService } from "./usecases/loan.service";
 import { LoanMigrationService } from "./usecases/loan-migration.service";
@@ -8,6 +8,7 @@ import { HandleLatePaymentService } from "./usecases/handle-late-payment.service
 import { UpdateLoanDto } from './dto/update-loan.dto';
 import { ClientService } from '../client/usecases/client.service';
 import { GlobalService } from 'src/globals/usecases/global.service';
+import { UpdateRepaymentDateUsecase } from "./usecases/update-repayment-date.usecase";
 @Controller('loan')
 export class LoanController {
   private readonly logger = new CustomLogger(LoanController.name);
@@ -18,6 +19,7 @@ export class LoanController {
     private readonly globalService: GlobalService,
     private readonly loanMigrationService: LoanMigrationService,
     private readonly handleLatePaymentService: HandleLatePaymentService,
+    private readonly updateRepaymentDateUsecase: UpdateRepaymentDateUsecase,
   ) { }
 
   @Post()
@@ -86,5 +88,12 @@ export class LoanController {
   async runHandlePaymentDueLoansCron(@Body() handlePaymentDueLoansDto: HandlePaymentDueLoansDto) {
     this.logger.log(`Marking Loan Payment Status to Payment Due  ${JSON.stringify(handlePaymentDueLoansDto)}`);
     return await this.handleLatePaymentService.runHandlePaymentDueLoansCron(handlePaymentDueLoansDto);
+  }
+
+
+  @Post('updateRepaymentDate')
+  async updateRepaymentDate(@Body() updateRepaymentDateDto: UpdateRepaymentDateDto) {
+    this.logger.log(`Updating Repayment Date ${JSON.stringify(updateRepaymentDateDto)}`);
+    return await this.updateRepaymentDateUsecase.updateRepaymentDate(updateRepaymentDateDto);
   }
 }
