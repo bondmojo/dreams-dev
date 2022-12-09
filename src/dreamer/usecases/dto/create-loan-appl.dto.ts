@@ -11,6 +11,9 @@ export class CreateZohoLoanApplicationDto {
   outstanding_amount: number;
   sendpulse_url: string;
   retool_url: string;
+  disbursed_amount: number;
+  loan_fee: number;
+  wing_wei_luy_transfer_fee: number;
   //loanOwner: string;
   lmsLoanId: string;
 

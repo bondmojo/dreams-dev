@@ -101,7 +101,9 @@ export class DreamerRepository {
         record.addKeyValue("Loan_Ammount", Number(loanDto.loanAmount));
         record.addKeyValue('Outstanding_Balance', Number(loanDto.outstanding_amount));
         record.addKeyValue("Membership_Point", Number(loanDto.dreamPoints));
-
+        record.addKeyValue('Disbursed_Amount', Number(loanDto.disbursed_amount));
+        record.addKeyValue('Loan_Fee', Number(loanDto.loan_fee));
+        record.addKeyValue('Wing_Wei_Luy_Transfer_Fee', Number(loanDto.wing_wei_luy_transfer_fee));
         record.addKeyValue('Sendpulse_URL', loanDto.sendpulse_url);
         record.addKeyValue('Retool_URL', loanDto.retool_url);
 
@@ -111,7 +113,6 @@ export class DreamerRepository {
         record.addKeyValue('Payment_Via', loanDto.paymentVia);
 
         record.addKeyValue("Loan_Status", new Choice(loanDto.loanStatus));
-
         if (!loanDto.membershipTier) {
             this.log.log("no membership tier found. for =" + (await dreamerModel).name);
             loanDto.membershipTier = "1";

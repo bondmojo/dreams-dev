@@ -11,6 +11,8 @@ export class GlobalService {
 
 
     public readonly LOAN_FEES: number = 3;
+    public readonly LOAN_LATE_FEE_EACH_MONTH: number = 3;
+    public readonly LOAN_GRACE_PERIOD_DAYS: number = 3;
 
     public readonly LOAN_STATUS: any = {
         APPROVED: 'Approved',
@@ -44,6 +46,7 @@ export class GlobalService {
         DREAM_POINT_EARNED: 'dream_point_earned',
         CREDIT_REPAYMENT: 'credit_repayment',
         FEE_PAYMENT: 'fee_payment',
+        LATE_FEE: 'late_fee',
         PARTIAL_PAYMENT: 'partial_payment',
         DREAM_POINT_REFUND: 'dream_point_refund',
     };

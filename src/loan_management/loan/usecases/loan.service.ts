@@ -89,7 +89,7 @@ export class LoanService {
         return loanFromDb;
     }
 
-    async createLoanInZoho(createLoanDto: any) {
+    async createLoanInZoho(createLoanDto: any): Promise<any> {
 
         const zohoLoanDto = new CreateZohoLoanApplicationDto();
         zohoLoanDto.lmsLoanId = createLoanDto.id;
@@ -102,6 +102,9 @@ export class LoanService {
         zohoLoanDto.preferredPaymentMethod = createLoanDto.acc_provider_type;
         zohoLoanDto.paymentVia = createLoanDto.wire_transfer_type;
         zohoLoanDto.membershipTier = createLoanDto.membership_tier;
+        zohoLoanDto.disbursed_amount = createLoanDto.amount - createLoanDto.dream_point;
+        zohoLoanDto.wing_wei_luy_transfer_fee = createLoanDto.wing_wei_luy_transfer_fee;
+        zohoLoanDto.loan_fee = this.globalService.LOAN_FEES;
         zohoLoanDto.outstanding_amount = createLoanDto.outstanding_amount;
         zohoLoanDto.sendpulse_url = this.globalService.BASE_SENDPULSE_URL + createLoanDto?.sendpulse_id;;
         zohoLoanDto.retool_url = this.globalService.BASE_RETOOL_URL + "#customer_id=" + createLoanDto?.client_id;;

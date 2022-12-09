@@ -83,4 +83,10 @@ export class Loan {
 
   @Column({ type: 'float', default: 0 })
   late_fee: number;
+
+  @Column({ type: 'int', default: 0, unsigned: true })
+  late_fee_applied_count: number;
+
+  @Column({ type: "json", nullable: true })
+  previous_repayment_dates: Date[];
 };

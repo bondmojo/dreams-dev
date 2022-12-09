@@ -25,6 +25,9 @@ export class CreateClientAndLoanDto {
   province: string;
   national_id: string;
   house_no: string;
+  utm_source: string;
+  utm_campaign: string;
+  utm_medium: string;
   // Loan Fields
   client_id: string;
   amount: number;

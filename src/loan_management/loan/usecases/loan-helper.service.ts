@@ -11,7 +11,7 @@ import { add } from 'date-fns';
 import { SendpluseService } from "src/external/sendpulse/sendpluse.service";
 import { ZohoLoanHelperService } from "./zoho-loan-helper.service";
 import { Choice } from "@zohocrm/typescript-sdk-2.0/utils/util/choice";
-import { differenceInCalendarDays } from "date-fns"
+import { differenceInCalendarDays, compareAsc, startOfDay, addDays } from "date-fns"
 
 @Injectable()
 export class LoanHelperService {
@@ -120,6 +120,7 @@ export class LoanHelperService {
             await this.createCreditRepaymentTransaction(loan, createRepaymentTransactionDto);
             await this.createFeePaymentTransaction(loan, createRepaymentTransactionDto);
             await this.checkAndCreateCreditWingTransferFeeTransaction(loan, createRepaymentTransactionDto);
+            await this.checkAndCreateLateFeeTransaction(loan, createRepaymentTransactionDto);
             await this.createDreamPointEarnedTransaction(loan, createRepaymentTransactionDto);
             await this.updateLoanAfterFullyPaid(loan, createRepaymentTransactionDto);
             const new_client_tier = +loan?.client?.tier + 1
@@ -130,6 +131,7 @@ export class LoanHelperService {
                 Loan_Status: new Choice(this.globalService.ZOHO_LOAN_STATUS.FULLY_PAID),
                 Last_Repaid_Date: new Date(),
                 Days_Fully_Paid: differenceInCalendarDays(new Date(), new Date(loan.disbursed_date)),
+                Payment_Status: this.calcLoanPaymentStatus(loan),
             };
 
         }
@@ -188,6 +190,20 @@ export class LoanHelperService {
         }
     }
 
+    async checkAndCreateLateFeeTransaction(loan: Loan, createRepaymentTransactionDto: CreateRepaymentTransactionDto): Promise<any> {
+        if (loan.late_fee) {
+            const transactionDto = {
+                loan_id: loan.id,
+                amount: loan.late_fee,
+                image: createRepaymentTransactionDto.image,
+                type: this.globalService.TRANSACTION_TYPE.LATE_FEE,
+                note: createRepaymentTransactionDto.note,
+            }
+            const transaction = await this.transactionService.create(transactionDto);
+            return transaction;
+        }
+    }
+
     async createDreamPointEarnedTransaction(loan: Loan, createRepaymentTransactionDto: CreateRepaymentTransactionDto): Promise<any> {
         const transactionDto = {
             loan_id: loan.id,
@@ -205,7 +221,8 @@ export class LoanHelperService {
         const fields_to_be_update: object = {
             outstanding_amount: 0,
             paid_date: today,
-            status: this.globalService.LOAN_STATUS.FULLY_PAID
+            status: this.globalService.LOAN_STATUS.FULLY_PAID,
+            payment_status: this.calcLoanPaymentStatus(loan),
         }
 
         this.log.log(`Updating loan after fully paid with data ${JSON.stringify(fields_to_be_update)}`);
@@ -344,5 +361,16 @@ export class LoanHelperService {
             contact_id: loan.client.sendpulse_id,
         });
         return;
+    }
+
+    calcLoanPaymentStatus(loan: Loan): string {
+        const first_repayment_date = (loan.previous_repayment_dates && loan.previous_repayment_dates.length) ? loan.previous_repayment_dates[0] : loan.repayment_date;
+        const grace_repayment_date = addDays(new Date(first_repayment_date), this.globalService.LOAN_GRACE_PERIOD_DAYS);
+        const today = new Date();
+        // if payment status is late if today is greater then grace repayment date
+        if (compareAsc(startOfDay(today), grace_repayment_date) == 1) {
+            return this.globalService.LOAN_PAYMENT_STATUS.PAID_LATE;
+        }
+        return this.globalService.LOAN_PAYMENT_STATUS.PAID_ON_TIME;
     }
 }
