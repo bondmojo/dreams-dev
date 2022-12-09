@@ -24,4 +24,7 @@ export class CreateClientDto {
   summary_has_loan_in_arrear: string;
   summary_membership_level: string;
   acc_update_date: string;
+  utm_source: string;
+  utm_campaign: string;
+  utm_medium: string;
 }

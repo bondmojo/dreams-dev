@@ -90,6 +90,15 @@ export class Client {
   @Column({ nullable: true })
   national_id: string;
 
+  @Column({ nullable: true })
+  utm_source: string;
+
+  @Column({ nullable: true })
+  utm_campaign: string;
+
+  @Column({ nullable: true })
+  utm_medium: string;
+
   @Column({ type: 'timestamp', nullable: true })
   acc_update_date: string;
 
