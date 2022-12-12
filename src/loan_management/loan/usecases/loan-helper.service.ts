@@ -131,7 +131,7 @@ export class LoanHelperService {
                 Loan_Status: new Choice(this.globalService.ZOHO_LOAN_STATUS.FULLY_PAID),
                 Last_Repaid_Date: new Date(),
                 Days_Fully_Paid: differenceInCalendarDays(new Date(), new Date(loan.disbursed_date)),
-                Payment_Status: this.calcLoanPaymentStatus(loan),
+                Payment_Status: new Choice(this.calcLoanPaymentStatus(loan)),
             };
 
         }
