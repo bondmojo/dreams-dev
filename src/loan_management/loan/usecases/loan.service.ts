@@ -148,6 +148,7 @@ export class LoanService {
         loanResponse.wireTransferType = loan?.wire_transfer_type;
         loanResponse.loanStatus = loan?.status;
         loanResponse.dueDate = "" + loan?.repayment_date;
+        loanResponse.wingCode = "" + loan?.wing_code;
         loanResponse.outstandingBalance = "" + loan?.outstanding_amount;
         loanResponse.membershipTier = client?.tier;
         loanResponse.lastTransactionAmount = "" + await this.loanHelperService.getLoanLastPartialPaymentAmount(loan.id);
