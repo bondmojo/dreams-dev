@@ -282,6 +282,7 @@ export class DreamerRepository {
     // This function should be use for all future update implementations.
     async updateFieldsOnZoho(id: string, zohoKeyValuePairs: any, moduleName: string): Promise<string> {
         // zohoDataKeyValuePair should be key value pair
+        this.log.log(`Upading Zoho field with data at ${JSON.stringify(zohoKeyValuePairs)}`);
         const record = new Record();
         Object.keys(zohoKeyValuePairs).forEach(key => {
             record.addKeyValue(key, zohoKeyValuePairs[key]);
