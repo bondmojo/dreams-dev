@@ -42,7 +42,7 @@ export class ClientService {
         });
         // appending max_credit_amount to client object
         const max_credit_amount = this.globalService.TIER_AMOUNT[client.tier];
-        const today_date = format(new Date(), 'qo MMMM yyyy')
+        const today_date = format(new Date(), 'do MMMM yyyy');
         return { ...client, max_credit_amount: max_credit_amount, today_date: today_date };
     }
 
