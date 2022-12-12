@@ -12,5 +12,6 @@ export class GetLoanResponse {
     lastTransactionAmount?: string;
     dreamPointsEarned?: string;
     nextLoanAmount?: string;
+    wingCode?: string;
 }
 
