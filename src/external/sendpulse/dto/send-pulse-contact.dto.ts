@@ -4,6 +4,7 @@ export class SendPulseContactDto {
     status: number;
     type: number;
     channel_data: TelegramDataDto;
+    variables: any;
 }
 
 export class TelegramDataDto {

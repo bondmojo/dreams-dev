@@ -17,5 +17,7 @@ export class UpdateClientDto {
   acc_update_date: string;
   dream_points_earned: number;
   dream_points_committed: number;
-
+  utm_source: string;
+  utm_campaign: string;
+  utm_medium: string;
 }
