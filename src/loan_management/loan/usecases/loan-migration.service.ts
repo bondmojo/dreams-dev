@@ -10,6 +10,7 @@ import { TransactionService } from "../../transaction/usecases/transaction.servi
 import { SendpluseService } from "src/external/sendpulse/sendpluse.service";
 import { ClientService } from '../../client/usecases/client.service';
 import { UpdateClientDto } from "../../client/dto";
+import { Choice } from "@zohocrm/typescript-sdk-2.0/utils/util/choice";
 
 @Injectable()
 export class LoanMigrationService {
@@ -39,6 +40,7 @@ export class LoanMigrationService {
                     Wing_Wei_Luy_Transfer_Fee: Number(loan.wing_wei_luy_transfer_fee),
                     Loan_Fee: this.globalService.LOAN_FEES,
                     Disbursed_Amount: loan.amount - loan.dream_point,
+                    Payment_Status: new Choice(this.globalService.LOAN_PAYMENT_STATUS.PENDING),
                 };
 
                 count++;

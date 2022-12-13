@@ -78,7 +78,7 @@ export class Loan {
   @Column({ nullable: true, unique: false })
   tier: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, default: 'Pending' })
   payment_status: string;
 
   @Column({ type: 'float', default: 0 })

@@ -187,7 +187,8 @@ export class LoanService {
         const zohoKeyValuePairs = {
             Loan_Status: new Choice(this.globalService.ZOHO_LOAN_STATUS.DISBURSED),
             Disbursal_Date: new Date(),
-            Repayment_Date: new Date(loan.repayment_date)
+            Repayment_Date: new Date(loan.repayment_date),
+            Payment_Status: new Choice(this.globalService.LOAN_PAYMENT_STATUS.PENDING),
         };
         await this.zohoLoanHelperService.updateZohoFields(loan.zoho_loan_id, zohoKeyValuePairs, this.globalService.ZOHO_MODULES.LOAN);
         return disbursedResponse;

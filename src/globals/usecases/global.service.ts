@@ -32,6 +32,7 @@ export class GlobalService {
     }
 
     public readonly LOAN_PAYMENT_STATUS: any = {
+        PENDING: 'Pending',
         PAID_ON_TIME: 'Paid On Time',
         PAID_LATE: 'Paid Late',
         PAYMENT_DUE: 'Payment Due',
