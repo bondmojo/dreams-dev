@@ -165,13 +165,16 @@ export class DreamerRepository {
     async updatePaymentDetails(id: string, paymentDetails: PaymentDetailsRequestDto, moduleName: string): Promise<string> {
         const record = new Record();
 
-        record.addKeyValue('Account_No', paymentDetails.paymentAccountNumber);
         record.addKeyValue('Payment_Via', paymentDetails.paymentVia);
 
-        if (moduleName === "Leads")
+        if (moduleName === "Leads") {
+            record.addKeyValue('Account_Number', paymentDetails.paymentAccountNumber);
             record.addKeyValue('Provider', new Choice(paymentDetails.preferredPaymentMethod));
-        else
+        }
+        else {
+            record.addKeyValue('Account_No', paymentDetails.paymentAccountNumber);
             record.addKeyValue('Provider_Bank', paymentDetails.preferredPaymentMethod);
+        }
 
         const map: Map<string, any> = await this.zohoservice.updateRecord(id, record, moduleName);
 
