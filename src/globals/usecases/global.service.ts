@@ -17,8 +17,8 @@ export class GlobalService {
     public readonly LOAN_STATUS: any = {
         APPROVED: 'Approved',
         REQUESTED: 'Requested',
-        DISBURSED: 'Disbursed',
         NOT_QUALIFIED: 'Not Qualified',
+        DISBURSED: 'Disbursed',
         FULLY_PAID: 'Fully Paid',
     }
 

@@ -163,7 +163,7 @@ export class PaymentReminderService {
   async fetchCustomersByDueDate(dueDate: Date): Promise<Loan[] | null> {
     this.log.log("FETCHing Clients with Due date =" + dueDate);
     let loanPromise = await this.loanRepository.find({
-      where: { repayment_date: dueDate, status: Not("Fully Paid") },
+      where: { repayment_date: dueDate, status: this.globalService.LOAN_STATUS.DISBURSED },
       relations: ['client']
     });
     this.log.log("repayment_date loans=" + JSON.stringify(loanPromise));
@@ -173,7 +173,7 @@ export class PaymentReminderService {
   async fetchOlderCustomers(dueDate: Date): Promise<Loan[] | null> {
     this.log.log("FETCHing Older Customers with Due date less than =" + dueDate);
     let loanPromise = await this.loanRepository.find({
-      where: { repayment_date: LessThan(dueDate), status: Not("Fully Paid") },
+      where: { repayment_date: LessThan(dueDate), status: this.globalService.LOAN_STATUS.DISBURSED },
       relations: ['client']
     });
     this.log.log("OLDER CUSTOMER loans=" + JSON.stringify(loanPromise));
