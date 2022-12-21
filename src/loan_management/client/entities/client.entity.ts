@@ -7,6 +7,8 @@ import {
   OneToMany
 } from 'typeorm';
 import { Loan } from '../../loan/entities/loan.entity';
+import { RepaymentSchedule } from 'src/loan_management/repayment_schedule/entities/repayment_schedule.entity';
+
 @Entity({ name: "clients" })
 export class Client {
   @PrimaryColumn()
@@ -19,7 +21,10 @@ export class Client {
   migration_test: string;
 
   @OneToMany(() => Loan, loan => loan.client)
-  loan: Loan
+  loan: Loan;
+
+  @OneToMany(() => RepaymentSchedule, repayment_schedule => repayment_schedule.loan)
+  repayment_schedule: RepaymentSchedule;
 
   @Column({ nullable: true, unique: true })
   zoho_id: string;

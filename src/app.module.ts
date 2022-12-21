@@ -16,7 +16,7 @@ import { TransactionModule } from "./loan_management/transaction/transaction.mod
 import { ScheduleModule } from '@nestjs/schedule';
 import { FileUploadModule } from './files/file_upload.module';
 import { DataSource } from 'typeorm';
-
+import { RepaymentScheduleModule } from './loan_management/repayment_schedule/repayment_schedule.module';
 @Module({
   controllers: [HealthCheckController],
   imports: [
@@ -28,7 +28,7 @@ import { DataSource } from 'typeorm';
       },
     }),
     ScheduleModule.forRoot(),
-    ConfigModule.forRoot(), EventEmitterModule.forRoot(), ZohoModule, DreamerModule, SendpulseModule, ClientModule, LoanModule, TransactionModule, GlobalModule, FileUploadModule]
+    ConfigModule.forRoot(), EventEmitterModule.forRoot(), ZohoModule, DreamerModule, SendpulseModule, ClientModule, LoanModule, TransactionModule, GlobalModule, FileUploadModule, RepaymentScheduleModule]
 })
 export class AppModule {
 

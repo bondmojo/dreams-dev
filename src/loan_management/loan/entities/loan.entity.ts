@@ -11,7 +11,7 @@ import {
 
 import { Client } from "../../client/entities/client.entity";
 import { Transaction } from '../../transaction/entities/transaction.entity';
-
+import { RepaymentSchedule } from 'src/loan_management/repayment_schedule/entities/repayment_schedule.entity';
 @Entity({ name: "loans" })
 export class Loan {
   @PrimaryColumn()
@@ -23,6 +23,9 @@ export class Loan {
   @ManyToOne(() => Client, client => client.loan)
   @JoinColumn({ name: 'client_id', referencedColumnName: 'id' })
   client: Client;
+
+  @OneToMany(() => RepaymentSchedule, repayment_schedule => repayment_schedule.loan)
+  repayment_schedule: RepaymentSchedule;
 
   @Column({ type: 'double', nullable: true })
   amount: number;
@@ -78,7 +81,7 @@ export class Loan {
   @Column({ nullable: true, unique: false })
   tier: string;
 
-  @Column({ nullable: true, default: 'Pending' })
+  @Column({ nullable: true })
   payment_status: string;
 
   @Column({ type: 'float', default: 0 })

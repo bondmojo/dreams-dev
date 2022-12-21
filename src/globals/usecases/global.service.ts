@@ -158,6 +158,20 @@ export class GlobalService {
         "NEXT_LOAN_AMOUNT": this.isDev ? "6347ece53cfb19125f6d0b58" : "6350344b00bc7d0dfa140eeb",
     }
 
+    // Repayment Schuedle Global Configurations
+    public readonly INSTALMENT_MEMBERSHIP_FEE = 3;
+    public readonly INSTALMENT_GRACE_PERIOD_DAYS = 3;
+    public readonly INSTALMENT_PAYMENT_STATUS: any = {
+        NOT_SCHEDULD: 100,
+        SCHEDULED: 200,
+        PAYMENT_DUE: 300,
+        PARTIAL_PAID: 400,
+        IN_GRACE_PERIOD: 500,
+        WAIVED_OFF: 600,
+        FULLY_PAID: 700,
+    }
+
+
     /* constructor(
     ) { }
 
