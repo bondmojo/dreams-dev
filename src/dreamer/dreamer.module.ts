@@ -15,6 +15,7 @@ import { ClientModule } from "src/loan_management/client/client.module";
 import { CreateLoanApplicationUsecase } from "./usecases/create-loan-application.usecase";
 import { DreamerLoanApplController } from "./dreamer.loanappl.controller";
 import { UpdateFieldsOnZohoUsecase } from './usecases/update-fields-on-zoho.usecase';
+import { CreateZohoRepaymentScheduleUsecase } from './usecases/create-repayment-schedule.usecase';
 @Module({
     imports: [SendpulseModule, ZohoModule, ShuftiModule, GlobalModule, ClientModule],
     controllers: [DreamerController, DreamerLoanApplController],
@@ -27,9 +28,10 @@ import { UpdateFieldsOnZohoUsecase } from './usecases/update-fields-on-zoho.usec
         KycCompletionUpdateUsecase,
         DreamerRepository,
         CreateLoanApplicationUsecase,
-        UpdateFieldsOnZohoUsecase
+        UpdateFieldsOnZohoUsecase,
+        CreateZohoRepaymentScheduleUsecase
     ],
-    exports: [CreateLoanApplicationUsecase, UpdateFieldsOnZohoUsecase]
+    exports: [CreateLoanApplicationUsecase, UpdateFieldsOnZohoUsecase, CreateZohoRepaymentScheduleUsecase]
 })
 export class DreamerModule {
 }

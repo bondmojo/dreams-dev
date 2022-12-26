@@ -17,6 +17,8 @@ import { UpdateLoanDto } from "../dto/update-loan.dto";
 import { ZohoLoanHelperService } from "./zoho-loan-helper.service";
 import { SendpulseLoanHelperService } from "./sendpulse-loan-helper.service";
 import { Choice } from "@zohocrm/typescript-sdk-2.0/utils/util/choice";
+import { CreateRepaymentScheduleUsecase } from "src/loan_management/repayment_schedule/usecases/create_repayment_schedule.service";
+import { CreateRepaymentScheduleDto } from "src/loan_management/repayment_schedule/dto/create-repayment-schedule.dto";
 
 @Injectable()
 export class LoanService {
@@ -30,6 +32,7 @@ export class LoanService {
         private readonly zohoLoanHelperService: ZohoLoanHelperService,
         private readonly sendpulseLoanHelperService: SendpulseLoanHelperService,
         private eventEmitter: EventEmitter2,
+        private readonly createRepaymentScheduleUsecase: CreateRepaymentScheduleUsecase,
     ) { }
 
     //FIXME: Remove "any" Decorator from createLoanDto object
@@ -191,6 +194,17 @@ export class LoanService {
             Payment_Status: new Choice(this.globalService.LOAN_PAYMENT_STATUS.PENDING),
         };
         await this.zohoLoanHelperService.updateZohoFields(loan.zoho_loan_id, zohoKeyValuePairs, this.globalService.ZOHO_MODULES.LOAN);
+
+        const crpSch = new CreateRepaymentScheduleDto();
+        crpSch.client_id = loan.client_id;
+        crpSch.loan_amount = loan.amount;
+        crpSch.loan_id = loan.id;
+        crpSch.loan_tenure_in_months = loan.tenure_in_months;
+        crpSch.zoho_loan_id = loan.zoho_loan_id;
+
+        this.log.debug("creating repayment schedule for loan" + JSON.stringify(crpSch));
+        await this.createRepaymentScheduleUsecase.create(crpSch);
+        
         return disbursedResponse;
     }
 

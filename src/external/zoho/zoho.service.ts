@@ -32,12 +32,16 @@ export class ZohoService {
     }
 
     async saveRecord(record: Record, moduleName: string): Promise<Map<string, any>> {
-        let recordOperations = new RecordOperations();
-        let request = new BodyWrapper();
         let recordsArray = [];
 
         //Add Record instance to the array
         recordsArray.push(record);
+        return await this.saveRecordArray(recordsArray, moduleName);
+    }
+
+    async saveRecordArray(recordsArray: Record[], moduleName: string): Promise<Map<string, any>> {
+        let recordOperations = new RecordOperations();
+        let request = new BodyWrapper();
 
         //Set the array to data in BodyWrapper instance
         request.setData(recordsArray);
@@ -54,6 +58,7 @@ export class ZohoService {
         const successResponse = this.extractResponse(response);
 
         return (successResponse as SuccessResponse).getDetails();
+
     }
 
     async updateRecord(dreamerId: string, record: Record, moduleName: string) {
