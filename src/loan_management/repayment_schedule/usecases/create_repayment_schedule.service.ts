@@ -31,7 +31,7 @@ export class CreateRepaymentScheduleUsecase {
         for (let i = 0; i < tenure; i++) {
             const getRepaymentScheduleModelDto = new GetRepaymentScheduleModelDto();
             getRepaymentScheduleModelDto.instalment_number = i + 1;
-            getRepaymentScheduleModelDto.principal_amount = createRepaymentScheduleDto.loan_amount / tenure;
+            getRepaymentScheduleModelDto.principal_amount = Math.floor(createRepaymentScheduleDto.loan_amount / tenure);
             getRepaymentScheduleModelDto.loan_id = createRepaymentScheduleDto.loan_id;
             getRepaymentScheduleModelDto.client_id = createRepaymentScheduleDto.client_id;
             getRepaymentScheduleModelDto.zoho_loan_id = createRepaymentScheduleDto.zoho_loan_id;
@@ -66,7 +66,7 @@ export class CreateRepaymentScheduleUsecase {
     getRepaymentScheduleModel(getRepaymentScheduleModelDto: GetRepaymentScheduleModelDto): RepaymentScheduleModel {
         const model = new RepaymentScheduleModel();
         const now = new Date();
-        const repayment_status = (getRepaymentScheduleModelDto.instalment_number == 1) ? 'SCHEDULED' : 'NOT_SCHEDULD'
+        const schedule_status = (getRepaymentScheduleModelDto.instalment_number == 1) ? 'SCHEDULED' : 'NOT_SCHEDULED'
 
         model.id = 'RS' + Math.floor(Math.random() * 100000000);
         model.loan_id = getRepaymentScheduleModelDto.loan_id;
@@ -74,13 +74,14 @@ export class CreateRepaymentScheduleUsecase {
         model.instalment_number = getRepaymentScheduleModelDto.instalment_number;
         model.zoho_loan_id = getRepaymentScheduleModelDto.zoho_loan_id;
 
-        model.ins_principal_amount = getRepaymentScheduleModelDto.principal_amount;
+        model.ins_principal_amount = Number(getRepaymentScheduleModelDto.principal_amount.toFixed(2));
         model.ins_membership_fee = this.globalService.INSTALMENT_MEMBERSHIP_FEE;
-        model.ins_overdue_amount = model.ins_principal_amount + model.ins_membership_fee;
+        model.ins_overdue_amount = Number((model.ins_principal_amount + model.ins_membership_fee).toFixed(2));
         model.ins_additional_fee = Number(0);
         model.total_paid_amount = Number(0);
 
-        model.repayment_status = this.globalService.INSTALMENT_PAYMENT_STATUS[repayment_status];
+        model.repayment_status = this.globalService.INSTALMENT_PAYMENT_STATUS['NOT_PAID'];
+        model.scheduling_status = this.globalService.INSTALMENT_SCHEDULING_STATUS[schedule_status];
         model.grace_period = this.globalService.INSTALMENT_GRACE_PERIOD_DAYS;
         model.number_of_penalties = 0;
         model.ins_from_date = addMonths(now, getRepaymentScheduleModelDto.instalment_number - 1);

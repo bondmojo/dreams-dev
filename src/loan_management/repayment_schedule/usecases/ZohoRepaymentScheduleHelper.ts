@@ -5,6 +5,7 @@ import { Injectable } from "@nestjs/common";
 import { Record } from "@zohocrm/typescript-sdk-2.0/core/com/zoho/crm/api/record/record";
 import { Choice } from "@zohocrm/typescript-sdk-2.0/utils/util/choice";
 import { RepaymentScheduleModel } from '../model/repayment-scehdule.model';
+import { GlobalService } from "src/globals/usecases/global.service";
 
 
 
@@ -13,7 +14,8 @@ export class ZohoRepaymentScheduleHelper {
     private readonly log = new CustomLogger(ZohoRepaymentScheduleHelper.name);
 
     constructor(
-        private readonly zohoCreateRepaymentSchedule: CreateZohoRepaymentScheduleUsecase
+        private readonly zohoCreateRepaymentSchedule: CreateZohoRepaymentScheduleUsecase,
+        private readonly globalService: GlobalService
     ) { }
     //
 
@@ -27,21 +29,14 @@ export class ZohoRepaymentScheduleHelper {
         zohoRepaymentSchedulePair["Loan_Id"] = zoholoanID;
         zohoRepaymentSchedulePair["Total_Paid_Amount"] = Number(repaymentScheduleModel.total_paid_amount);
         zohoRepaymentSchedulePair["Overdue_Amount"] = Number(repaymentScheduleModel.ins_overdue_amount);
+        zohoRepaymentSchedulePair["Repayment_Status"] = new Choice(this.globalService.INSTALMENT_PAYMENT_STATUS_STR[repaymentScheduleModel.repayment_status]);
 
-        //todo implement all repayment status
-        if (repaymentScheduleModel.repayment_status == "200") {
-            zohoRepaymentSchedulePair["Repayment_Status"] = new Choice("Not Paid");
-        }
-        else {
-            zohoRepaymentSchedulePair["Repayment_Status"] = new Choice("Paid");
-        }
         zohoRepaymentSchedulePair["Due_Principal_Amount"] = Number(repaymentScheduleModel.ins_principal_amount);
         zohoRepaymentSchedulePair["Repayment_Date"] = repaymentScheduleModel.due_date;
-        //@TODO: Implement scheduling status too
-        zohoRepaymentSchedulePair["Scheduling_Status"] = new Choice("Not Scheduled");
+        zohoRepaymentSchedulePair["Scheduling_Status"] = new Choice(this.globalService.INSTALMENT_SCHEDULING_STATUS_STR[repaymentScheduleModel.scheduling_status]);
 
         zohoRepaymentSchedulePair["Last_Paid_Date"] = repaymentScheduleModel.previous_repayment_dates;
-        
+
         //todo add other fields
         return zohoRepaymentSchedulePair;
     }
