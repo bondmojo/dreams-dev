@@ -298,4 +298,41 @@ export class DreamerRepository {
         return (map.get('id') as bigint).toString();
     }
 
+    // This function should be use for all future update implementations.
+    async createRecordOnZoho(zohoKeyValuePairs: any, moduleName: string): Promise<string> {
+        // zohoDataKeyValuePair should be key value pair
+        this.log.log(`Creating Zoho field with data at ${JSON.stringify(zohoKeyValuePairs)}`);
+        const record = new Record();
+        Object.keys(zohoKeyValuePairs).forEach(key => {
+            record.addKeyValue(key, zohoKeyValuePairs[key]);
+        });
+
+        const map: Map<string, any> = await this.zohoservice.saveRecord(record, moduleName);
+
+        console.log(`Zoho Fields Successfully Created = Modue: ${moduleName} , Fields ${JSON.stringify(zohoKeyValuePairs)}`);
+
+        return (map.get('id') as bigint).toString();
+    }
+
+    async createBulkRecordOnZoho(zohoRecordList: [], moduleName: string): Promise<string> {
+        // zohoDataKeyValuePair should be key value pair
+        this.log.log(`Creating Zoho field with data at ${JSON.stringify(zohoRecordList)}`);
+
+        const recordArray: Record[] = [];
+
+        zohoRecordList.forEach(zohoKeyValuePairs => {
+            const record = new Record();
+            Object.keys(zohoKeyValuePairs).forEach(key => {
+                record.addKeyValue(key, zohoKeyValuePairs[key]);
+            });
+            recordArray.push(record);
+        });
+
+        const map: Map<string, any> = await this.zohoservice.saveRecordArray(recordArray, moduleName);
+
+        console.log(`Zoho Fields Successfully Created = Modue: ${moduleName} , Fields ${JSON.stringify(recordArray)}`);
+
+        return (map.get('id') as bigint).toString();
+    }
+
 }

@@ -3,4 +3,5 @@ export class GetRepaymentScheduleModelDto {
   client_id: string;
   instalment_number: number;
   principal_amount: number;
+  zoho_loan_id: string;
 }
