@@ -162,13 +162,29 @@ export class GlobalService {
     public readonly INSTALMENT_MEMBERSHIP_FEE = 3;
     public readonly INSTALMENT_GRACE_PERIOD_DAYS = 3;
     public readonly INSTALMENT_PAYMENT_STATUS: any = {
-        NOT_SCHEDULD: 100,
-        SCHEDULED: 200,
-        PAYMENT_DUE: 300,
-        PARTIAL_PAID: 400,
-        IN_GRACE_PERIOD: 500,
+        NOT_PAID: 100,
+        PARTIAL_PAID: 200,
+        IN_GRACE_PERIOD: 300,
+        PAYMENT_DUE: 400,
+        FULLY_PAID: 500,
         WAIVED_OFF: 600,
-        FULLY_PAID: 700,
+    }
+    public readonly INSTALMENT_PAYMENT_STATUS_STR: any = {
+        100: 'Not Paid',
+        200: 'Partial Paid',
+        300: 'In Grace Period',
+        400: 'Payment Due',
+        500: 'Fully Paid',
+        600: 'Waived Off',
+    }
+
+    public readonly INSTALMENT_SCHEDULING_STATUS: any = {
+        NOT_SCHEDULED: 100,
+        SCHEDULED: 200,
+    }
+    public readonly INSTALMENT_SCHEDULING_STATUS_STR: any = {
+        100: 'Not Scheduled',
+        200: 'Scheduled',
     }
 
 
