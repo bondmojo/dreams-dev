@@ -50,6 +50,9 @@ export class RepaymentSchedule {
   @Column()
   repayment_status: string;
 
+  @Column()
+  scheduling_status: string;
+
   @Column({ type: 'int' })
   grace_period: number;
 
@@ -67,6 +70,9 @@ export class RepaymentSchedule {
 
   @Column({ type: 'date' })
   due_date: Date;
+
+  @Column({ nullable: true })
+  zoho_loan_id: string;
 
   @CreateDateColumn()
   created_at: string;
