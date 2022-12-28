@@ -197,14 +197,15 @@ export class LoanService {
 
         const crpSch = new CreateRepaymentScheduleDto();
         crpSch.client_id = loan.client_id;
-        crpSch.loan_amount = loan.amount;
+        // loan amount is equal to loan_amount + extra fees
+        crpSch.loan_amount = loan.amount + loan.wing_wei_luy_transfer_fee;
         crpSch.loan_id = loan.id;
         crpSch.loan_tenure_in_months = loan.tenure_in_months;
         crpSch.zoho_loan_id = loan.zoho_loan_id;
 
         this.log.debug("creating repayment schedule for loan" + JSON.stringify(crpSch));
         await this.createRepaymentScheduleUsecase.create(crpSch);
-        
+
         return disbursedResponse;
     }
 
