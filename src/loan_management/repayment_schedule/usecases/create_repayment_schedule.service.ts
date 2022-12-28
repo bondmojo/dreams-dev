@@ -20,47 +20,52 @@ export class CreateRepaymentScheduleUsecase {
     ) { }
 
     async create(createRepaymentScheduleDto: CreateRepaymentScheduleDto): Promise<string> {
-        // Generating client id
-        let tenure = Number(createRepaymentScheduleDto.loan_tenure_in_months);
-        if (tenure == null || tenure == 0) {
-            tenure = 1;
-        }
-        this.log.log("Creating Repayment schedule with tenure =" + tenure);
+        try {
+            // Generating client id
+            let tenure = Number(createRepaymentScheduleDto.loan_tenure_in_months);
+            if (tenure == null || tenure == 0) {
+                tenure = 1;
+            }
+            this.log.log("Creating Repayment schedule with tenure =" + tenure);
 
-        const zohoRepaymentScheduleArray: any = [];
-        for (let i = 0; i < tenure; i++) {
-            const getRepaymentScheduleModelDto = new GetRepaymentScheduleModelDto();
-            getRepaymentScheduleModelDto.instalment_number = i + 1;
-            getRepaymentScheduleModelDto.principal_amount = Math.floor(createRepaymentScheduleDto.loan_amount / tenure);
-            getRepaymentScheduleModelDto.loan_id = createRepaymentScheduleDto.loan_id;
-            getRepaymentScheduleModelDto.client_id = createRepaymentScheduleDto.client_id;
-            getRepaymentScheduleModelDto.zoho_loan_id = createRepaymentScheduleDto.zoho_loan_id;
+            const zohoRepaymentScheduleArray: any = [];
+            for (let i = 0; i < tenure; i++) {
+                const getRepaymentScheduleModelDto = new GetRepaymentScheduleModelDto();
+                getRepaymentScheduleModelDto.instalment_number = i + 1;
+                getRepaymentScheduleModelDto.principal_amount = Math.floor(createRepaymentScheduleDto.loan_amount / tenure);
+                getRepaymentScheduleModelDto.loan_id = createRepaymentScheduleDto.loan_id;
+                getRepaymentScheduleModelDto.client_id = createRepaymentScheduleDto.client_id;
+                getRepaymentScheduleModelDto.zoho_loan_id = createRepaymentScheduleDto.zoho_loan_id;
 
 
-            //add remainder amount in last instalment.
-            if (i == tenure - 1) {
-                getRepaymentScheduleModelDto.principal_amount += createRepaymentScheduleDto.loan_amount % tenure;
+                //add remainder amount in last instalment.
+                if (i == tenure - 1) {
+                    getRepaymentScheduleModelDto.principal_amount += createRepaymentScheduleDto.loan_amount % tenure;
+                }
+
+                const repayment_schedule_model = this.getRepaymentScheduleModel(getRepaymentScheduleModelDto);
+                console.log("repayment_schedule_model :: ", repayment_schedule_model);
+
+                const savedRecord = await this.repaymentScheduleRepository.save(repayment_schedule_model);
+
+                this.log.debug("Record saved =" + JSON.stringify(savedRecord));
+
+                //create ZohoRepayment Payment
+                const zohoReschRecord = this.zohoRepaymentScheduleHelper.getRepaymentScheduleObject(savedRecord);
+                zohoRepaymentScheduleArray.push(zohoReschRecord);
+                this.log.debug("Record saved =" + JSON.stringify(savedRecord));
             }
 
-            const repayment_schedule_model = this.getRepaymentScheduleModel(getRepaymentScheduleModelDto);
-            console.log("repayment_schedule_model :: ", repayment_schedule_model);
+            this.log.log("Creating ZOho Schedule =" + JSON.stringify(zohoRepaymentScheduleArray));
 
-            const savedRecord = await this.repaymentScheduleRepository.save(repayment_schedule_model);
+            await this.zohoRepaymentScheduleHelper.createZohoRepaymentSchedule(zohoRepaymentScheduleArray);
 
-            this.log.debug("Record saved =" + JSON.stringify(savedRecord));
 
-            //create ZohoRepayment Payment
-            const zohoReschRecord = this.zohoRepaymentScheduleHelper.getRepaymentScheduleObject(savedRecord);
-            zohoRepaymentScheduleArray.push(zohoReschRecord);
-            this.log.debug("Record saved =" + JSON.stringify(savedRecord));
+            return 'Done';
         }
-
-        this.log.log("Creating ZOho Schedule =" + JSON.stringify(zohoRepaymentScheduleArray));
-
-        await this.zohoRepaymentScheduleHelper.createZohoRepaymentSchedule(zohoRepaymentScheduleArray);
-
-
-        return 'Done';
+        catch (error) {
+            this.log.error("Error in Repayment Schedule Creation" + JSON.stringify(error));
+        }
     }
 
     getRepaymentScheduleModel(getRepaymentScheduleModelDto: GetRepaymentScheduleModelDto): RepaymentScheduleModel {

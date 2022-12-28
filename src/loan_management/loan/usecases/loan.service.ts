@@ -175,38 +175,43 @@ export class LoanService {
     }
 
     async disbursed(disbursedLoanDto: DisbursedLoanDto): Promise<any> {
-        const disbursedResponse = { status: true };
-        const loan = await this.loanRepository.findOne({
-            where: { id: disbursedLoanDto.loan_id },
-            relations: ['client']
-        });
+        try {
+            const disbursedResponse = { status: true };
+            const loan = await this.loanRepository.findOne({
+                where: { id: disbursedLoanDto.loan_id },
+                relations: ['client']
+            });
 
-        if (!loan || loan.status != this.globalService.LOAN_STATUS.APPROVED) {
-            throw new BadRequestException('Forbidden', 'No Approved loan found for loan id');
+            if (!loan || loan.status != this.globalService.LOAN_STATUS.APPROVED) {
+                throw new BadRequestException('Forbidden', 'No Approved loan found for loan id');
+            }
+            await this.loanHelperService.createCreditDisbursementTransaction(loan, disbursedLoanDto);
+            await this.loanHelperService.checkAndCreateWingTransferFeeTransaction(loan, disbursedLoanDto);
+            await this.loanHelperService.updateLoanDataAfterDisbursement(loan, disbursedLoanDto);
+            const zohoKeyValuePairs = {
+                Loan_Status: new Choice(this.globalService.ZOHO_LOAN_STATUS.DISBURSED),
+                Disbursal_Date: new Date(),
+                Repayment_Date: new Date(loan.repayment_date),
+                Payment_Status: new Choice(this.globalService.LOAN_PAYMENT_STATUS.PENDING),
+            };
+            await this.zohoLoanHelperService.updateZohoFields(loan.zoho_loan_id, zohoKeyValuePairs, this.globalService.ZOHO_MODULES.LOAN);
+
+            const crpSch = new CreateRepaymentScheduleDto();
+            crpSch.client_id = loan.client_id;
+            // loan amount is equal to loan_amount + extra fees
+            crpSch.loan_amount = loan.amount + loan.wing_wei_luy_transfer_fee;
+            crpSch.loan_id = loan.id;
+            crpSch.loan_tenure_in_months = loan.tenure_in_months;
+            crpSch.zoho_loan_id = loan.zoho_loan_id;
+
+            this.log.debug("creating repayment schedule for loan" + JSON.stringify(crpSch));
+            await this.createRepaymentScheduleUsecase.create(crpSch);
+
+            return disbursedResponse;
         }
-        await this.loanHelperService.createCreditDisbursementTransaction(loan, disbursedLoanDto);
-        await this.loanHelperService.checkAndCreateWingTransferFeeTransaction(loan, disbursedLoanDto);
-        await this.loanHelperService.updateLoanDataAfterDisbursement(loan, disbursedLoanDto);
-        const zohoKeyValuePairs = {
-            Loan_Status: new Choice(this.globalService.ZOHO_LOAN_STATUS.DISBURSED),
-            Disbursal_Date: new Date(),
-            Repayment_Date: new Date(loan.repayment_date),
-            Payment_Status: new Choice(this.globalService.LOAN_PAYMENT_STATUS.PENDING),
-        };
-        await this.zohoLoanHelperService.updateZohoFields(loan.zoho_loan_id, zohoKeyValuePairs, this.globalService.ZOHO_MODULES.LOAN);
-
-        const crpSch = new CreateRepaymentScheduleDto();
-        crpSch.client_id = loan.client_id;
-        // loan amount is equal to loan_amount + extra fees
-        crpSch.loan_amount = loan.amount + loan.wing_wei_luy_transfer_fee;
-        crpSch.loan_id = loan.id;
-        crpSch.loan_tenure_in_months = loan.tenure_in_months;
-        crpSch.zoho_loan_id = loan.zoho_loan_id;
-
-        this.log.debug("creating repayment schedule for loan" + JSON.stringify(crpSch));
-        await this.createRepaymentScheduleUsecase.create(crpSch);
-
-        return disbursedResponse;
+        catch (error) {
+            this.log.error("Error in Loan Disbursement " + JSON.stringify(error));
+        }
     }
 
     async createRepaymentTransaction(createRepaymentTransactionDto: CreateRepaymentTransactionDto): Promise<any> {
