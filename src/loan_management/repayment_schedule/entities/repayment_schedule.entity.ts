@@ -5,10 +5,12 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   ManyToOne,
-  JoinColumn
+  JoinColumn,
+  OneToMany
 } from 'typeorm';
 import { Loan } from '../../loan/entities/loan.entity';
 import { Client } from '../../client/entities/client.entity';
+import { Transaction } from '../../transaction/entities/transaction.entity';
 
 @Entity({ name: "loan_repayment_schedule" })
 export class RepaymentSchedule {
@@ -31,6 +33,9 @@ export class RepaymentSchedule {
   @ManyToOne(() => Client, client => client.repayment_schedule)
   @JoinColumn({ name: 'client_id', referencedColumnName: 'id' })
   client: Client;
+
+  @OneToMany(() => Transaction, transaction => transaction.loan)
+  transaction: Transaction[]
 
   @Column({ type: 'decimal', precision: 10, scale: 2 })
   ins_overdue_amount: number;

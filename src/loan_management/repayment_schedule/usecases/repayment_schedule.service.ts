@@ -11,6 +11,12 @@ export class RepaymentScheduleService {
         private readonly repaymentScheduleRepository: Repository<RepaymentSchedule>,
 
     ) { }
-    //
+    async findOne(fields: object): Promise<any> {
+        const loan = await this.repaymentScheduleRepository.findOne({
+            where: fields,
+            order: { ['created_at']: 'DESC' }
+        });
+        return loan;
+    }
 
 }
