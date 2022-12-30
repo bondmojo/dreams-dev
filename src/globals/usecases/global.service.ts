@@ -166,26 +166,44 @@ export class GlobalService {
         PARTIAL_PAID: 200,
         IN_GRACE_PERIOD: 300,
         PAYMENT_DUE: 400,
-        FULLY_PAID: 500,
-        WAIVED_OFF: 600,
+        PAID_ON_TIME: 500,
+        PAID_LATE: 600,
+        WAIVED_OFF: 700,
     }
     public readonly INSTALMENT_PAYMENT_STATUS_STR: any = {
         100: 'Not Paid',
         200: 'Partial Paid',
         300: 'In Grace Period',
         400: 'Payment Due',
-        500: 'Fully Paid',
-        600: 'Waived Off',
+        500: 'Paid On Time',
+        600: 'Paid Late',
+        700: 'Waived Off',
     }
 
     public readonly INSTALMENT_SCHEDULING_STATUS: any = {
         NOT_SCHEDULED: 100,
         SCHEDULED: 200,
+        COMPLETED: 300,
     }
+
     public readonly INSTALMENT_SCHEDULING_STATUS_STR: any = {
         100: 'Not Scheduled',
         200: 'Scheduled',
+        300: 'Completed'
     }
+
+    public readonly INSTALMENT_TRANSACTION_TYPE: any = {
+        DEBIT_WING_WEI_LUY_TRANSFER_FEE: 'debit_wing_wei_luy_transfer_fee',
+        CREDIT_WING_WEI_LUY_TRANSFER_FEE: 'credit_wing_wei_luy_transfer_fee',
+        CREDIT_DISBURSEMENT: 'credit_disbursement',
+        DREAM_POINT_COMMITMENT: 'dream_point_commitment',
+        DREAM_POINT_EARNED: 'dream_point_earned',
+        CREDIT_REPAYMENT: 'credit_repayment',
+        FEE_PAYMENT: 'fee_payment',
+        ADDITIONAL_FEE: 'additional_fee',
+        PARTIAL_PAYMENT: 'partial_payment',
+        DREAM_POINT_REFUND: 'dream_point_refund',
+    };
 
 
     /* constructor(
