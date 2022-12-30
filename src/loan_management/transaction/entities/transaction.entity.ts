@@ -8,7 +8,7 @@ import {
 } from 'typeorm';
 
 import { Loan } from "../../loan/entities/loan.entity";
-
+import { RepaymentSchedule } from "../../repayment_schedule/entities/repayment_schedule.entity";
 @Entity({ name: "transactions" })
 export class Transaction {
   @PrimaryColumn()
@@ -20,6 +20,13 @@ export class Transaction {
   @ManyToOne(() => Loan, loan => loan.transaction)
   @JoinColumn({ name: 'loan_id', referencedColumnName: 'id' })
   loan: Loan[];
+
+  @Column()
+  repayment_schedule_id: string;
+
+  @ManyToOne(() => RepaymentSchedule, repaymentSchedule => repaymentSchedule.transaction)
+  @JoinColumn({ name: 'repayment_schedule_id', referencedColumnName: 'id' })
+  repaymentSchedule: RepaymentSchedule[];
 
   @Column({ type: 'double', nullable: true })
   amount: number;
