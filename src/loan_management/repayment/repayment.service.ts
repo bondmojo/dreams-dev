@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { BadRequestException, Injectable } from "@nestjs/common";
 import { ProcessRepaymentDto } from "./dto";
 import { CustomLogger } from "../../custom_logger";
 import { GlobalService } from "../../globals/usecases/global.service";
@@ -19,6 +19,12 @@ export class RepaymentService {
     async process(processRepaymentDto: ProcessRepaymentDto): Promise<any> {
         const loan = await this.loanService.findOneForInternalUse({ id: processRepaymentDto.loan_id });
         const scheudle_instalment = await this.repaymentScheduleService.findOne({ loan_id: loan.id, scheduling_status: this.globalService.INSTALMENT_SCHEDULING_STATUS.SCHEDULED });
+
+        if (!scheudle_instalment) {
+            this.logger.log(`No Schedule Instalment Found For ${JSON.stringify(processRepaymentDto)}`);
+            throw new BadRequestException('Forbidden', 'No Schedule Instalment Found!');
+        }
+
         if (scheudle_instalment.ins_overdue_amount == processRepaymentDto.amount) {
             await this.handleEqualPaymentUsecase.process(processRepaymentDto);
         }

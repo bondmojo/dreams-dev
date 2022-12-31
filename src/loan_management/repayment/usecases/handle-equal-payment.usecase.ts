@@ -7,6 +7,8 @@ import { GlobalService } from "../../../globals/usecases/global.service";
 import { LoanService } from "../../loan/usecases/loan.service";
 import { RepaymentScheduleService } from "src/loan_management/repayment_schedule/usecases/repayment_schedule.service";
 import { TransactionService } from "../../transaction/usecases/transaction.service";
+import { compareAsc, startOfDay, addDays } from "date-fns"
+import { UpdateRepaymentScheduleDto } from '../../repayment_schedule/dto';
 
 @Injectable()
 export class HandleEqualPaymentUsecase {
@@ -24,6 +26,31 @@ export class HandleEqualPaymentUsecase {
         const scheudle_instalment = await this.repaymentScheduleService.findOne({ loan_id: loan.id, scheduling_status: this.globalService.INSTALMENT_SCHEDULING_STATUS.SCHEDULED });
 
         await this.createTransactions(processRepaymentDto, scheudle_instalment);
+        await this.updateRepaymentSchedule(scheudle_instalment);
+
+    }
+
+    async updateRepaymentSchedule(scheudle_instalment: any) {
+        const repayment_status = this.calcInsPaymentStatus(scheudle_instalment);
+        const updateRepaymentScheduleDto = new UpdateRepaymentScheduleDto();
+        updateRepaymentScheduleDto.id = scheudle_instalment.id;
+        updateRepaymentScheduleDto.repayment_status = repayment_status;
+        updateRepaymentScheduleDto.scheduling_status = this.globalService.INSTALMENT_SCHEDULING_STATUS.COMPLETED;
+        updateRepaymentScheduleDto.ins_overdue_amount = 0;
+        updateRepaymentScheduleDto.paid_date = new Date();
+
+        await this.repaymentScheduleService.update(updateRepaymentScheduleDto);
+    }
+
+    calcInsPaymentStatus(scheudle_instalment: any): any {
+        const first_repayment_date = (scheudle_instalment.previous_repayment_dates && scheudle_instalment.previous_repayment_dates.length) ? scheudle_instalment.previous_repayment_dates[0] : scheudle_instalment.due_date;
+        const grace_repayment_date = addDays(new Date(first_repayment_date), this.globalService.INSTALMENT_GRACE_PERIOD_DAYS);
+        const today = new Date();
+        // if payment status is late if today is greater then grace repayment date
+        if (compareAsc(startOfDay(today), grace_repayment_date) == 1) {
+            return this.globalService.INSTALMENT_PAYMENT_STATUS.PAID_LATE;
+        }
+        return this.globalService.INSTALMENT_PAYMENT_STATUS.PAID_ON_TIME;
     }
 
     async createTransactions(processRepaymentDto: any, scheudle_instalment: any) {
