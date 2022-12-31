@@ -27,7 +27,19 @@ export class HandleEqualPaymentUsecase {
 
         await this.createTransactions(processRepaymentDto, scheudle_instalment);
         await this.updateRepaymentSchedule(scheudle_instalment);
+        await this.scheduleNextInstalment(scheudle_instalment, loan.id);
+    }
 
+    async scheduleNextInstalment(scheudle_instalment: any, loan_id: string) {
+        const next_ins_number = scheudle_instalment.instalment_number + 1;
+        const next_scheudle_instalment = await this.repaymentScheduleService.findOne({ loan_id: loan_id, instalment_number: next_ins_number, scheduling_status: this.globalService.INSTALMENT_SCHEDULING_STATUS.NOT_SCHEDULED });
+        if (!next_scheudle_instalment) {
+            return 'No Due Instalment pending for this user.'
+        }
+        const updateRepaymentScheduleDto = new UpdateRepaymentScheduleDto();
+        updateRepaymentScheduleDto.id = next_scheudle_instalment.id;
+        updateRepaymentScheduleDto.scheduling_status = this.globalService.INSTALMENT_SCHEDULING_STATUS.SCHEDULED;
+        await this.repaymentScheduleService.update(updateRepaymentScheduleDto);
     }
 
     async updateRepaymentSchedule(scheudle_instalment: any) {
