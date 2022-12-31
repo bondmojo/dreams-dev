@@ -76,6 +76,9 @@ export class RepaymentSchedule {
   @Column({ type: 'date' })
   due_date: Date;
 
+  @Column({ type: 'date', nullable: true })
+  paid_date: Date;
+
   @Column({ nullable: true })
   zoho_loan_id: string;
 
