@@ -92,6 +92,12 @@ export class LoanService {
         return loanFromDb;
     }
 
+
+    async update(updateLoanDto: UpdateLoanDto) {
+        this.log.log(`Updating Loan with data ${JSON.stringify(updateLoanDto)}`);
+        await this.loanRepository.update(updateLoanDto.id, updateLoanDto);
+    }
+
     async createLoanInZoho(createLoanDto: any): Promise<any> {
 
         const zohoLoanDto = new CreateZohoLoanApplicationDto();
