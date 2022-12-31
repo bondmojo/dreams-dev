@@ -43,7 +43,7 @@ export class LoanService {
         this.log.log("Creating Loan in LMS. Zoho Loan Required =" + createLoanDto.do_create_zoho_loan);
 
         createLoanDto.id = 'LN' + Math.floor(Math.random() * 100000000);
-        createLoanDto.loan_fee = this.globalService.LOAN_FEES;
+        createLoanDto.loan_fee = createLoanDto.tenure_in_months * this.globalService.LOAN_FEES;
 
         // calculate outstanding balance & wing_wei_luy_transfer_fee
         createLoanDto.wing_wei_luy_transfer_fee = 0;
@@ -113,7 +113,7 @@ export class LoanService {
         zohoLoanDto.membershipTier = createLoanDto.membership_tier;
         zohoLoanDto.disbursed_amount = createLoanDto.amount - createLoanDto.dream_point;
         zohoLoanDto.wing_wei_luy_transfer_fee = createLoanDto.wing_wei_luy_transfer_fee;
-        zohoLoanDto.loan_fee = this.globalService.LOAN_FEES;
+        zohoLoanDto.loan_fee = createLoanDto.loan_fee;
         zohoLoanDto.outstanding_amount = createLoanDto.outstanding_amount;
         zohoLoanDto.sendpulse_url = this.globalService.BASE_SENDPULSE_URL + createLoanDto?.sendpulse_id;;
         zohoLoanDto.retool_url = this.globalService.BASE_RETOOL_URL + "#customer_id=" + createLoanDto?.client_id;;
