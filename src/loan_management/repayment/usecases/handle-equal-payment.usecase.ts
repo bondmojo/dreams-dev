@@ -1,15 +1,15 @@
 import { Injectable } from "@nestjs/common";
-import { InjectRepository } from '@nestjs/typeorm';
 import { ProcessRepaymentDto } from "../dto";
 import { CustomLogger } from "../../../custom_logger";
-import { Repository } from 'typeorm';
 import { GlobalService } from "../../../globals/usecases/global.service";
 import { LoanService } from "../../loan/usecases/loan.service";
 import { RepaymentScheduleService } from "src/loan_management/repayment_schedule/usecases/repayment_schedule.service";
 import { TransactionService } from "../../transaction/usecases/transaction.service";
 import { compareAsc, startOfDay, addDays } from "date-fns"
 import { UpdateRepaymentScheduleDto } from '../../repayment_schedule/dto';
-
+import { Loan } from '../../loan/entities/loan.entity';
+import { UpdateLoanDto } from "src/loan_management/loan/dto/update-loan.dto";
+import { RepaymentHelperService } from "../repayment-helper.service";
 @Injectable()
 export class HandleEqualPaymentUsecase {
     private readonly logger = new CustomLogger(HandleEqualPaymentUsecase.name);
@@ -19,15 +19,27 @@ export class HandleEqualPaymentUsecase {
         private readonly loanService: LoanService,
         private readonly transactionService: TransactionService,
         private readonly repaymentScheduleService: RepaymentScheduleService,
+        private readonly repaymentHelperService: RepaymentHelperService,
     ) { }
 
     async process(processRepaymentDto: ProcessRepaymentDto): Promise<any> {
         const loan = await this.loanService.findOneForInternalUse({ id: processRepaymentDto.loan_id });
         const scheudle_instalment = await this.repaymentScheduleService.findOne({ loan_id: loan.id, scheduling_status: this.globalService.INSTALMENT_SCHEDULING_STATUS.SCHEDULED });
-
         await this.createTransactions(processRepaymentDto, scheudle_instalment);
         await this.updateRepaymentSchedule(scheudle_instalment);
+        await this.updateLoan(processRepaymentDto, loan);
         await this.scheduleNextInstalment(scheudle_instalment, loan.id);
+    }
+
+    async updateLoan(processRepaymentDto: ProcessRepaymentDto, loan: Loan) {
+        const outstanding_amount = loan.outstanding_amount - processRepaymentDto.amount;
+        const updateLoanDto = new UpdateLoanDto();
+        if (outstanding_amount) {
+            updateLoanDto.payment_status = await this.repaymentHelperService.getLoanStatus(loan);
+        }
+        updateLoanDto.id = loan.id;
+        updateLoanDto.outstanding_amount = outstanding_amount;
+        await this.loanService.update(updateLoanDto);
     }
 
     async scheduleNextInstalment(scheudle_instalment: any, loan_id: string) {
