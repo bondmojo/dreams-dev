@@ -7,7 +7,6 @@ import { EventEmitter2 } from "@nestjs/event-emitter";
 import { Repository } from 'typeorm';
 import { DisbursedLoanDto, CreateRepaymentTransactionDto, CreateLoanDto } from '../dto';
 import { GlobalService } from "../../../globals/usecases/global.service"
-import { add } from 'date-fns';
 import { SendpluseService } from "src/external/sendpulse/sendpluse.service";
 import { ZohoLoanHelperService } from "./zoho-loan-helper.service";
 import { Choice } from "@zohocrm/typescript-sdk-2.0/utils/util/choice";
