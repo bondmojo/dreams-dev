@@ -1,6 +1,8 @@
 import { CreateRepaymentScheduleDto } from './create-repayment-schedule.dto';
 import { GetRepaymentScheduleModelDto } from './get-repayment-schedule-model.dto';
+import { UpdateRepaymentScheduleDto } from './update-repayment-schedule.dto';
 export {
   CreateRepaymentScheduleDto,
-  GetRepaymentScheduleModelDto
+  GetRepaymentScheduleModelDto,
+  UpdateRepaymentScheduleDto
 };
