@@ -21,26 +21,35 @@ export class RepaymentService {
     ) { }
 
     async process(processRepaymentDto: ProcessRepaymentDto): Promise<any> {
-        const loan = await this.loanService.findOneForInternalUse({ id: processRepaymentDto.loan_id });
-        const scheudle_instalment = await this.repaymentScheduleService.findOne({ loan_id: loan.id, scheduling_status: this.globalService.INSTALMENT_SCHEDULING_STATUS.SCHEDULED });
+        try {
+            const loan = await this.loanService.findOneForInternalUse({ id: processRepaymentDto.loan_id });
+            const scheudle_instalment = await this.repaymentScheduleService.findOne({ loan_id: loan.id, scheduling_status: this.globalService.INSTALMENT_SCHEDULING_STATUS.SCHEDULED });
 
-        if (!scheudle_instalment) {
-            this.logger.log(`No Schedule Instalment Found For ${JSON.stringify(processRepaymentDto)}`);
-            throw new BadRequestException('Forbidden', 'No Schedule Instalment Found!');
+            if (!scheudle_instalment) {
+                this.logger.log(`No Schedule Instalment Found For ${JSON.stringify(processRepaymentDto)}`);
+                throw new BadRequestException('Forbidden', 'No Schedule Instalment Found!');
+            }
+
+            if (processRepaymentDto.amount > loan.outstanding_amount) {
+                this.logger.log(`Request Amount is greater than loan overdue amount ${JSON.stringify(processRepaymentDto)}`);
+                throw new BadRequestException('Forbidden', 'Amount is greater loan overdue amount!');
+            }
+
+            if (processRepaymentDto.amount == scheudle_instalment.ins_overdue_amount) {
+                await this.handleEqualPaymentUsecase.process(processRepaymentDto);
+            }
+
+            if (processRepaymentDto.amount < scheudle_instalment.ins_overdue_amount) {
+                await this.handleUnderPaymentUsecase.process(processRepaymentDto);
+            }
+
+            if (processRepaymentDto.amount > scheudle_instalment.ins_overdue_amount) {
+                await this.handleOverPaymentUsecase.process(processRepaymentDto);
+            }
+
+            return 'Done';
+        } catch (error) {
+            this.logger.error("Error in Loan Instalment Processing for Loan ID = " + processRepaymentDto.loan_id + JSON.stringify(error));
         }
-
-        if (processRepaymentDto.amount == scheudle_instalment.ins_overdue_amount) {
-            await this.handleEqualPaymentUsecase.process(processRepaymentDto);
-        }
-
-        if (processRepaymentDto.amount < scheudle_instalment.ins_overdue_amount) {
-            await this.handleUnderPaymentUsecase.process(processRepaymentDto);
-        }
-
-        if (processRepaymentDto.amount > scheudle_instalment.ins_overdue_amount) {
-            await this.handleOverPaymentUsecase.process(processRepaymentDto);
-        }
-
-        return 'Done';
     }
 }
