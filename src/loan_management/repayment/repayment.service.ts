@@ -6,6 +6,7 @@ import { LoanService } from "../loan/usecases/loan.service";
 import { RepaymentScheduleService } from "src/loan_management/repayment_schedule/usecases/repayment_schedule.service";
 import { HandleEqualPaymentUsecase } from "./usecases/handle-equal-payment.usecase";
 import { HandleUnderPaymentUsecase } from "./usecases/handle-under-payment.usecase";
+import { HandleOverPaymentUsecase } from "./usecases/handle-over-payment.usecase";
 @Injectable()
 export class RepaymentService {
     private readonly logger = new CustomLogger(RepaymentService.name);
@@ -15,7 +16,8 @@ export class RepaymentService {
         private readonly loanService: LoanService,
         private readonly repaymentScheduleService: RepaymentScheduleService,
         private readonly handleEqualPaymentUsecase: HandleEqualPaymentUsecase,
-        private readonly handleUnderPaymentUsecase: HandleUnderPaymentUsecase
+        private readonly handleUnderPaymentUsecase: HandleUnderPaymentUsecase,
+        private readonly handleOverPaymentUsecase: HandleOverPaymentUsecase,
     ) { }
 
     async process(processRepaymentDto: ProcessRepaymentDto): Promise<any> {
@@ -27,12 +29,16 @@ export class RepaymentService {
             throw new BadRequestException('Forbidden', 'No Schedule Instalment Found!');
         }
 
-        if (scheudle_instalment.ins_overdue_amount == processRepaymentDto.amount) {
+        if (processRepaymentDto.amount == scheudle_instalment.ins_overdue_amount) {
             await this.handleEqualPaymentUsecase.process(processRepaymentDto);
         }
 
-        if (scheudle_instalment.ins_overdue_amount > processRepaymentDto.amount) {
+        if (processRepaymentDto.amount < scheudle_instalment.ins_overdue_amount) {
             await this.handleUnderPaymentUsecase.process(processRepaymentDto);
+        }
+
+        if (processRepaymentDto.amount > scheudle_instalment.ins_overdue_amount) {
+            await this.handleOverPaymentUsecase.process(processRepaymentDto);
         }
 
         return 'Done';
