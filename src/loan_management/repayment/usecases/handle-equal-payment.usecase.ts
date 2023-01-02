@@ -34,7 +34,7 @@ export class HandleEqualPaymentUsecase {
     async updateLoan(processRepaymentDto: ProcessRepaymentDto, loan: Loan) {
         const outstanding_amount = loan.outstanding_amount - processRepaymentDto.amount;
         const updateLoanDto = new UpdateLoanDto();
-        if (outstanding_amount) {
+        if (!outstanding_amount) {
             updateLoanDto.payment_status = await this.repaymentHelperService.getLoanStatus(loan);
         }
         updateLoanDto.id = loan.id;
