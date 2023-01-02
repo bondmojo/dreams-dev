@@ -5,6 +5,7 @@ import { GlobalService } from "../../globals/usecases/global.service";
 import { LoanService } from "../loan/usecases/loan.service";
 import { RepaymentScheduleService } from "src/loan_management/repayment_schedule/usecases/repayment_schedule.service";
 import { HandleEqualPaymentUsecase } from "./usecases/handle-equal-payment.usecase";
+import { HandleUnderPaymentUsecase } from "./usecases/handle-under-payment.usecase";
 @Injectable()
 export class RepaymentService {
     private readonly logger = new CustomLogger(RepaymentService.name);
@@ -13,7 +14,8 @@ export class RepaymentService {
         private readonly globalService: GlobalService,
         private readonly loanService: LoanService,
         private readonly repaymentScheduleService: RepaymentScheduleService,
-        private readonly handleEqualPaymentUsecase: HandleEqualPaymentUsecase
+        private readonly handleEqualPaymentUsecase: HandleEqualPaymentUsecase,
+        private readonly handleUnderPaymentUsecase: HandleUnderPaymentUsecase
     ) { }
 
     async process(processRepaymentDto: ProcessRepaymentDto): Promise<any> {
@@ -27,6 +29,10 @@ export class RepaymentService {
 
         if (scheudle_instalment.ins_overdue_amount == processRepaymentDto.amount) {
             await this.handleEqualPaymentUsecase.process(processRepaymentDto);
+        }
+
+        if (scheudle_instalment.ins_overdue_amount > processRepaymentDto.amount) {
+            await this.handleUnderPaymentUsecase.process(processRepaymentDto);
         }
 
         return 'Done';

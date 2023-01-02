@@ -8,12 +8,13 @@ import { LoanModule } from "../loan/loan.module";
 import { RepaymentScheduleModule } from '../repayment_schedule/repayment_schedule.module';
 import { TransactionModule } from "../transaction/transaction.module";
 import { HandleEqualPaymentUsecase } from './usecases/handle-equal-payment.usecase';
+import { HandleUnderPaymentUsecase } from './usecases/handle-under-payment.usecase';
 import { RepaymentHelperService } from './repayment-helper.service';
 @Module({
   imports: [LoanModule, RepaymentScheduleModule, TransactionModule],
   controllers: [RepaymentController],
   providers: [
-    RepaymentService, RepaymentHelperService, HandleEqualPaymentUsecase],
+    RepaymentService, RepaymentHelperService, HandleEqualPaymentUsecase, HandleUnderPaymentUsecase],
   exports: [RepaymentService]
 })
 export class RepaymentModule { }
