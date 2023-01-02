@@ -83,6 +83,7 @@ export class HandleEqualPaymentUsecase {
             loan_id: processRepaymentDto.loan_id,
             scheudle_instalment_id: scheudle_instalment.id,
             amount: processRepaymentDto.amount,
+            image: processRepaymentDto.image,
             type: this.globalService.INSTALMENT_TRANSACTION_TYPE.PARTIAL_PAYMENT,
         };
         await this.transactionService.create(createPartialPaidTxnDto);
@@ -92,6 +93,7 @@ export class HandleEqualPaymentUsecase {
             loan_id: processRepaymentDto.loan_id,
             scheudle_instalment_id: scheudle_instalment.id,
             amount: scheudle_instalment.ins_principal_amount,
+            image: processRepaymentDto.image,
             type: this.globalService.INSTALMENT_TRANSACTION_TYPE.CREDIT_REPAYMENT,
         };
         await this.transactionService.create(createCreditRepaymentTxnDto);
@@ -101,6 +103,7 @@ export class HandleEqualPaymentUsecase {
             loan_id: processRepaymentDto.loan_id,
             scheudle_instalment_id: scheudle_instalment.id,
             amount: scheudle_instalment.ins_membership_fee,
+            image: processRepaymentDto.image,
             type: this.globalService.INSTALMENT_TRANSACTION_TYPE.FEE_PAYMENT,
         };
         await this.transactionService.create(createInstalmentFeeTxnDto);
@@ -111,6 +114,7 @@ export class HandleEqualPaymentUsecase {
                 loan_id: processRepaymentDto.loan_id,
                 scheudle_instalment_id: scheudle_instalment.id,
                 amount: scheudle_instalment.ins_additional_fee,
+                image: processRepaymentDto.image,
                 type: this.globalService.INSTALMENT_TRANSACTION_TYPE.ADDITIONAL_FEE,
             };
             await this.transactionService.create(createAdditionalFeeTxnDto);
