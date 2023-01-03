@@ -24,9 +24,9 @@ export class Transaction {
   @Column()
   repayment_schedule_id: string;
 
-  @ManyToOne(() => RepaymentSchedule, repaymentSchedule => repaymentSchedule.transaction)
-  @JoinColumn({ name: 'repayment_schedule_id', referencedColumnName: 'id' })
-  repaymentSchedule: RepaymentSchedule[];
+  @ManyToOne(() => RepaymentSchedule, repayment_schedule => repayment_schedule.transaction)
+  @JoinColumn({ name: 'repayment_schedule_id' })
+  repayment_schedule: RepaymentSchedule;
 
   @Column({ type: 'double', nullable: true })
   amount: number;

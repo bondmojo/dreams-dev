@@ -23,7 +23,7 @@ export class Client {
   @OneToMany(() => Loan, loan => loan.client)
   loan: Loan;
 
-  @OneToMany(() => RepaymentSchedule, repayment_schedule => repayment_schedule.loan)
+  @OneToMany(() => RepaymentSchedule, repayment_schedule => repayment_schedule.client)
   repayment_schedule: RepaymentSchedule;
 
   @Column({ nullable: true, unique: true })

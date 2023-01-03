@@ -34,8 +34,8 @@ export class RepaymentSchedule {
   @JoinColumn({ name: 'client_id', referencedColumnName: 'id' })
   client: Client;
 
-  @OneToMany(() => Transaction, transaction => transaction.loan)
-  transaction: Transaction[]
+  @OneToMany(() => Transaction, transaction => transaction.repayment_schedule)
+  transaction: Transaction[];
 
   @Column({ type: 'decimal', precision: 10, scale: 2 })
   ins_overdue_amount: number;
