@@ -21,7 +21,7 @@ export class Transaction {
   @JoinColumn({ name: 'loan_id', referencedColumnName: 'id' })
   loan: Loan[];
 
-  @Column()
+  @Column({ nullable: true })
   repayment_schedule_id: string;
 
   @ManyToOne(() => RepaymentSchedule, repayment_schedule => repayment_schedule.transaction)
