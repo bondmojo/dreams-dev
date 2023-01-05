@@ -1,5 +1,5 @@
 
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { RepaymentController } from './repayment.controller';
@@ -11,11 +11,14 @@ import { HandleEqualPaymentUsecase } from './usecases/handle-equal-payment.useca
 import { HandleUnderPaymentUsecase } from './usecases/handle-under-payment.usecase';
 import { HandleOverPaymentUsecase } from './usecases/handle-over-payment.usecase';
 import { RepaymentHelperService } from './repayment-helper.service';
+import { ZohoRepaymentHelperService } from './zoho-repayment-helper.service';
+import { DreamerModule } from 'src/dreamer/dreamer.module';
+
 @Module({
-  imports: [LoanModule, RepaymentScheduleModule, TransactionModule],
+  imports: [LoanModule, RepaymentScheduleModule, TransactionModule, forwardRef(() => DreamerModule)],
   controllers: [RepaymentController],
   providers: [
-    RepaymentService, RepaymentHelperService, HandleEqualPaymentUsecase, HandleUnderPaymentUsecase, HandleOverPaymentUsecase],
+    RepaymentService, RepaymentHelperService, HandleEqualPaymentUsecase, HandleUnderPaymentUsecase, HandleOverPaymentUsecase, ZohoRepaymentHelperService],
   exports: [RepaymentService]
 })
 export class RepaymentModule { }

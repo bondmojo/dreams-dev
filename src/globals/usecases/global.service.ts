@@ -70,6 +70,7 @@ export class GlobalService {
         DREAMER: 'Leads',
         LOAN: 'Loans',
         TASK: 'Tasks',
+        REPAYMENT_SCHEDULES: 'Repayment_Schedules',
     }
 
     public readonly REPAYMENT_TRANSACTION_TYPE: any = {
