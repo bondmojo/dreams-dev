@@ -40,7 +40,7 @@ export class GetRepaymentScheduleUsecase {
             return repaymentScheduleArray;
         }
         catch (error) {
-            this.log.error("Error in Repayment Schedule Creation" + JSON.stringify(error));
+            this.log.error(`Error in Repayment Schedule Creation ${error}`);
         }
     }
 
