@@ -90,5 +90,8 @@ export class RepaymentSchedule {
 
   @UpdateDateColumn()
   updated_at: string;
+
+  @Column({ nullable: true, default: 'USD' })
+  currency: string;
 };
 
