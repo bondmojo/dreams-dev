@@ -10,6 +10,9 @@ import { UpdateRepaymentScheduleDto } from '../../repayment_schedule/dto';
 import { Loan } from '../../loan/entities/loan.entity';
 import { UpdateLoanDto } from "src/loan_management/loan/dto/update-loan.dto";
 import { RepaymentHelperService } from "../repayment-helper.service";
+import { Choice } from "@zohocrm/typescript-sdk-2.0/utils/util/choice";
+import { ZohoRepaymentHelperService } from "../zoho-repayment-helper.service";
+
 @Injectable()
 export class HandleUnderPaymentUsecase {
     private readonly logger = new CustomLogger(HandleUnderPaymentUsecase.name);
@@ -20,6 +23,7 @@ export class HandleUnderPaymentUsecase {
         private readonly transactionService: TransactionService,
         private readonly repaymentScheduleService: RepaymentScheduleService,
         private readonly repaymentHelperService: RepaymentHelperService,
+        private readonly zohoRepaymentHelperService: ZohoRepaymentHelperService,
     ) { }
 
     async process(processRepaymentDto: ProcessRepaymentDto): Promise<any> {
@@ -36,14 +40,33 @@ export class HandleUnderPaymentUsecase {
         updateLoanDto.id = loan.id;
         updateLoanDto.outstanding_amount = outstanding_amount;
         await this.loanService.update(updateLoanDto);
+
+        let zohoKeyValuePairs: any = {};
+
+        zohoKeyValuePairs = {
+            Outstanding_Balance: outstanding_amount,
+        };
+        this.logger.log(`Updating Loan On Zoho ${loan.zoho_loan_id} ${JSON.stringify(zohoKeyValuePairs)} `);
+        await this.zohoRepaymentHelperService.updateZohoFields(loan.zoho_loan_id, zohoKeyValuePairs, this.globalService.ZOHO_MODULES.LOAN);
+
     }
 
     async updateRepaymentSchedule(scheudle_instalment: any, processRepaymentDto: ProcessRepaymentDto) {
         const updateRepaymentScheduleDto = new UpdateRepaymentScheduleDto();
         updateRepaymentScheduleDto.id = scheudle_instalment.id;
-        updateRepaymentScheduleDto.repayment_status = this.globalService.INSTALMENT_PAYMENT_STATUS_STR.PARTIAL_PAID;
+        updateRepaymentScheduleDto.repayment_status = this.globalService.INSTALMENT_PAYMENT_STATUS.PARTIAL_PAID;
         updateRepaymentScheduleDto.ins_overdue_amount = scheudle_instalment.ins_overdue_amount - processRepaymentDto.amount;
         await this.repaymentScheduleService.update(updateRepaymentScheduleDto);
+
+        let zohoKeyValuePairs: any = {};
+        zohoKeyValuePairs = {
+            Repayment_Status: new Choice(this.globalService.INSTALMENT_PAYMENT_STATUS_STR[updateRepaymentScheduleDto.repayment_status]),
+            Overdue_Amount: updateRepaymentScheduleDto.ins_overdue_amount,
+            Last_Paid_Date: new Date(),
+        };
+        this.logger.log(`Updating Repayment Schedule On Zoho ${updateRepaymentScheduleDto.id} ${JSON.stringify(zohoKeyValuePairs)} ${this.globalService.ZOHO_MODULES.REPAYMENT_SCHEDULES}`);
+        await this.zohoRepaymentHelperService.updateZohoFields(scheudle_instalment.zoho_repayment_schedule_id, zohoKeyValuePairs, this.globalService.ZOHO_MODULES.REPAYMENT_SCHEDULES);
+
     }
 
     async createTransactions(processRepaymentDto: any, scheudle_instalment: any) {

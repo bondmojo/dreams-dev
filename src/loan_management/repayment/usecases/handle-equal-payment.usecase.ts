@@ -10,6 +10,8 @@ import { UpdateRepaymentScheduleDto } from '../../repayment_schedule/dto';
 import { Loan } from '../../loan/entities/loan.entity';
 import { UpdateLoanDto } from "src/loan_management/loan/dto/update-loan.dto";
 import { RepaymentHelperService } from "../repayment-helper.service";
+import { Choice } from "@zohocrm/typescript-sdk-2.0/utils/util/choice";
+import { ZohoRepaymentHelperService } from "../zoho-repayment-helper.service";
 @Injectable()
 export class HandleEqualPaymentUsecase {
     private readonly logger = new CustomLogger(HandleEqualPaymentUsecase.name);
@@ -20,6 +22,7 @@ export class HandleEqualPaymentUsecase {
         private readonly transactionService: TransactionService,
         private readonly repaymentScheduleService: RepaymentScheduleService,
         private readonly repaymentHelperService: RepaymentHelperService,
+        private readonly zohoRepaymentHelperService: ZohoRepaymentHelperService,
     ) { }
 
     async process(processRepaymentDto: ProcessRepaymentDto): Promise<any> {
@@ -40,6 +43,15 @@ export class HandleEqualPaymentUsecase {
         updateLoanDto.id = loan.id;
         updateLoanDto.outstanding_amount = outstanding_amount;
         await this.loanService.update(updateLoanDto);
+        let zohoKeyValuePairs: any = {};
+
+        zohoKeyValuePairs = {
+            Payment_Status: new Choice(updateLoanDto.payment_status),
+            Outstanding_Balance: outstanding_amount,
+        };
+        this.logger.log(`Updating Loan On Zoho ${loan.zoho_loan_id} ${JSON.stringify(zohoKeyValuePairs)} `);
+        await this.zohoRepaymentHelperService.updateZohoFields(loan.zoho_loan_id, zohoKeyValuePairs, this.globalService.ZOHO_MODULES.LOAN);
+
     }
 
     async scheduleNextInstalment(scheudle_instalment: any, loan_id: string) {
@@ -52,6 +64,13 @@ export class HandleEqualPaymentUsecase {
         updateRepaymentScheduleDto.id = next_scheudle_instalment.id;
         updateRepaymentScheduleDto.scheduling_status = this.globalService.INSTALMENT_SCHEDULING_STATUS.SCHEDULED;
         await this.repaymentScheduleService.update(updateRepaymentScheduleDto);
+
+        let zohoKeyValuePairs: any = {};
+        zohoKeyValuePairs = {
+            Scheduling_Status: new Choice(this.globalService.INSTALMENT_SCHEDULING_STATUS_STR[updateRepaymentScheduleDto.scheduling_status]),
+        };
+        await this.zohoRepaymentHelperService.updateZohoFields(next_scheudle_instalment.zoho_repayment_schedule_id, zohoKeyValuePairs, this.globalService.ZOHO_MODULES.REPAYMENT_SCHEDULES);
+
     }
 
     async updateRepaymentSchedule(scheudle_instalment: any) {
@@ -64,6 +83,16 @@ export class HandleEqualPaymentUsecase {
         updateRepaymentScheduleDto.paid_date = new Date();
 
         await this.repaymentScheduleService.update(updateRepaymentScheduleDto);
+
+        let zohoKeyValuePairs: any = {};
+        zohoKeyValuePairs = {
+            Repayment_Status: new Choice(this.globalService.INSTALMENT_PAYMENT_STATUS_STR[updateRepaymentScheduleDto.repayment_status]),
+            Scheduling_Status: new Choice(this.globalService.INSTALMENT_SCHEDULING_STATUS_STR[updateRepaymentScheduleDto.scheduling_status]),
+            Overdue_Amount: updateRepaymentScheduleDto.ins_overdue_amount,
+            Last_Paid_Date: new Date(),
+        };
+        this.logger.log(`Updating Repayment Schedule On Zoho ${updateRepaymentScheduleDto.id} ${JSON.stringify(zohoKeyValuePairs)} ${this.globalService.ZOHO_MODULES.REPAYMENT_SCHEDULES}`);
+        await this.zohoRepaymentHelperService.updateZohoFields(scheudle_instalment.zoho_repayment_schedule_id, zohoKeyValuePairs, this.globalService.ZOHO_MODULES.REPAYMENT_SCHEDULES);
     }
 
     calcInsPaymentStatus(scheudle_instalment: any): any {
