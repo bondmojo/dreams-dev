@@ -41,12 +41,9 @@ export class ZohoRepaymentScheduleHelper {
         return zohoRepaymentSchedulePair;
     }
 
-    createZohoRepaymentSchedule(recordPairArray: any) {
-        this.zohoCreateRepaymentSchedule.create(recordPairArray);
-
+    async createZohoRepaymentSchedule(recordPairArray: any): Promise<any> {
+        return await this.zohoCreateRepaymentSchedule.create(recordPairArray);
     }
-
-
 
 }
 

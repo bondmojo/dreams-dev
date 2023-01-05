@@ -12,7 +12,7 @@ export class CreateZohoRepaymentScheduleUsecase {
 
     async create(recordPairArray: []) {
 
-        await this.repository.createBulkRecordOnZoho(recordPairArray, 'repayment_schedules');
+        return await this.repository.createBulkRecordOnZoho(recordPairArray, 'repayment_schedules');
 
         //return await this.repository.createLoanApplication(createLoanDto.dreamerId, createLoanDto);
     }

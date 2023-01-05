@@ -314,7 +314,7 @@ export class DreamerRepository {
         return (map.get('id') as bigint).toString();
     }
 
-    async createBulkRecordOnZoho(zohoRecordList: [], moduleName: string): Promise<string> {
+    async createBulkRecordOnZoho(zohoRecordList: [], moduleName: string): Promise<string[]> {
         // zohoDataKeyValuePair should be key value pair
         this.log.log(`Creating Zoho field with data at ${JSON.stringify(zohoRecordList)}`);
 
@@ -328,11 +328,10 @@ export class DreamerRepository {
             recordArray.push(record);
         });
 
-        const map: Map<string, any> = await this.zohoservice.saveRecordArray(recordArray, moduleName);
-
+        const saveRecordResponse = await this.zohoservice.saveRecordArray(recordArray, moduleName);
         console.log(`Zoho Fields Successfully Created = Modue: ${moduleName} , Fields ${JSON.stringify(recordArray)}`);
-
-        return (map.get('id') as bigint).toString();
+        const response = saveRecordResponse.map((map: Map<string, any>) => (map.get('id') as bigint).toString())
+        return response;
     }
 
 }

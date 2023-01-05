@@ -36,10 +36,10 @@ export class ZohoService {
 
         //Add Record instance to the array
         recordsArray.push(record);
-        return await this.saveRecordArray(recordsArray, moduleName);
+        return (await this.saveRecordArray(recordsArray, moduleName))[0];
     }
 
-    async saveRecordArray(recordsArray: Record[], moduleName: string): Promise<Map<string, any>> {
+    async saveRecordArray(recordsArray: Record[], moduleName: string): Promise<Map<string, any>[]> {
         let recordOperations = new RecordOperations();
         let request = new BodyWrapper();
 
@@ -53,12 +53,10 @@ export class ZohoService {
         let response = await recordOperations.createRecords(moduleName, request);
 
         this.log.log(":" + JSON.stringify(response));
+        let responseArray = this.extractResponseArray(response);
 
-
-        const successResponse = this.extractResponse(response);
-
-        return (successResponse as SuccessResponse).getDetails();
-
+        const successResponses = responseArray.map(e => (e as SuccessResponse).getDetails());
+        return successResponses;
     }
 
     async updateRecord(dreamerId: string, record: Record, moduleName: string) {
@@ -142,5 +140,35 @@ export class ZohoService {
         this.log.log("Successfully performed operation on Zoho");
 
         return actionResponse;
+    }
+
+    private extractResponseArray(response: APIResponse<ActionHandler>) {
+        this.log.log("Received response from the " + JSON.stringify(response));
+
+        if (response == null) {
+            throw new HttpException('Unable to push data to Zoho', HttpStatus.BAD_REQUEST);
+        }
+
+        let responseObject: ActionHandler = response.getObject();
+
+        if (responseObject == null) {
+            throw new HttpException('Invalid data pushed to zoho', HttpStatus.BAD_REQUEST);
+        }
+
+        if (responseObject.constructor.name === 'APIException') {
+            throw new HttpException((responseObject as SuccessResponse).getMessage().getValue(), HttpStatus.BAD_REQUEST);
+        }
+
+        const actionResponses: ActionResponse[] = (responseObject as ActionWrapper).getData();
+
+        const actionResponse = actionResponses[0];
+
+        if (actionResponse.constructor.name === 'APIException') {
+            throw new HttpException((actionResponse as SuccessResponse).getMessage().getValue(), HttpStatus.BAD_REQUEST);
+        }
+
+        this.log.log("Successfully performed operation on Zoho");
+
+        return actionResponses;
     }
 }

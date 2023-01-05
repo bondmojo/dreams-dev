@@ -44,7 +44,6 @@ export class CreateRepaymentScheduleUsecase {
                 }
 
                 const repayment_schedule_model = this.getRepaymentScheduleModel(getRepaymentScheduleModelDto);
-                console.log("repayment_schedule_model :: ", repayment_schedule_model);
 
                 const savedRecord = await this.repaymentScheduleRepository.save(repayment_schedule_model);
 
@@ -58,13 +57,14 @@ export class CreateRepaymentScheduleUsecase {
 
             this.log.log("Creating ZOho Schedule =" + JSON.stringify(zohoRepaymentScheduleArray));
 
-            await this.zohoRepaymentScheduleHelper.createZohoRepaymentSchedule(zohoRepaymentScheduleArray);
-
+            const zohoRepaymentScheduleResponse = await this.zohoRepaymentScheduleHelper.createZohoRepaymentSchedule(zohoRepaymentScheduleArray);
+            this.log.log(`Repayment Schedule Zoho Response ${zohoRepaymentScheduleResponse}`);
+            await this.updateZohoRepaymentScheduleId(zohoRepaymentScheduleArray, zohoRepaymentScheduleResponse);
 
             return 'Done';
         }
         catch (error) {
-            this.log.error("Error in Repayment Schedule Creation" + JSON.stringify(error));
+            this.log.error(`Error in Repayment Schedule Creation ${error}`);
         }
     }
 
@@ -93,6 +93,12 @@ export class CreateRepaymentScheduleUsecase {
         model.ins_to_date = addMonths(now, getRepaymentScheduleModelDto.instalment_number);
         model.due_date = addMonths(now, getRepaymentScheduleModelDto.instalment_number);
         return model;
+    }
+
+    async updateZohoRepaymentScheduleId(zohoRepaymentScheduleArray: any, zohoRespArray: Array<string>) {
+        for (let i = 0; i < zohoRespArray.length; i++) {
+            await this.repaymentScheduleRepository.update(zohoRepaymentScheduleArray[i].Name, { zoho_repayment_schedule_id: zohoRespArray[i] });
+        }
     }
 
 }
