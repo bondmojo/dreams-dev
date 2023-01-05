@@ -82,6 +82,9 @@ export class RepaymentSchedule {
   @Column({ nullable: true })
   zoho_loan_id: string;
 
+  @Column({ nullable: true })
+  zoho_repayment_schedule_id: string;
+
   @CreateDateColumn()
   created_at: string;
 
