@@ -49,7 +49,7 @@ export class RepaymentService {
 
             return 'Done';
         } catch (error) {
-            this.logger.error("Error in Loan Instalment Processing for Loan ID = " + processRepaymentDto.loan_id + JSON.stringify(error));
+            this.logger.error(`Error in Loan Instalment Processing for Loan ID = ${processRepaymentDto.loan_id} error:  ${error}`);
         }
     }
 }
