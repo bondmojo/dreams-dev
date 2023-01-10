@@ -18,7 +18,7 @@ export class RepaymentSchedule {
   id: string;
 
   @Column()
-  instalment_number: number;
+  ins_number: number;
 
   @Column()
   loan_id: string;
