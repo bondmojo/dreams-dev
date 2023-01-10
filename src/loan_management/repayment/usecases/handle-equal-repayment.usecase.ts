@@ -53,7 +53,7 @@ export class HandleEqualRepaymentUsecase extends HandleRepaymentUsecase {
 
         let zohoKeyValuePairs: any = {};
         zohoKeyValuePairs = {
-            Scheduling_Status: new Choice(this.globalService.INSTALMENT_SCHEDULING_STATUS_STR[updateRepaymentScheduleDto.scheduling_status]),
+            Installment_Status: new Choice(this.globalService.INSTALMENT_SCHEDULING_STATUS_STR[updateRepaymentScheduleDto.scheduling_status]),
         };
         await this.zohoRepaymentHelperService.updateZohoFields(next_scheudle_instalment.zoho_repayment_schedule_id, zohoKeyValuePairs, this.globalService.ZOHO_MODULES.REPAYMENT_SCHEDULES);
 
@@ -73,7 +73,7 @@ export class HandleEqualRepaymentUsecase extends HandleRepaymentUsecase {
         let zohoKeyValuePairs: any = {};
         zohoKeyValuePairs = {
             Repayment_Status: new Choice(this.globalService.INSTALMENT_PAYMENT_STATUS_STR[updateRepaymentScheduleDto.repayment_status]),
-            Scheduling_Status: new Choice(this.globalService.INSTALMENT_SCHEDULING_STATUS_STR[updateRepaymentScheduleDto.scheduling_status]),
+            Installment_Status: new Choice(this.globalService.INSTALMENT_SCHEDULING_STATUS_STR[updateRepaymentScheduleDto.scheduling_status]),
             Overdue_Amount: updateRepaymentScheduleDto.ins_overdue_amount,
             Last_Paid_Date: new Date(),
         };

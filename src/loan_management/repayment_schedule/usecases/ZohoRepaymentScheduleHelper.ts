@@ -33,7 +33,7 @@ export class ZohoRepaymentScheduleHelper {
 
         zohoRepaymentSchedulePair["Due_Principal_Amount"] = Number(repaymentScheduleModel.ins_principal_amount);
         zohoRepaymentSchedulePair["Repayment_Date"] = repaymentScheduleModel.due_date;
-        zohoRepaymentSchedulePair["Scheduling_Status"] = new Choice(this.globalService.INSTALMENT_SCHEDULING_STATUS_STR[repaymentScheduleModel.scheduling_status]);
+        zohoRepaymentSchedulePair["Installment_Status"] = new Choice(this.globalService.INSTALMENT_SCHEDULING_STATUS_STR[repaymentScheduleModel.scheduling_status]);
 
         zohoRepaymentSchedulePair["Last_Paid_Date"] = repaymentScheduleModel.previous_repayment_dates;
 

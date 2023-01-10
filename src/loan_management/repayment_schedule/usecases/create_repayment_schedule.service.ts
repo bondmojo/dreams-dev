@@ -73,7 +73,7 @@ export class CreateRepaymentScheduleUsecase {
         const now = new Date();
         const schedule_status = (getRepaymentScheduleModelDto.instalment_number == 1) ? 'SCHEDULED' : 'NOT_SCHEDULED'
 
-        model.id = 'RS' + Math.floor(Math.random() * 100000000);
+        model.id = 'INS' + Math.floor(Math.random() * 100000000);
         model.loan_id = getRepaymentScheduleModelDto.loan_id;
         model.client_id = getRepaymentScheduleModelDto.client_id;
         model.instalment_number = getRepaymentScheduleModelDto.instalment_number;
