@@ -38,7 +38,8 @@ export class SendpluseService {
                     params: { id: id }
                 }
             ));
-            this.log.log(`Successfully retrieved user data from send pulse ${response.statusText}`)
+            this.log.log(`Successfully retrieved user data from send pulse ${response.statusText}`);
+
             return response.data.data;
         }
         catch (error) {

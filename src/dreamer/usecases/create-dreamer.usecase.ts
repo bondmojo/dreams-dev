@@ -41,5 +41,6 @@ export class CreateDreamerUsecase {
         dreamer.name = data.name;
         dreamer.firstName = data.first_name;
         dreamer.lastName = data.last_name ? data.last_name : '-';
+        dreamer.telegram_id = contact.telegram_id;
     }
 }

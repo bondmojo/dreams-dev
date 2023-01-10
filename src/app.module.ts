@@ -18,6 +18,7 @@ import { FileUploadModule } from './files/file_upload.module';
 import { DataSource } from 'typeorm';
 import { RepaymentScheduleModule } from './loan_management/repayment_schedule/repayment_schedule.module';
 import { RepaymentModule } from './loan_management/repayment/repayment.module';
+import { CustomTelegramModule } from './external/telegram/telegram.module';
 @Module({
   controllers: [HealthCheckController],
   imports: [
@@ -29,7 +30,8 @@ import { RepaymentModule } from './loan_management/repayment/repayment.module';
       },
     }),
     ScheduleModule.forRoot(),
-    ConfigModule.forRoot(), EventEmitterModule.forRoot(), ZohoModule, DreamerModule, SendpulseModule, ClientModule, LoanModule, TransactionModule, GlobalModule, FileUploadModule, RepaymentScheduleModule, RepaymentModule]
+    ConfigModule.forRoot(), EventEmitterModule.forRoot(), ZohoModule, DreamerModule, SendpulseModule, ClientModule, LoanModule,
+    TransactionModule, GlobalModule, FileUploadModule, RepaymentScheduleModule, RepaymentModule, CustomTelegramModule]
 })
 export class AppModule {
 
