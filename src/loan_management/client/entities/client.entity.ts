@@ -107,6 +107,9 @@ export class Client {
   @Column({ type: 'timestamp', nullable: true })
   acc_update_date: string;
 
+  @Column({ nullable: true, unique: true })
+  telegram_id: string;
+
   @CreateDateColumn()
   created_at: string;
 
