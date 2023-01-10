@@ -31,7 +31,7 @@ export class CreateRepaymentScheduleUsecase {
             const zohoRepaymentScheduleArray: any = [];
             for (let i = 0; i < tenure; i++) {
                 const getRepaymentScheduleModelDto = new GetRepaymentScheduleModelDto();
-                getRepaymentScheduleModelDto.instalment_number = i + 1;
+                getRepaymentScheduleModelDto.ins_number = i + 1;
                 getRepaymentScheduleModelDto.principal_amount = Math.floor(createRepaymentScheduleDto.loan_amount / tenure);
                 getRepaymentScheduleModelDto.loan_id = createRepaymentScheduleDto.loan_id;
                 getRepaymentScheduleModelDto.client_id = createRepaymentScheduleDto.client_id;
@@ -71,12 +71,12 @@ export class CreateRepaymentScheduleUsecase {
     getRepaymentScheduleModel(getRepaymentScheduleModelDto: GetRepaymentScheduleModelDto): RepaymentScheduleModel {
         const model = new RepaymentScheduleModel();
         const now = new Date();
-        const schedule_status = (getRepaymentScheduleModelDto.instalment_number == 1) ? 'SCHEDULED' : 'NOT_SCHEDULED'
+        const schedule_status = (getRepaymentScheduleModelDto.ins_number == 1) ? 'SCHEDULED' : 'NOT_SCHEDULED'
 
         model.id = 'INS' + Math.floor(Math.random() * 100000000);
         model.loan_id = getRepaymentScheduleModelDto.loan_id;
         model.client_id = getRepaymentScheduleModelDto.client_id;
-        model.instalment_number = getRepaymentScheduleModelDto.instalment_number;
+        model.ins_number = getRepaymentScheduleModelDto.ins_number;
         model.zoho_loan_id = getRepaymentScheduleModelDto.zoho_loan_id;
 
         model.ins_principal_amount = Number(getRepaymentScheduleModelDto.principal_amount.toFixed(2));
@@ -89,9 +89,9 @@ export class CreateRepaymentScheduleUsecase {
         model.scheduling_status = this.globalService.INSTALMENT_SCHEDULING_STATUS[schedule_status];
         model.grace_period = this.globalService.INSTALMENT_GRACE_PERIOD_DAYS;
         model.number_of_penalties = 0;
-        model.ins_from_date = addMonths(now, getRepaymentScheduleModelDto.instalment_number - 1);
-        model.ins_to_date = addMonths(now, getRepaymentScheduleModelDto.instalment_number);
-        model.due_date = addMonths(now, getRepaymentScheduleModelDto.instalment_number);
+        model.ins_from_date = addMonths(now, getRepaymentScheduleModelDto.ins_number - 1);
+        model.ins_to_date = addMonths(now, getRepaymentScheduleModelDto.ins_number);
+        model.due_date = addMonths(now, getRepaymentScheduleModelDto.ins_number);
         return model;
     }
 

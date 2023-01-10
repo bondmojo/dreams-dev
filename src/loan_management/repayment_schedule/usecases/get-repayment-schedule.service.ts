@@ -23,7 +23,7 @@ export class GetRepaymentScheduleUsecase {
             const repaymentScheduleArray: any = [];
             for (let i = 0; i < tenure; i++) {
                 const repaymentScheduleDto: any = {};
-                repaymentScheduleDto.instalment_number = i + 1;
+                repaymentScheduleDto.ins_number = i + 1;
                 let principal_amount = Math.floor(loan_amount / tenure);
                 //add remainder amount in last instalment.
                 if (i == tenure - 1) {
@@ -31,7 +31,7 @@ export class GetRepaymentScheduleUsecase {
                 }
                 repaymentScheduleDto.ins_overdue_amount = Number((principal_amount + this.globalService.INSTALMENT_MEMBERSHIP_FEE).toFixed(2));
                 const now = new Date();
-                repaymentScheduleDto.due_date = addMonths(now, repaymentScheduleDto.instalment_number);
+                repaymentScheduleDto.due_date = addMonths(now, repaymentScheduleDto.ins_number);
 
                 repaymentScheduleArray.push(repaymentScheduleDto);
             }

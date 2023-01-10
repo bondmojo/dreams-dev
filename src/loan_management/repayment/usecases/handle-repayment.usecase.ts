@@ -30,7 +30,7 @@ export abstract class HandleRepaymentUsecase {
     }
 
     async getLoanStatus(loan: Loan): Promise<string> {
-        const last_instalment = await this.repaymentScheduleService.findOne({ loan_id: loan.id, instalment_number: loan.tenure_in_months, scheduling_status: this.globalService.INSTALMENT_SCHEDULING_STATUS.COMPLETED });
+        const last_instalment = await this.repaymentScheduleService.findOne({ loan_id: loan.id, ins_number: loan.tenure_in_months, scheduling_status: this.globalService.INSTALMENT_SCHEDULING_STATUS.COMPLETED });
         if (!last_instalment) {
             return this.globalService.LOAN_PAYMENT_STATUS.PENDING;
         }

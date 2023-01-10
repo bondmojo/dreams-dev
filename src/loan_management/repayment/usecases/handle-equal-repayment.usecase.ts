@@ -41,8 +41,8 @@ export class HandleEqualRepaymentUsecase extends HandleRepaymentUsecase {
     }
 
     async scheduleNextInstalment(scheudle_instalment: any, loan_id: string) {
-        const next_ins_number = scheudle_instalment.instalment_number + 1;
-        const next_scheudle_instalment = await this.repaymentScheduleService.findOne({ loan_id: loan_id, instalment_number: next_ins_number, scheduling_status: this.globalService.INSTALMENT_SCHEDULING_STATUS.NOT_SCHEDULED });
+        const next_ins_number = scheudle_instalment.ins_number + 1;
+        const next_scheudle_instalment = await this.repaymentScheduleService.findOne({ loan_id: loan_id, ins_number: next_ins_number, scheduling_status: this.globalService.INSTALMENT_SCHEDULING_STATUS.NOT_SCHEDULED });
         if (!next_scheudle_instalment) {
             return 'No Due Instalment pending for this user.'
         }
