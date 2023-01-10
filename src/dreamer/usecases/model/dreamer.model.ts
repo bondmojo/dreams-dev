@@ -11,6 +11,7 @@ export class DreamerModel {
     utmSorce: string;
     utmMedium: string;
     utmCampaign: string;
+    telegram_id: string;
 }
 
 export class LoanRequest {

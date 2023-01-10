@@ -9,6 +9,7 @@ import { SendpulseHelperService } from './sendpulse-helper.service';
 import { CalculationResultDto } from './dto/calculation-result.dto';
 import { RunFlowModel } from './model/run-flow-model';
 import { GlobalService } from "../../globals/usecases/global.service";
+import { SendPulseContactDto } from './dto/send-pulse-contact.dto';
 
 
 @Controller('sendpulse')
@@ -39,7 +40,6 @@ export class SendpulseController {
     this.log.log(`convertToKhmerNumber request data ${id}`);
     return { number: this.sendpulseHelperService.convertToKhmerNumber(id) };
   }
-
 
   @Post('/calculator/loan')
   loanCalculator(@Body() calculateLoanDto: CalculateLoanDto): CalculationResultDto {
@@ -74,4 +74,13 @@ export class SendpulseController {
 
     return this.sendpulseService.updateApplicationStatus(reqData);
   }
+
+  @Get('/getContact/:id')
+  async getContact(@Param('id') id: string) {
+    const data: SendPulseContactDto = await this.sendpulseService.getContact(id);
+    this.log.log(JSON.stringify(data as SendPulseContactDto));
+
+    return data;
+  }
+
 }

@@ -154,6 +154,7 @@ export class DreamerRepository {
         record.addKeyValue('utm_Source', dreamer.utmSorce);
         record.addKeyValue('utm_Medium', dreamer.utmMedium);
         record.addKeyValue('utm_Campaign', dreamer.utmCampaign);
+        record.addKeyValue('Telegram_Id', dreamer.telegram_id);
 
         const map: Map<string, any> = await this.zohoservice.saveRecord(record, 'Leads');
 
