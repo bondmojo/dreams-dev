@@ -28,6 +28,7 @@ export class CreateClientAndLoanDto {
   utm_source: string;
   utm_campaign: string;
   utm_medium: string;
+  telegram_id: string;
   // Loan Fields
   client_id: string;
   amount: number;

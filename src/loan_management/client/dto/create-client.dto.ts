@@ -27,4 +27,5 @@ export class CreateClientDto {
   utm_source: string;
   utm_campaign: string;
   utm_medium: string;
+  telegram_id: string;
 }
