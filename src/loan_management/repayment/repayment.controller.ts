@@ -1,7 +1,7 @@
 import { ProcessRepaymentDto } from './dto';
-import { Body, Controller, Param, Post, Get } from '@nestjs/common';
-import { RepaymentService } from "./repayment.service";
 import { CustomLogger } from "../../custom_logger";
+import { Body, Controller, Post } from '@nestjs/common';
+import { RepaymentService } from "./services/repayment.service";
 
 @Controller('repayment')
 export class RepaymentController {

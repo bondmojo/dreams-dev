@@ -1,29 +1,15 @@
 import { Injectable } from "@nestjs/common";
 import { ProcessRepaymentDto } from "../dto";
 import { CustomLogger } from "../../../custom_logger";
-import { GlobalService } from "../../../globals/usecases/global.service";
-import { LoanService } from "../../loan/usecases/loan.service";
-import { RepaymentScheduleService } from "src/loan_management/repayment_schedule/usecases/repayment_schedule.service";
-import { TransactionService } from "../../transaction/usecases/transaction.service";
-import { compareAsc, startOfDay, addDays } from "date-fns"
-import { UpdateRepaymentScheduleDto } from '../../repayment_schedule/dto';
 import { Loan } from '../../loan/entities/loan.entity';
-import { UpdateLoanDto } from "src/loan_management/loan/dto/update-loan.dto";
-import { RepaymentHelperService } from "../repayment-helper.service";
+import { compareAsc, startOfDay, addDays } from "date-fns"
+import { HandleRepaymentUsecase } from './handle-repayment.usecase';
 import { Choice } from "@zohocrm/typescript-sdk-2.0/utils/util/choice";
-import { ZohoRepaymentHelperService } from "../zoho-repayment-helper.service";
+import { UpdateRepaymentScheduleDto } from '../../repayment_schedule/dto';
+import { UpdateLoanDto } from "src/loan_management/loan/dto/update-loan.dto";
 @Injectable()
-export class HandleEqualPaymentUsecase {
-    private readonly logger = new CustomLogger(HandleEqualPaymentUsecase.name);
-
-    constructor(
-        private readonly globalService: GlobalService,
-        private readonly loanService: LoanService,
-        private readonly transactionService: TransactionService,
-        private readonly repaymentScheduleService: RepaymentScheduleService,
-        private readonly repaymentHelperService: RepaymentHelperService,
-        private readonly zohoRepaymentHelperService: ZohoRepaymentHelperService,
-    ) { }
+export class HandleEqualRepaymentUsecase extends HandleRepaymentUsecase {
+    private readonly logger = new CustomLogger(HandleEqualRepaymentUsecase.name);
 
     async process(processRepaymentDto: ProcessRepaymentDto): Promise<any> {
         const loan = await this.loanService.findOneForInternalUse({ id: processRepaymentDto.loan_id });
@@ -38,7 +24,7 @@ export class HandleEqualPaymentUsecase {
         const outstanding_amount = loan.outstanding_amount - processRepaymentDto.amount;
         const updateLoanDto = new UpdateLoanDto();
         if (!outstanding_amount) {
-            updateLoanDto.payment_status = await this.repaymentHelperService.getLoanStatus(loan);
+            updateLoanDto.payment_status = await this.getLoanStatus(loan);
         }
         updateLoanDto.id = loan.id;
         updateLoanDto.outstanding_amount = outstanding_amount;

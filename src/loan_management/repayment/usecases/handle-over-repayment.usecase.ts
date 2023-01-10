@@ -1,22 +1,29 @@
 import { Injectable } from "@nestjs/common";
 import { ProcessRepaymentDto } from "../dto";
 import { CustomLogger } from "../../../custom_logger";
-import { GlobalService } from "../../../globals/usecases/global.service";
 import { LoanService } from "../../loan/usecases/loan.service";
+import { HandleRepaymentUsecase } from "./handle-repayment.usecase";
+import { GlobalService } from "../../../globals/usecases/global.service";
+import { HandleEqualRepaymentUsecase } from "./handle-equal-repayment.usecase";
+import { HandleUnderRepaymentUsecase } from "./handle-under-repayment.usecase";
+import { TransactionService } from "../../transaction/usecases/transaction.service";
+import { ZohoRepaymentHelperService } from "../services/zoho-repayment-helper.service";
 import { RepaymentScheduleService } from "src/loan_management/repayment_schedule/usecases/repayment_schedule.service";
-import { HandleEqualPaymentUsecase } from "./handle-equal-payment.usecase";
-import { HandleUnderPaymentUsecase } from "./handle-under-payment.usecase";
 @Injectable()
-export class HandleOverPaymentUsecase {
-    private readonly logger = new CustomLogger(HandleOverPaymentUsecase.name);
+export class HandleOverRepaymentUsecase extends HandleRepaymentUsecase {
+    private readonly logger = new CustomLogger(HandleOverRepaymentUsecase.name);
 
     constructor(
-        private readonly globalService: GlobalService,
-        private readonly loanService: LoanService,
-        private readonly repaymentScheduleService: RepaymentScheduleService,
-        private readonly handleEqualPaymentUsecase: HandleEqualPaymentUsecase,
-        private readonly handleUnderPaymentUsecase: HandleUnderPaymentUsecase
-    ) { }
+        public readonly loanService: LoanService,
+        public readonly globalService: GlobalService,
+        public readonly transactionService: TransactionService,
+        public readonly repaymentScheduleService: RepaymentScheduleService,
+        public readonly zohoRepaymentHelperService: ZohoRepaymentHelperService,
+        private readonly handleEqualPaymentUsecase: HandleEqualRepaymentUsecase,
+        private readonly handleUnderRepaymentUsecase: HandleUnderRepaymentUsecase,
+    ) {
+        super(loanService, globalService, transactionService, repaymentScheduleService, zohoRepaymentHelperService);
+    }
 
     async process(processRepaymentDto: ProcessRepaymentDto): Promise<any> {
         const loan = await this.loanService.findOneForInternalUse({ id: processRepaymentDto.loan_id });
@@ -37,7 +44,7 @@ export class HandleOverPaymentUsecase {
                 underPaymentProcessDto.amount = processRepaymentDto.amount;
                 underPaymentProcessDto.image = processRepaymentDto.image;
                 underPaymentProcessDto.note = processRepaymentDto.note;
-                await this.handleUnderPaymentUsecase.process(underPaymentProcessDto);
+                await this.handleUnderRepaymentUsecase.process(underPaymentProcessDto);
                 processRepaymentDto.amount = 0;
             }
         }
