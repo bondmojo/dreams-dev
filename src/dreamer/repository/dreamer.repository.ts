@@ -80,6 +80,7 @@ export class DreamerRepository {
             taskRecord.addKeyValue("$se_module", "Leads");
             //taskRecord.addKeyValue("Retool_Url", taskDetails.retool_url);
 
+            this.log.log(`Trying to create task on Zoho: ${JSON.stringify(Object.fromEntries(taskRecord.getKeyValues()))}`);
             const map: Map<string, any> = await this.zohoservice.saveRecord(taskRecord, "Tasks");
             this.log.log(`Successfully saved user as ${map.get('id')}`);
             return (map.get('id') as bigint).toString();
@@ -126,6 +127,8 @@ export class DreamerRepository {
                 loanDto.membershipTier = "1";
             }
             record.addKeyValue("Loan_Tier_Membership", '' + loanDto.membershipTier);
+
+            this.log.log(`Trying to create loan on zoho: ${JSON.stringify(Object.fromEntries(record.getKeyValues()))}`);
             const map: Map<string, any> = await this.zohoservice.saveRecord(record, 'Loans');
             this.log.log(`Successfully saved user loan for zoho user ${dreamerId} as ${map.get('id')}`);
 
@@ -192,6 +195,7 @@ export class DreamerRepository {
                 record.addKeyValue('Provider_Bank', paymentDetails.preferredPaymentMethod);
             }
 
+            this.log.log(`Trying to update payment details on zoho: ${JSON.stringify(Object.fromEntries(record.getKeyValues()))}`);
             const map: Map<string, any> = await this.zohoservice.updateRecord(id, record, moduleName);
 
             this.log.log(`Successfully updated user ${id} data`);
@@ -217,6 +221,7 @@ export class DreamerRepository {
             record.addKeyValue('Lead_Status', new Choice("KYC Details Submitted-2"));
 
             //FIXME: Module name shall come from GlobalConstants
+            this.log.log(`Trying to update additional details on zoho: ${JSON.stringify(Object.fromEntries(record.getKeyValues()))}`);
             const map: Map<string, any> = await this.zohoservice.updateRecord(dreamerId, record, 'Leads');
 
             this.log.log(`Successfully updated user ${dreamerId} data`);
@@ -236,6 +241,7 @@ export class DreamerRepository {
             record.addKeyValue('KYC_Status', new Choice('Initiated'));
 
             //FIXME: Module name shall come from GlobalConstants
+            this.log.log(`Trying to save Kyc Initial Details on Zoho: ${JSON.stringify(Object.fromEntries(record.getKeyValues()))}`);
             const map: Map<string, any> = await this.zohoservice.updateRecord(dreamerId, record, 'Leads');
 
             this.log.log(`Successfully updated user ${dreamerId} data`);
@@ -287,6 +293,7 @@ export class DreamerRepository {
                 record.addKeyValue('KYC_Rejection_Reason', event.rejectionReason);
             }
             //FIXME: Module name shall come from GlobalConstants
+            this.log.log(`Trying to update KYC Details on Zoho: ${JSON.stringify(Object.fromEntries(record.getKeyValues()))}`);
             const map: Map<string, any> = await this.zohoservice.updateRecord(event.dreamerId, record, 'Leads');
 
             this.log.log(`Successfully updated user ${event.dreamerId} data`);
@@ -328,6 +335,7 @@ export class DreamerRepository {
                 record.addKeyValue(key, zohoKeyValuePairs[key]);
             });
 
+            this.log.log(`Trying to update fields on Zoho: ${JSON.stringify(Object.fromEntries(record.getKeyValues()))}`);
             const map: Map<string, any> = await this.zohoservice.updateRecord(id, record, moduleName);
 
             console.log(`Zoho Fields Successfully updated = Modue: ${moduleName} , UserModuleId:  ${id}, Fields ${JSON.stringify(zohoKeyValuePairs)}`);
