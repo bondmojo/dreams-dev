@@ -194,7 +194,7 @@ export class LoanService {
             });
 
             if (!loan || loan.status != this.globalService.LOAN_STATUS.APPROVED) {
-                throw new BadRequestException('Forbidden', 'No Approved loan found for loan id');
+                throw new BadRequestException('No Approved loan found for loan id');
             }
             await this.loanHelperService.createCreditDisbursementTransaction(loan, disbursedLoanDto);
             await this.loanHelperService.checkAndCreateWingTransferFeeTransaction(loan, disbursedLoanDto);
@@ -241,7 +241,7 @@ export class LoanService {
 
             if (!loan) {
                 this.log.log(`Requested Loan not found for ${videoReceivedCallbackDto.client_id}`);
-                throw new BadRequestException('Forbidden', `No Requested loan found for client id ${videoReceivedCallbackDto.client_id}`);
+                throw new BadRequestException(`No Requested loan found for client id ${videoReceivedCallbackDto.client_id}`);
             }
 
             await this.zohoLoanHelperService.updateZohoLoanStatus(loan.zoho_loan_id, this.globalService.ZOHO_LOAN_STATUS.VIDEO_REQUEST_SUBMITTED, this.globalService.ZOHO_MODULES.LOAN);
