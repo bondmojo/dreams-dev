@@ -2,7 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { CustomLogger } from "../../../custom_logger";
 // import { Loan } from '../entities/loan.entity';
 import { GlobalService } from "../../../globals/usecases/global.service"
-import { UpdateFieldsOnZohoUsecase } from "../../../dreamer/usecases/update-fields-on-zoho.usecase";
+import { UpdateFieldsOnZohoUsecase } from "../../../external/zoho/dreams/utility/update-fields-on-zoho.usecase";
 import { Choice } from "@zohocrm/typescript-sdk-2.0/utils/util/choice";
 
 @Injectable()

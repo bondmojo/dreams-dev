@@ -4,7 +4,7 @@ import { GlobalService } from "../../../globals/usecases/global.service"
 import { Loan } from '../entities/loan.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DreamerModel } from "src/dreamer/usecases/model/dreamer.model";
+import { DreamerModel } from "src/external/zoho/dreams/dreamer/usecases/model/dreamer.model";
 import { SendpluseService } from "src/external/sendpulse/sendpluse.service";
 
 @Injectable()

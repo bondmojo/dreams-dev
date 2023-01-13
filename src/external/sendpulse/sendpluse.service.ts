@@ -5,7 +5,7 @@ import { SendPulseTokenDto } from "./dto/send-pulse-token.dto";
 import { firstValueFrom } from 'rxjs';
 import { CustomLogger } from "../../custom_logger";
 import { SendPulseResponseDto } from "./dto/send-pulse-response.dto";
-import { DreamerModel } from "../../dreamer/usecases/model/dreamer.model";
+import { DreamerModel } from "../zoho/dreams/dreamer/usecases/model/dreamer.model";
 import { SetVariableRequestDto } from "./dto/set-variable-request.dto";
 import { RunFlowModel } from "./model/run-flow-model";
 import { OnEvent } from "@nestjs/event-emitter";

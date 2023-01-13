@@ -1,7 +1,7 @@
 import { Body, Controller, Get, HttpException, HttpStatus, Param, Post } from '@nestjs/common';
 import { SendpluseService } from './sendpluse.service';
 import { CustomLogger } from "../../custom_logger";
-import { DreamerModel } from '../../dreamer/usecases/model/dreamer.model';
+import { DreamerModel } from '../zoho/dreams/dreamer/usecases/model/dreamer.model';
 import { UpdateApplicationStatusRequestDto } from './dto/update-application-status-request.dto';
 import { CalculateLoanDto } from './dto/calculate-loan.dto';
 import { CalculationDto } from './dto/calculation.dto';
