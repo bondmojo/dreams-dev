@@ -15,32 +15,44 @@ export class CreateDreamerUsecase {
     ) { }
 
     async create(createDreamerDto: CreateDreamerDto): Promise<DreamerModel> {
-        let dreamer = new DreamerModel();
-        this.populateRequestData(dreamer, createDreamerDto);
-        const contact = await this.sendpulseService.getContact(createDreamerDto.externalId);
-        this.popluateSendPulseData(dreamer, contact);
-        this.log.log("Populated Data from sendpulse");
-        dreamer.id = await this.repository.saveDreamer(dreamer);
-        return dreamer;
+        try {
+            let dreamer = new DreamerModel();
+            this.populateRequestData(dreamer, createDreamerDto);
+            const contact = await this.sendpulseService.getContact(createDreamerDto.externalId);
+            this.popluateSendPulseData(dreamer, contact);
+            this.log.log("Populated Data from sendpulse");
+            dreamer.id = await this.repository.saveDreamer(dreamer);
+            return dreamer;
+        } catch (error) {
+            this.log.error(`DREAMER: ERROR OCCURED WHILE RUNNING create:  ${error}`);
+        }
     }
 
 
     private populateRequestData(dreamer: DreamerModel, createDreamerDto: CreateDreamerDto) {
-        dreamer.externalId = createDreamerDto.externalId;
-        dreamer.loanRequest = new LoanRequest();
-        dreamer.loanRequest.amount = Number(createDreamerDto.loanAmount);
-        dreamer.loanRequest.pointsAmount = Number(createDreamerDto.pointsAmount);
-        dreamer.sendpulse_url = this.globalService.BASE_SENDPULSE_URL + createDreamerDto?.externalId;
-        dreamer.utmSorce = createDreamerDto.utmSorce;
-        dreamer.utmMedium = createDreamerDto.utmMedium;
-        dreamer.utmCampaign = createDreamerDto.utmCampaign;
+        try {
+            dreamer.externalId = createDreamerDto.externalId;
+            dreamer.loanRequest = new LoanRequest();
+            dreamer.loanRequest.amount = Number(createDreamerDto.loanAmount);
+            dreamer.loanRequest.pointsAmount = Number(createDreamerDto.pointsAmount);
+            dreamer.sendpulse_url = this.globalService.BASE_SENDPULSE_URL + createDreamerDto?.externalId;
+            dreamer.utmSorce = createDreamerDto.utmSorce;
+            dreamer.utmMedium = createDreamerDto.utmMedium;
+            dreamer.utmCampaign = createDreamerDto.utmCampaign;
+        } catch (error) {
+            this.log.error(`DREAMER: ERROR OCCURED WHILE RUNNING populateRequestData:  ${error}`);
+        }
     }
 
     private popluateSendPulseData(dreamer: DreamerModel, contact: SendPulseContactDto) {
-        const data = contact.channel_data;
-        dreamer.name = data.name;
-        dreamer.firstName = data.first_name;
-        dreamer.lastName = data.last_name ? data.last_name : '-';
-        dreamer.telegram_id = contact.telegram_id;
+        try {
+            const data = contact.channel_data;
+            dreamer.name = data.name;
+            dreamer.firstName = data.first_name;
+            dreamer.lastName = data.last_name ? data.last_name : '-';
+            dreamer.telegram_id = contact.telegram_id;
+        } catch (error) {
+            this.log.error(`DREAMER: ERROR OCCURED WHILE RUNNING popluateSendPulseData:  ${error}`);
+        }
     }
 }

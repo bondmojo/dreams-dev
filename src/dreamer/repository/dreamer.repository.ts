@@ -29,274 +29,323 @@ export class DreamerRepository {
     ) { }
 
     async getDreamer(dreamer: string): Promise<DreamerModel> {
-        const dreamerModel = new DreamerModel();
-        const record: Record = await this.zohoservice.getDreamerRecord(dreamer);
-        dreamerModel.id = record.getKeyValue(Field.Leads.ID.getAPIName());
-        dreamerModel.externalId = record.getKeyValue('Telegram_Chat_ID');
-        dreamerModel.name = record.getKeyValue(Field.Leads.FULL_NAME.getAPIName());
-        dreamerModel.status = record.getKeyValue(Field.Leads.LEAD_STATUS.getAPIName());
-        //TODO: Map other values as required
-        return dreamerModel;
+        try {
+            const dreamerModel = new DreamerModel();
+            const record: Record = await this.zohoservice.getDreamerRecord(dreamer);
+            dreamerModel.id = record.getKeyValue(Field.Leads.ID.getAPIName());
+            dreamerModel.externalId = record.getKeyValue('Telegram_Chat_ID');
+            dreamerModel.name = record.getKeyValue(Field.Leads.FULL_NAME.getAPIName());
+            dreamerModel.status = record.getKeyValue(Field.Leads.LEAD_STATUS.getAPIName());
+            //TODO: Map other values as required
+            return dreamerModel;
+        } catch (error) {
+            this.log.error(`DREAMER REPO: ERROR OCCURED WHILE RUNNING getDreamer :  ${error}`);
+        }
     }
 
     async createTask(dreamerId: string, taskDetails: ZohoTaskRequest) {
-        const taskRecord = new Record();
-        const today = new Date();
-        const user = new User();
-        user.setEmail(taskDetails.assign_to);
+        try {
+            const taskRecord = new Record();
+            const today = new Date();
+            const user = new User();
+            user.setEmail(taskDetails.assign_to);
 
-        //Set dreamerId/leadid
-        const id = BigInt(dreamerId);
-        const whatId = new Record();
-        whatId.setId(id);
-        //whatId.addKeyValue("name", "LN3990696");
+            //Set dreamerId/leadid
+            const id = BigInt(dreamerId);
+            const whatId = new Record();
+            whatId.setId(id);
+            //whatId.addKeyValue("name", "LN3990696");
 
-        taskRecord.addFieldValue(Field.Tasks.WHAT_ID, whatId);
+            taskRecord.addFieldValue(Field.Tasks.WHAT_ID, whatId);
 
-        taskRecord.addFieldValue(Field.Tasks.SUBJECT, taskDetails.subject);
-        taskRecord.addFieldValue(Field.Tasks.CREATED_TIME, today);
-        taskRecord.addFieldValue(Field.Tasks.STATUS, new Choice(taskDetails.status));
-        taskRecord.addFieldValue(Field.Tasks.OWNER, user);
+            taskRecord.addFieldValue(Field.Tasks.SUBJECT, taskDetails.subject);
+            taskRecord.addFieldValue(Field.Tasks.CREATED_TIME, today);
+            taskRecord.addFieldValue(Field.Tasks.STATUS, new Choice(taskDetails.status));
+            taskRecord.addFieldValue(Field.Tasks.OWNER, user);
 
-        if (taskDetails?.dreamservice_customer_id) {
-            const retoolUrl = this.globalService.BASE_RETOOL_URL + "#customer_id=" + taskDetails?.dreamservice_customer_id;
-            taskRecord.addFieldValue(Field.Tasks.DESCRIPTION, retoolUrl);
-            this.log.log(`createTask. Retool URL = ${retoolUrl}`);
+            if (taskDetails?.dreamservice_customer_id) {
+                const retoolUrl = this.globalService.BASE_RETOOL_URL + "#customer_id=" + taskDetails?.dreamservice_customer_id;
+                taskRecord.addFieldValue(Field.Tasks.DESCRIPTION, retoolUrl);
+                this.log.log(`createTask. Retool URL = ${retoolUrl}`);
+            }
+
+            if (taskDetails?.sendpulse_url_required && taskDetails?.sendpulse_id) {
+                const sendpulseUrl = this.globalService.BASE_SENDPULSE_URL + taskDetails?.sendpulse_id;
+                taskRecord.addFieldValue(Field.Tasks.DESCRIPTION, sendpulseUrl);
+                this.log.log(`createTask. Sendpulse URL = ${sendpulseUrl}`);
+            }
+
+            taskRecord.addFieldValue(Field.Tasks.DUE_DATE, taskDetails.due_date); //FIXME:: move outside
+
+            taskRecord.addKeyValue("$se_module", "Leads");
+            //taskRecord.addKeyValue("Retool_Url", taskDetails.retool_url);
+
+            this.log.log(`Trying to create task on Zoho: ${JSON.stringify(Object.fromEntries(taskRecord.getKeyValues()))}`);
+            const map: Map<string, any> = await this.zohoservice.saveRecord(taskRecord, "Tasks");
+            this.log.log(`Successfully saved user as ${map.get('id')}`);
+            return (map.get('id') as bigint).toString();
+        } catch (error) {
+            this.log.error(`DREAMER REPO: ERROR OCCURED WHILE RUNNING createTask:  ${error}`);
         }
-
-        if (taskDetails?.sendpulse_url_required && taskDetails?.sendpulse_id) {
-            const sendpulseUrl = this.globalService.BASE_SENDPULSE_URL + taskDetails?.sendpulse_id;
-            taskRecord.addFieldValue(Field.Tasks.DESCRIPTION, sendpulseUrl);
-            this.log.log(`createTask. Sendpulse URL = ${sendpulseUrl}`);
-        }
-
-        taskRecord.addFieldValue(Field.Tasks.DUE_DATE, taskDetails.due_date); //FIXME:: move outside
-
-        taskRecord.addKeyValue("$se_module", "Leads");
-        //taskRecord.addKeyValue("Retool_Url", taskDetails.retool_url);
-
-        const map: Map<string, any> = await this.zohoservice.saveRecord(taskRecord, "Tasks");
-        this.log.log(`Successfully saved user as ${map.get('id')}`);
-        return (map.get('id') as bigint).toString();
     }
 
     async createLoanApplication(dreamerId: string, loanDto: CreateZohoLoanApplicationDto): Promise<CreateZohoLoanApplicationDto> {
+        try {
+            const dreamerModel = this.getDreamer(dreamerId);
 
-        const dreamerModel = this.getDreamer(dreamerId);
+            const record = new Record();
+            //Set dreamerId/leadid
+            const id = BigInt(dreamerId);
+            const dreamer = new Record();
+            dreamer.setId(id);
 
-        const record = new Record();
-        //Set dreamerId/leadid
-        const id = BigInt(dreamerId);
-        const dreamer = new Record();
-        dreamer.setId(id);
+            const user = new User();
+            //Assign to lead owner(Kalyana)
+            user.setId(BigInt(process.env.ZOHO_LEAD_OWNER_ID));
+            record.addFieldValue(Field.Leads.OWNER, user);
 
-        const user = new User();
-        //Assign to lead owner(Kalyana)
-        user.setId(BigInt(process.env.ZOHO_LEAD_OWNER_ID));
-        record.addFieldValue(Field.Leads.OWNER, user);
+            record.addKeyValue("Dreamer_Name", dreamer);
+            record.addKeyValue("Name", loanDto.lmsLoanId);
 
-        record.addKeyValue("Dreamer_Name", dreamer);
-        record.addKeyValue("Name", loanDto.lmsLoanId);
-
-        record.addKeyValue("Loan_Ammount", Number(loanDto.loanAmount));
-        record.addKeyValue('Outstanding_Balance', Number(loanDto.outstanding_amount));
-        record.addKeyValue("Membership_Point", Number(loanDto.dreamPoints));
-        record.addKeyValue('Disbursed_Amount', Number(loanDto.disbursed_amount));
-        record.addKeyValue('Loan_Fee', Number(loanDto.loan_fee));
-        record.addKeyValue('Wing_Wei_Luy_Transfer_Fee', Number(loanDto.wing_wei_luy_transfer_fee));
-        record.addKeyValue('Sendpulse_URL', loanDto.sendpulse_url);
-        record.addKeyValue('Retool_URL', loanDto.retool_url);
+            record.addKeyValue("Loan_Ammount", Number(loanDto.loanAmount));
+            record.addKeyValue('Outstanding_Balance', Number(loanDto.outstanding_amount));
+            record.addKeyValue("Membership_Point", Number(loanDto.dreamPoints));
+            record.addKeyValue('Disbursed_Amount', Number(loanDto.disbursed_amount));
+            record.addKeyValue('Loan_Fee', Number(loanDto.loan_fee));
+            record.addKeyValue('Wing_Wei_Luy_Transfer_Fee', Number(loanDto.wing_wei_luy_transfer_fee));
+            record.addKeyValue('Sendpulse_URL', loanDto.sendpulse_url);
+            record.addKeyValue('Retool_URL', loanDto.retool_url);
 
 
-        record.addKeyValue('Provider_Bank', loanDto.preferredPaymentMethod);
-        record.addKeyValue('Account_No', loanDto.paymentAccountNumber);
-        record.addKeyValue('Payment_Via', loanDto.paymentVia);
+            record.addKeyValue('Provider_Bank', loanDto.preferredPaymentMethod);
+            record.addKeyValue('Account_No', loanDto.paymentAccountNumber);
+            record.addKeyValue('Payment_Via', loanDto.paymentVia);
 
-        record.addKeyValue("Loan_Status", new Choice(loanDto.loanStatus));
-        if (!loanDto.membershipTier) {
-            this.log.log("no membership tier found. for =" + (await dreamerModel).name);
-            loanDto.membershipTier = "1";
+            record.addKeyValue("Loan_Status", new Choice(loanDto.loanStatus));
+            if (!loanDto.membershipTier) {
+                this.log.log("no membership tier found. for =" + (await dreamerModel).name);
+                loanDto.membershipTier = "1";
+            }
+            record.addKeyValue("Loan_Tier_Membership", '' + loanDto.membershipTier);
+
+            this.log.log(`Trying to create loan on zoho: ${JSON.stringify(Object.fromEntries(record.getKeyValues()))}`);
+            const map: Map<string, any> = await this.zohoservice.saveRecord(record, 'Loans');
+            this.log.log(`Successfully saved user loan for zoho user ${dreamerId} as ${map.get('id')}`);
+
+            loanDto.loanId = (map.get('id') as bigint).toString();
+            return loanDto;
+        } catch (error) {
+            this.log.error(`DREAMER REPO: ERROR OCCURED WHILE RUNNING createLoanApplication :  ${error}`);
         }
-        record.addKeyValue("Loan_Tier_Membership", '' + loanDto.membershipTier);
-        const map: Map<string, any> = await this.zohoservice.saveRecord(record, 'Loans');
-        this.log.log(`Successfully saved user loan for zoho user ${dreamerId} as ${map.get('id')}`);
-
-        loanDto.loanId = (map.get('id') as bigint).toString();
-        return loanDto;
     }
 
     async saveDreamer(dreamer: DreamerModel): Promise<string> {
-        const record = new Record();
+        try {
+            const record = new Record();
 
-        record.addFieldValue(Field.Leads.LAST_NAME, dreamer.lastName);
-        record.addFieldValue(Field.Leads.FIRST_NAME, dreamer.firstName);
-        record.addFieldValue(Field.Leads.FULL_NAME, dreamer.name);
-        record.addFieldValue(Field.Leads.COMPANY, this.COMPANY_NAME);
-        record.addFieldValue(Field.Leads.CITY, 'default');
-        record.addFieldValue(Field.Leads.EMAIL, "mohit.joshi@gojo.co");
-        record.addFieldValue(Field.Leads.LEAD_STATUS, new Choice('New'));
+            record.addFieldValue(Field.Leads.LAST_NAME, dreamer.lastName);
+            record.addFieldValue(Field.Leads.FIRST_NAME, dreamer.firstName);
+            record.addFieldValue(Field.Leads.FULL_NAME, dreamer.name);
+            record.addFieldValue(Field.Leads.COMPANY, this.COMPANY_NAME);
+            record.addFieldValue(Field.Leads.CITY, 'default');
+            record.addFieldValue(Field.Leads.EMAIL, "mohit.joshi@gojo.co");
+            record.addFieldValue(Field.Leads.LEAD_STATUS, new Choice('New'));
 
-        const user = new User();
-        //Assign to lead owner(Kalyana)
-        user.setId(BigInt(process.env.ZOHO_LEAD_OWNER_ID));
-        record.addFieldValue(Field.Leads.OWNER, user);
+            const user = new User();
+            //Assign to lead owner(Kalyana)
+            user.setId(BigInt(process.env.ZOHO_LEAD_OWNER_ID));
+            record.addFieldValue(Field.Leads.OWNER, user);
 
-        //Moving this data to loan module
-        //record.addKeyValue('Amount', dreamer.loanRequest.amount);
-        //record.addKeyValue('Points', dreamer.loanRequest.pointsAmount);
-        record.addKeyValue('Lead_Source', new Choice('Telegram'));
-        record.addKeyValue('Telegram_Chat_ID', dreamer.externalId);
-        record.addKeyValue('Amount', dreamer.loanRequest.amount);
-        record.addKeyValue('Points', dreamer.loanRequest.pointsAmount);
-        record.addKeyValue('Sendpulse_URL', dreamer.sendpulse_url);
+            //Moving this data to loan module
+            //record.addKeyValue('Amount', dreamer.loanRequest.amount);
+            //record.addKeyValue('Points', dreamer.loanRequest.pointsAmount);
+            record.addKeyValue('Lead_Source', new Choice('Telegram'));
+            record.addKeyValue('Telegram_Chat_ID', dreamer.externalId);
+            record.addKeyValue('Amount', dreamer.loanRequest.amount);
+            record.addKeyValue('Points', dreamer.loanRequest.pointsAmount);
+            record.addKeyValue('Sendpulse_URL', dreamer.sendpulse_url);
 
-        // UTM Params
-        record.addKeyValue('utm_Source', dreamer.utmSorce);
-        record.addKeyValue('utm_Medium', dreamer.utmMedium);
-        record.addKeyValue('utm_Campaign', dreamer.utmCampaign);
-        record.addKeyValue('Telegram_Id', "" + dreamer.telegram_id);
+            // UTM Params
+            record.addKeyValue('utm_Source', dreamer.utmSorce);
+            record.addKeyValue('utm_Medium', dreamer.utmMedium);
+            record.addKeyValue('utm_Campaign', dreamer.utmCampaign);
+            record.addKeyValue('Telegram_Id', "" + dreamer.telegram_id);
 
-        const map: Map<string, any> = await this.zohoservice.saveRecord(record, 'Leads');
+            this.log.log(`Trying to save dreamer on zoho: ${JSON.stringify(Object.fromEntries(record.getKeyValues()))}`);
+            const map: Map<string, any> = await this.zohoservice.saveRecord(record, 'Leads');
 
-        this.log.log(`Successfully saved user ${dreamer.externalId} as ${map.get('id')}`);
+            this.log.log(`Successfully saved user ${dreamer.externalId} as ${map.get('id')}`);
 
-        return (map.get('id') as bigint).toString();
+            return (map.get('id') as bigint).toString();
+        } catch (error) {
+            this.log.error(`DREAMER REPO: ERROR OCCURED WHILE RUNNING saveDreamer :  ${error}`);
+        }
     }
 
     async updatePaymentDetails(id: string, paymentDetails: PaymentDetailsRequestDto, moduleName: string): Promise<string> {
-        const record = new Record();
+        try {
+            const record = new Record();
 
-        record.addKeyValue('Payment_Via', paymentDetails.paymentVia);
+            record.addKeyValue('Payment_Via', paymentDetails.paymentVia);
 
-        if (moduleName === "Leads") {
-            record.addKeyValue('Account_Number', paymentDetails.paymentAccountNumber);
-            record.addKeyValue('Provider', new Choice(paymentDetails.preferredPaymentMethod));
+            if (moduleName === "Leads") {
+                record.addKeyValue('Account_Number', paymentDetails.paymentAccountNumber);
+                record.addKeyValue('Provider', new Choice(paymentDetails.preferredPaymentMethod));
+            }
+            else {
+                record.addKeyValue('Account_No', paymentDetails.paymentAccountNumber);
+                record.addKeyValue('Provider_Bank', paymentDetails.preferredPaymentMethod);
+            }
+
+            this.log.log(`Trying to update payment details on zoho: ${JSON.stringify(Object.fromEntries(record.getKeyValues()))}`);
+            const map: Map<string, any> = await this.zohoservice.updateRecord(id, record, moduleName);
+
+            this.log.log(`Successfully updated user ${id} data`);
+
+            return (map.get('id') as bigint).toString();
+        } catch (error) {
+            this.log.error(`DREAMER REPO: ERROR OCCURED WHILE RUNNING updatePaymentDetails :  ${error}`);
         }
-        else {
-            record.addKeyValue('Account_No', paymentDetails.paymentAccountNumber);
-            record.addKeyValue('Provider_Bank', paymentDetails.preferredPaymentMethod);
-        }
-
-        const map: Map<string, any> = await this.zohoservice.updateRecord(id, record, moduleName);
-
-        this.log.log(`Successfully updated user ${id} data`);
-
-        return (map.get('id') as bigint).toString();
     }
 
     async updateAdditionalDetails(dreamerId: string, additionalDetails: AdditionalDetailsRequestDto): Promise<string> {
-        // FIXME :: replace with updateFieldsOnZoho
-        const record = new Record();
-        record.addKeyValue('Address_Line_1', additionalDetails.addressLine1);
-        record.addKeyValue('Address_Line_2', additionalDetails.addressLine2);
-        record.addKeyValue('City', additionalDetails.city);
-        record.addKeyValue('State', additionalDetails.state);
-        record.addKeyValue('Zip_Code', additionalDetails.pincode);
-        record.addKeyValue('Country', 'Cambodia');
-        record.addKeyValue('Alternate_Phone_Number', additionalDetails.alternatePhoneNumber);
-        record.addKeyValue('Type', new Choice(additionalDetails.employmentType));
-        record.addKeyValue('Lead_Status', new Choice("KYC Details Submitted-2"));
+        try {
+            // FIXME :: replace with updateFieldsOnZoho
+            const record = new Record();
+            record.addKeyValue('Address_Line_1', additionalDetails.addressLine1);
+            record.addKeyValue('Address_Line_2', additionalDetails.addressLine2);
+            record.addKeyValue('City', additionalDetails.city);
+            record.addKeyValue('State', additionalDetails.state);
+            record.addKeyValue('Zip_Code', additionalDetails.pincode);
+            record.addKeyValue('Country', 'Cambodia');
+            record.addKeyValue('Alternate_Phone_Number', additionalDetails.alternatePhoneNumber);
+            record.addKeyValue('Type', new Choice(additionalDetails.employmentType));
+            record.addKeyValue('Lead_Status', new Choice("KYC Details Submitted-2"));
 
-        //FIXME: Module name shall come from GlobalConstants
-        const map: Map<string, any> = await this.zohoservice.updateRecord(dreamerId, record, 'Leads');
+            //FIXME: Module name shall come from GlobalConstants
+            this.log.log(`Trying to update additional details on zoho: ${JSON.stringify(Object.fromEntries(record.getKeyValues()))}`);
+            const map: Map<string, any> = await this.zohoservice.updateRecord(dreamerId, record, 'Leads');
 
-        this.log.log(`Successfully updated user ${dreamerId} data`);
+            this.log.log(`Successfully updated user ${dreamerId} data`);
 
-        return (map.get('id') as bigint).toString();
+            return (map.get('id') as bigint).toString();
+        } catch (error) {
+            this.log.error(`DREAMER REPO: ERROR OCCURED WHILE RUNNING updateAdditionalDetails :  ${error}`);
+        }
     }
 
     async saveKycInitialDetails(dreamerId: string, kycId: string): Promise<string> {
-        // FIXME :: replace with updateFieldsOnZoho
-        const record = new Record();
-        record.addKeyValue('KYC_Id', kycId);
-        record.addKeyValue('Successful_KYC_Time', new Date());
-        record.addKeyValue('KYC_Status', new Choice('Initiated'));
+        try {
+            // FIXME :: replace with updateFieldsOnZoho
+            const record = new Record();
+            record.addKeyValue('KYC_Id', kycId);
+            record.addKeyValue('Successful_KYC_Time', new Date());
+            record.addKeyValue('KYC_Status', new Choice('Initiated'));
 
-        //FIXME: Module name shall come from GlobalConstants
-        const map: Map<string, any> = await this.zohoservice.updateRecord(dreamerId, record, 'Leads');
+            //FIXME: Module name shall come from GlobalConstants
+            this.log.log(`Trying to save Kyc Initial Details on Zoho: ${JSON.stringify(Object.fromEntries(record.getKeyValues()))}`);
+            const map: Map<string, any> = await this.zohoservice.updateRecord(dreamerId, record, 'Leads');
 
-        this.log.log(`Successfully updated user ${dreamerId} data`);
+            this.log.log(`Successfully updated user ${dreamerId} data`);
 
-        return (map.get('id') as bigint).toString();
+            return (map.get('id') as bigint).toString();
+        } catch (error) {
+            this.log.error(`DREAMER REPO: ERROR OCCURED WHILE RUNNING saveKycInitialDetails :  ${error}`);
+        }
     }
 
     async updatekycDetails(event: KycEventDto): Promise<string> {
-        this.log.log("Event received");
-        const filesToDeletes: string[] = [];
-        const record = new Record();
-        record.addKeyValue('KYC_End_Time', new Date());
-        record.addFieldValue(Field.Leads.LEAD_STATUS, new Choice('KYC Submitted'));
-        if (event.status == KYCStatus.SUCCESS || event.status == KYCStatus.REJECTED) {
+        try {
+            this.log.log("Event received");
+            const filesToDeletes: string[] = [];
+            const record = new Record();
+            record.addKeyValue('KYC_End_Time', new Date());
+            record.addFieldValue(Field.Leads.LEAD_STATUS, new Choice('KYC Submitted'));
+            if (event.status == KYCStatus.SUCCESS || event.status == KYCStatus.REJECTED) {
 
-            try {
-                if (event.dob) {
-                    const today = new Date();
-                    const dateOfBirth = new Date(event.dob);
+                try {
+                    if (event.dob) {
+                        const today = new Date();
+                        const dateOfBirth = new Date(event.dob);
 
-                    let age = today.getFullYear() - dateOfBirth.getFullYear();
-                    const m = today.getMonth() - dateOfBirth.getMonth();
+                        let age = today.getFullYear() - dateOfBirth.getFullYear();
+                        const m = today.getMonth() - dateOfBirth.getMonth();
 
-                    if (m < 0 || (m === 0 && today.getDate() < dateOfBirth.getDate())) {
-                        age--;
+                        if (m < 0 || (m === 0 && today.getDate() < dateOfBirth.getDate())) {
+                            age--;
+                        }
+                        this.log.log("Now Adding Age in Zoho=" + age);
+                        record.addKeyValue('Age', age);
                     }
-                    this.log.log("Now Adding Age in Zoho=" + age);
-                    record.addKeyValue('Age', age);
+                } catch (error) {
+                    this.log.log("Error in Calculating Age " + error);
                 }
-            } catch (error) {
-                this.log.log("Error in Calculating Age " + error);
+                record.addKeyValue('National_Id', event.documentNumber);
+                record.addKeyValue('First_Name_On_Document', event.first);
+                record.addKeyValue('Last_Name_On_Document', event.last);
+                record.addKeyValue('DOB_On_Document', event.dob);
+                record.addKeyValue('Name1', event.full);
+                record.addKeyValue('Gender_On_Document', new Choice(event.gender));
+                record.addKeyValue('KYC_Rejection_Reason', event.rejectionReason);
+                record.addKeyValue('KYC_Status', new Choice(event.status == KYCStatus.SUCCESS ? 'Success' : 'Failed'));
+                await this.addDocument(record, filesToDeletes, event.dreamerId, event.kycId, event.documentProof, 'document', 'KYC_Documents');
+                await this.addDocument(record, filesToDeletes, event.dreamerId, event.kycId, event.faceProof, 'face', 'KYC_Documents');
+            } else {
+                record.addKeyValue('KYC_Status', new Choice('Failed'));
+                record.addKeyValue('KYC_Rejection_Reason', event.rejectionReason);
             }
-            record.addKeyValue('National_Id', event.documentNumber);
-            record.addKeyValue('First_Name_On_Document', event.first);
-            record.addKeyValue('Last_Name_On_Document', event.last);
-            record.addKeyValue('DOB_On_Document', event.dob);
-            record.addKeyValue('Name1', event.full);
-            record.addKeyValue('Gender_On_Document', new Choice(event.gender));
-            record.addKeyValue('KYC_Rejection_Reason', event.rejectionReason);
-            record.addKeyValue('KYC_Status', new Choice(event.status == KYCStatus.SUCCESS ? 'Success' : 'Failed'));
-            await this.addDocument(record, filesToDeletes, event.dreamerId, event.kycId, event.documentProof, 'document', 'KYC_Documents');
-            await this.addDocument(record, filesToDeletes, event.dreamerId, event.kycId, event.faceProof, 'face', 'KYC_Documents');
-        } else {
-            record.addKeyValue('KYC_Status', new Choice('Failed'));
-            record.addKeyValue('KYC_Rejection_Reason', event.rejectionReason);
+            //FIXME: Module name shall come from GlobalConstants
+            this.log.log(`Trying to update KYC Details on Zoho: ${JSON.stringify(Object.fromEntries(record.getKeyValues()))}`);
+            const map: Map<string, any> = await this.zohoservice.updateRecord(event.dreamerId, record, 'Leads');
+
+            this.log.log(`Successfully updated user ${event.dreamerId} data`);
+
+            return (map.get('id') as bigint).toString();
+        } catch (error) {
+            this.log.error(`DREAMER REPO: error in update Kyc Details :  ${error}`);
         }
-        //FIXME: Module name shall come from GlobalConstants
-        const map: Map<string, any> = await this.zohoservice.updateRecord(event.dreamerId, record, 'Leads');
-
-        this.log.log(`Successfully updated user ${event.dreamerId} data`);
-
-        return (map.get('id') as bigint).toString();
     }
 
     async addDocument(record: Record, filesToDeletes: string[], dreamerId: string, kycId: string, proof: string, name: string, field: string) {
-        if (proof) {
-            const fileName = `${dreamerId}-${kycId}-${name}.jpg`;
-            const fileLocation = path.join(os.tmpdir(), fileName);
-            this.log.log(`File will be generated at ${fileLocation}`);
+        try {
+            if (proof) {
+                const fileName = `${dreamerId}-${kycId}-${name}.jpg`;
+                const fileLocation = path.join(os.tmpdir(), fileName);
+                this.log.log(`File will be generated at ${fileLocation}`);
 
-            await promises.pipeline(got.stream(proof), createWriteStream(fileLocation));
+                await promises.pipeline(got.stream(proof), createWriteStream(fileLocation));
 
-            const streamWrapper = new StreamWrapper(undefined, undefined, fileLocation);
-            const map: Map<string, any> = await this.zohoservice.uploadAttachments(dreamerId, streamWrapper);
+                const streamWrapper = new StreamWrapper(undefined, undefined, fileLocation);
+                const map: Map<string, any> = await this.zohoservice.uploadAttachments(dreamerId, streamWrapper);
 
-            const fileId = (map.get('id')).toString();
-            this.log.log(`Attachment uploaded to the Zoho server ${fileId}`);
+                const fileId = (map.get('id')).toString();
+                this.log.log(`Attachment uploaded to the Zoho server ${fileId}`);
+            }
+        } catch (error) {
+            this.log.error(`DREAMER REPO: ERROR OCCURED WHILE RUNNING addDocument :  ${error}`);
         }
+
     }
 
     // This function should be use for all future update implementations.
     async updateFieldsOnZoho(id: string, zohoKeyValuePairs: any, moduleName: string): Promise<string> {
-        // zohoDataKeyValuePair should be key value pair
-        this.log.log(`Upading Zoho field with data at ${JSON.stringify(zohoKeyValuePairs)}`);
-        const record = new Record();
-        Object.keys(zohoKeyValuePairs).forEach(key => {
-            record.addKeyValue(key, zohoKeyValuePairs[key]);
-        });
+        try {
+            // zohoDataKeyValuePair should be key value pair
+            this.log.log(`Upading Zoho field with data at ${JSON.stringify(zohoKeyValuePairs)}`);
+            const record = new Record();
+            Object.keys(zohoKeyValuePairs).forEach(key => {
+                record.addKeyValue(key, zohoKeyValuePairs[key]);
+            });
 
-        const map: Map<string, any> = await this.zohoservice.updateRecord(id, record, moduleName);
+            this.log.log(`Trying to update fields on Zoho: ${JSON.stringify(Object.fromEntries(record.getKeyValues()))}`);
+            const map: Map<string, any> = await this.zohoservice.updateRecord(id, record, moduleName);
 
-        console.log(`Zoho Fields Successfully updated = Modue: ${moduleName} , UserModuleId:  ${id}, Fields ${JSON.stringify(zohoKeyValuePairs)}`);
+            console.log(`Zoho Fields Successfully updated = Modue: ${moduleName} , UserModuleId:  ${id}, Fields ${JSON.stringify(zohoKeyValuePairs)}`);
 
-        return (map.get('id') as bigint).toString();
+            return (map.get('id') as bigint).toString();
+        } catch (error) {
+            this.log.error(`DREAMER REPO: ERROR OCCURED WHILE RUNNING updateFieldsOnZoho :  ${error}`);
+        }
     }
 
     // This function should be use for all future update implementations.

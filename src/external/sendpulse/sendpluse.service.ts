@@ -28,9 +28,9 @@ export class SendpluseService {
     constructor(private readonly httpService: HttpService, private readonly globalService: GlobalService) { }
 
     async getContact(id: string): Promise<SendPulseContactDto> {
-        await this.checkAndGenerateToken();
-
         try {
+            await this.checkAndGenerateToken();
+
             const response = await firstValueFrom(this.httpService.get<SendPulseResponseDto<SendPulseContactDto>>(
                 this.url + '/telegram/contacts/get',
                 {
@@ -43,7 +43,7 @@ export class SendpluseService {
             return response.data.data;
         }
         catch (error) {
-            this.log.log('send pulse error' + error);
+            this.log.error(`SENDPUSLE SERVICE: ERROR OCCURED WHILE RUNNING GetContact:  ${error}`);
             throw new HttpException({
                 status: HttpStatus.BAD_GATEWAY,
                 error: 'sendpulse is not reachable',
@@ -53,8 +53,8 @@ export class SendpluseService {
     }
 
     async runFlowV2(model: RunFlowModel) {
-        await this.checkAndGenerateToken();
         try {
+            await this.checkAndGenerateToken();
             const response = await firstValueFrom(this.httpService.post<SendPulseResponseDto<SendPulseContactDto>>(
                 this.url + '/telegram/flows/run',
                 { contact_id: model.contact_id, flow_id: model.flow_id, external_data: model.external_data },
@@ -63,15 +63,15 @@ export class SendpluseService {
                 }
             ));
             this.log.log(`Successfully initiated flow ${model.flow_id} with response ${response.statusText}`);
-        } catch (ex) {
-            this.log.error("ERROR OCCURED WHILE RUNNING runFlowV2 =" + JSON.stringify(ex));
+        } catch (error) {
+            this.log.error(`SENDPUSLE SERVICE: ERROR OCCURED WHILE RUNNING runFlowV2:  ${error}`);
         }
     }
 
     async runFlow(model: DreamerModel, flow: string): Promise<any> {
-        await this.checkAndGenerateToken();
-        //this.globalService.logenv();
         try {
+            await this.checkAndGenerateToken();
+            //this.globalService.logenv();
             const response = await firstValueFrom(this.httpService.post<SendPulseResponseDto<SendPulseContactDto>>(
                 this.url + '/telegram/flows/run',
                 { contact_id: model.externalId, flow_id: flow, external_data: model.external_data },
@@ -80,21 +80,20 @@ export class SendpluseService {
                 }
             ));
             this.log.log(`Successfully initiated flow ${flow} with response ${response.statusText}`);
-        } catch (ex) {
-            this.log.error("ERROR OCCURED WHILE RUNNING runFlow =" + JSON.stringify(ex));
+        } catch (error) {
+            this.log.error(`SENDPUSLE SERVICE: ERROR OCCURED WHILE RUNNING runFlow:  ${error}`);
             return new HttpException({
                 status: HttpStatus.BAD_REQUEST,
-                error: JSON.stringify(ex),
+                error: JSON.stringify(error),
             }, HttpStatus.BAD_REQUEST);
-
         }
     }
 
     async setVariable(variableDto: SetVariableRequestDto): Promise<string> {
-        await this.checkAndGenerateToken();
 
-        this.log.log("Set Send pulse variable =" + JSON.stringify(variableDto));
         try {
+            await this.checkAndGenerateToken();
+            this.log.log("Set Send pulse variable =" + JSON.stringify(variableDto));
             const response = await firstValueFrom(this.httpService.post<SendPulseResponseDto<SendPulseContactDto>>(
                 this.url + '/telegram/contacts/setVariable',
                 { contact_id: variableDto.contact_id, variable_id: variableDto.variable_id, variable_value: variableDto.variable_value },
@@ -106,7 +105,7 @@ export class SendpluseService {
             return response.statusText;
         }
         catch (error) {
-            this.log.log("setVariable: Exception occured" + JSON.stringify(error));
+            this.log.error(`SENDPUSLE SERVICE: ERROR OCCURED WHILE RUNNING setVariable:  ${error}`);
             throw error;
         }
     }
@@ -117,72 +116,83 @@ export class SendpluseService {
     }
 
     async createClientId(client: Client): Promise<string> {
-        this.log.log("Creating ClientID in Sendpulse =" + JSON.stringify(client));
+        try {
+            this.log.log("Creating ClientID in Sendpulse =" + JSON.stringify(client));
 
-        const variableDto = new SetVariableRequestDto();
-        //Client ID Variable
-        variableDto.variable_id = this.globalService.SENDPULSE_VARIABLE_ID.CLIENT_ID;
-        variableDto.variable_value = client.id;
-        variableDto.contact_id = client.sendpulse_id;
+            const variableDto = new SetVariableRequestDto();
+            //Client ID Variable
+            variableDto.variable_id = this.globalService.SENDPULSE_VARIABLE_ID.CLIENT_ID;
+            variableDto.variable_value = client.id;
+            variableDto.contact_id = client.sendpulse_id;
 
-        return await this.setVariable(variableDto);
+            return await this.setVariable(variableDto);
+        } catch (error) {
+            this.log.error(`SENDPUSLE SERVICE: ERROR OCCURED WHILE RUNNING createClientId:  ${error}`);
+        }
     }
 
     @OnEvent('loan.status.changed')
     async updateApplicationStatus(reqData: UpdateApplicationStatusRequestDto) {
-        this.log.log(`Running flow for sendpulse user ${reqData.sendpulse_user_id} with application status =` + reqData.application_status);
+        try {
+            this.log.log(`Running flow for sendpulse user ${reqData.sendpulse_user_id} with application status =` + reqData.application_status);
 
-        let flowId;
-        const applStatus = reqData.application_status;
+            let flowId;
+            const applStatus = reqData.application_status;
 
-        switch (applStatus) {
-            case this.APPLICATION_STATUS[0]:
-                flowId = this.globalService.SENDPULSE_FLOW.APPLICATION_STATUS_FLOW_ID.Approved;
-                break;
-            case this.APPLICATION_STATUS[1]:
-                flowId = this.globalService.SENDPULSE_FLOW.APPLICATION_STATUS_FLOW_ID['Not Qualified'];
-                break;
-            case this.APPLICATION_STATUS[2]:
-                const transfertypeDto = new SetVariableRequestDto();
-                transfertypeDto.contact_id = reqData.sendpulse_user_id;
-                transfertypeDto.variable_name = "activeLoanId";
-                transfertypeDto.variable_id = this.globalService.SENDPULSE_VARIABLE_ID.ACTIVE_LOAN_ID;
-                transfertypeDto.variable_value = "" + reqData.loan_id;
-                await this.setVariable(transfertypeDto);
+            switch (applStatus) {
+                case this.APPLICATION_STATUS[0]:
+                    flowId = this.globalService.SENDPULSE_FLOW.APPLICATION_STATUS_FLOW_ID.Approved;
+                    break;
+                case this.APPLICATION_STATUS[1]:
+                    flowId = this.globalService.SENDPULSE_FLOW.APPLICATION_STATUS_FLOW_ID['Not Qualified'];
+                    break;
+                case this.APPLICATION_STATUS[2]:
+                    const transfertypeDto = new SetVariableRequestDto();
+                    transfertypeDto.contact_id = reqData.sendpulse_user_id;
+                    transfertypeDto.variable_name = "activeLoanId";
+                    transfertypeDto.variable_id = this.globalService.SENDPULSE_VARIABLE_ID.ACTIVE_LOAN_ID;
+                    transfertypeDto.variable_value = "" + reqData.loan_id;
+                    await this.setVariable(transfertypeDto);
 
-                flowId = this.globalService.SENDPULSE_FLOW.APPLICATION_STATUS_FLOW_ID.Disbursed;
-                break;
+                    flowId = this.globalService.SENDPULSE_FLOW.APPLICATION_STATUS_FLOW_ID.Disbursed;
+                    break;
+            }
+            if (flowId) {
+                const model = new DreamerModel();
+                model.externalId = reqData.sendpulse_user_id;
+                model.external_data = {};
+
+                this.log.log("Running " + applStatus + "Flow. FlowId =" + flowId);
+                return await this.runFlow(model, flowId);
+            }
+
+            return HttpStatus.NOT_FOUND;
+        } catch (error) {
+            this.log.error(`SENDPUSLE SERVICE: ERROR OCCURED WHILE RUNNING updateApplicationStatus:  ${error}`);
         }
-        if (flowId) {
-            const model = new DreamerModel();
-            model.externalId = reqData.sendpulse_user_id;
-            model.external_data = {};
-
-            this.log.log("Running " + applStatus + "Flow. FlowId =" + flowId);
-            return await this.runFlow(model, flowId);
-        }
-
-        return HttpStatus.NOT_FOUND;
-
     }
 
     async checkAndGenerateToken(): Promise<string> {
-        if (Date.now() < this.access_token_expiry_time && this.token) {
-            this.log.log("Valid token Available.");
-            return "" + this.token;
+        try {
+            if (Date.now() < this.access_token_expiry_time && this.token) {
+                this.log.log("Valid token Available.");
+                return "" + this.token;
+            }
+
+            const clientId = '4b0aae3eeb0b3fc5fa57b615d02705cb';
+            const clientSecret = 'd3e1f76dc3ed1b0094c3eff38bfa15e7';
+            const granttype = 'client_credentials';
+            const response = await firstValueFrom(this.httpService.post<SendPulseTokenDto>(
+                this.url + '/oauth/access_token',
+                { client_id: clientId, client_secret: clientSecret, grant_type: granttype },
+            ));
+            this.token = response.data.access_token;
+            this.access_token_expiry_time = Date.now() + response.data.expires_in * 1000;
+
+            this.log.log(`Generated token from the sendpulse server which expires in ` + this.access_token_expiry_time);
+            return response.data.access_token;
+        } catch (error) {
+            this.log.error(`SENDPUSLE SERVICE: ERROR OCCURED WHILE RUNNING checkAndGenerateToken:  ${error}`);
         }
-
-        const clientId = '4b0aae3eeb0b3fc5fa57b615d02705cb';
-        const clientSecret = 'd3e1f76dc3ed1b0094c3eff38bfa15e7';
-        const granttype = 'client_credentials';
-        const response = await firstValueFrom(this.httpService.post<SendPulseTokenDto>(
-            this.url + '/oauth/access_token',
-            { client_id: clientId, client_secret: clientSecret, grant_type: granttype },
-        ));
-        this.token = response.data.access_token;
-        this.access_token_expiry_time = Date.now() + response.data.expires_in * 1000;
-
-        this.log.log(`Generated token from the sendpulse server which expires in ` + this.access_token_expiry_time);
-        return response.data.access_token;
     }
 }
