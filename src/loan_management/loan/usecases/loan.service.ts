@@ -73,36 +73,6 @@ export class LoanService {
                 this.log.log("Loan Updated in zoho. " + zohoLoanDto.dreamerId);
             }
 
-            createLoanDto.id = 'LN' + Math.floor(Math.random() * 100000000);
-            createLoanDto.loan_fee = this.globalService.LOAN_FEES;
-
-            // calculate outstanding balance & wing_wei_luy_transfer_fee
-            createLoanDto.wing_wei_luy_transfer_fee = 0;
-            createLoanDto.outstanding_amount = +createLoanDto.amount + +createLoanDto.loan_fee;
-            const today = new Date(); // current time
-            createLoanDto.repayment_date = add(today, { months: 1 }); // today + tenure_in_months
-            // if wire_transfer_type is mobile then calc wing_wei_luy_transfer_fee and add it into outstanding_amount
-            if (createLoanDto?.wire_transfer_type == this.globalService.WIRE_TRANSFER_TYPES.MOBILE) {
-                const disbursed_amount = +createLoanDto.amount - +createLoanDto.dream_point;
-                createLoanDto.wing_wei_luy_transfer_fee = +this.globalService.CALC_WING_WEI_LUY_TRANSFER_FEE(disbursed_amount);
-                createLoanDto.outstanding_amount = +createLoanDto.outstanding_amount + +createLoanDto.wing_wei_luy_transfer_fee;
-            }
-            //Step 1; Create Loan in Dreams DB
-            const loanFromDb = await this.loanRepository.save(createLoanDto);
-            this.log.log("Loan Created in LMS. " + loanFromDb.id);
-
-            if (createLoanDto.do_create_zoho_loan) {
-                //Step 2: Create Loan in Zoho
-                const zohoLoanDto: CreateZohoLoanApplicationDto = await this.createLoanInZoho(createLoanDto);
-                this.log.log("Loan Created in zoho. " + zohoLoanDto.dreamerId);
-
-                //Step 3: Update Zoho loan ID in Dreams DB
-                //once loan is created in zoho, update zohoLoanID in our DB for future reference.
-                // Haven't put "await" here as this action can happen be in parallel.
-                this.loanHelperService.updateZohoLoanId(createLoanDto.id, zohoLoanDto.loanId);
-                this.log.log("Loan Updated in zoho. " + zohoLoanDto.dreamerId);
-            }
-
             this.sendpulseLoanHelperService.triggerVideoVerificationFlowIfClientHasSuccessfullyPaidLoan(createLoanDto);
             //Step 4: Emit Loan Status 
             //emitting loan approved event in  order to notify admin
