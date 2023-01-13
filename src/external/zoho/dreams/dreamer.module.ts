@@ -20,7 +20,7 @@ import { ZohoTaskRepository } from "./task/zoho-task.repository";
 import { UpdateLoanPaymentDetailsUsecase } from "./zoho-loans/usecases/update-loan-payment-details.usecase";
 import { CreateZohoRepaymentScheduleUsecase } from "./repayment_schedule/create-repayment-schedule.usecase";
 import { ZohoRepaymentScheduleRepository } from "./repayment_schedule/repayment-schedule.repository";
-
+import { ZohoHelperService } from "./utility/zoho-helper.service";
 @Module({
     imports: [SendpulseModule, ZohoModule, ShuftiModule, GlobalModule, ClientModule],
     controllers: [DreamerController, DreamerLoanApplController],
@@ -39,7 +39,8 @@ import { ZohoRepaymentScheduleRepository } from "./repayment_schedule/repayment-
         UpdateLoanPaymentDetailsUsecase,
         UpdateFieldsOnZohoUsecase,
         CreateZohoTaskUsecase,
-        CreateZohoRepaymentScheduleUsecase
+        CreateZohoRepaymentScheduleUsecase,
+        ZohoHelperService
     ],
     exports: [CreateLoanApplicationUsecase, UpdateFieldsOnZohoUsecase, CreateZohoRepaymentScheduleUsecase]
 })
