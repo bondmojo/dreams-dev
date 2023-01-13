@@ -18,6 +18,8 @@ import { UpdateFieldsOnZohoUsecase } from './utility/update-fields-on-zoho.useca
 import { ZohoLoanRepository } from "./zoho-loans/repository/zoho-loan.repository";
 import { ZohoTaskRepository } from "./task/zoho-task.repository";
 import { UpdateLoanPaymentDetailsUsecase } from "./zoho-loans/usecases/update-loan-payment-details.usecase";
+import { CreateZohoRepaymentScheduleUsecase } from "./repayment_schedule/create-repayment-schedule.usecase";
+import { ZohoRepaymentScheduleRepository } from "./repayment_schedule/repayment-schedule.repository";
 
 @Module({
     imports: [SendpulseModule, ZohoModule, ShuftiModule, GlobalModule, ClientModule],
@@ -32,12 +34,14 @@ import { UpdateLoanPaymentDetailsUsecase } from "./zoho-loans/usecases/update-lo
         DreamerRepository,
         ZohoTaskRepository,
         ZohoLoanRepository,
+        ZohoRepaymentScheduleRepository,
         CreateLoanApplicationUsecase,
         UpdateLoanPaymentDetailsUsecase,
         UpdateFieldsOnZohoUsecase,
-        CreateZohoTaskUsecase
+        CreateZohoTaskUsecase,
+        CreateZohoRepaymentScheduleUsecase
     ],
-    exports: [CreateLoanApplicationUsecase, UpdateFieldsOnZohoUsecase]
+    exports: [CreateLoanApplicationUsecase, UpdateFieldsOnZohoUsecase, CreateZohoRepaymentScheduleUsecase]
 })
 export class DreamerModule {
 }

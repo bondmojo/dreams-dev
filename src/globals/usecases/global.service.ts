@@ -70,6 +70,7 @@ export class GlobalService {
         DREAMER: 'Leads',
         LOAN: 'Loans',
         TASK: 'Tasks',
+        REPAYMENT_SCHEDULES: 'Repayment_Schedules',
     }
 
     public readonly REPAYMENT_TRANSACTION_TYPE: any = {
@@ -157,6 +158,54 @@ export class GlobalService {
         "MAX_CREDIT_AMOUNT": this.isDev ? "630f3559fc45bf34001312c7" : "6350317bcef5586a617e2b77",
         "NEXT_LOAN_AMOUNT": this.isDev ? "6347ece53cfb19125f6d0b58" : "6350344b00bc7d0dfa140eeb",
     }
+
+    // Repayment Schuedle Global Configurations
+    public readonly INSTALMENT_MEMBERSHIP_FEE = 3;
+    public readonly INSTALMENT_GRACE_PERIOD_DAYS = 3;
+    public readonly INSTALMENT_PAYMENT_STATUS: any = {
+        NOT_PAID: 100,
+        PARTIAL_PAID: 200,
+        IN_GRACE_PERIOD: 300,
+        PAYMENT_DUE: 400,
+        PAID_ON_TIME: 500,
+        PAID_LATE: 600,
+        WAIVED_OFF: 700,
+    }
+    public readonly INSTALMENT_PAYMENT_STATUS_STR: any = {
+        100: 'Not Paid',
+        200: 'Partial Paid',
+        300: 'In Grace Period',
+        400: 'Payment Due',
+        500: 'Paid On Time',
+        600: 'Paid Late',
+        700: 'Waived Off',
+    }
+
+    public readonly INSTALMENT_SCHEDULING_STATUS: any = {
+        NOT_SCHEDULED: 100,
+        SCHEDULED: 200,
+        COMPLETED: 300,
+    }
+
+    public readonly INSTALMENT_SCHEDULING_STATUS_STR: any = {
+        100: 'Not Scheduled',
+        200: 'Scheduled',
+        300: 'Completed'
+    }
+
+    public readonly INSTALMENT_TRANSACTION_TYPE: any = {
+        DEBIT_WING_WEI_LUY_TRANSFER_FEE: 'debit_wing_wei_luy_transfer_fee',
+        CREDIT_WING_WEI_LUY_TRANSFER_FEE: 'credit_wing_wei_luy_transfer_fee',
+        CREDIT_DISBURSEMENT: 'credit_disbursement',
+        DREAM_POINT_COMMITMENT: 'dream_point_commitment',
+        DREAM_POINT_EARNED: 'dream_point_earned',
+        CREDIT_REPAYMENT: 'credit_repayment',
+        FEE_PAYMENT: 'fee_payment',
+        ADDITIONAL_FEE: 'additional_fee',
+        PARTIAL_PAYMENT: 'partial_payment',
+        DREAM_POINT_REFUND: 'dream_point_refund',
+    };
+
 
     /* constructor(
     ) { }

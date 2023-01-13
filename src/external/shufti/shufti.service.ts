@@ -26,37 +26,40 @@ export class ShuftiService {
     }
 
     async initiateKyc(dreamerId: string, kycId: string): Promise<string> {
-        const request = structuredClone(this.TEMPLATE);
-        request.reference = kycId;
-        request.callback_url = this.callbackUrl + '/shufti/callback?dreamerId=' + dreamerId + "&kycId=" + kycId;
-        request.redirect_url = this.telegramBotUrl;
-        request.country = "KH";
-        request.language = "KM";
+        try {
+            const request = structuredClone(this.TEMPLATE);
+            request.reference = kycId;
+            request.callback_url = this.callbackUrl + '/shufti/callback?dreamerId=' + dreamerId + "&kycId=" + kycId;
+            request.redirect_url = this.telegramBotUrl;
+            request.country = "KH";
+            request.language = "KM";
 
-        if (this.globalService.isDev) {
-            request.ttl = 1;
-        }
-        else {
-            request.ttl = 4320;
-        }
-
-        //request.redirect_url = this.registrationUrl + "#leadId=" + dreamerId + "&kycId=" + kycId;
-        const response = await firstValueFrom(this.httpService.post<ShuftiResponseDto>(
-            this.url,
-            request,
-            {
-                headers: { 'Authorization': 'BASIC ' + this.shuftiAuth }
+            if (this.globalService.isDev) {
+                request.ttl = 1;
             }
-        ));
-        this.logger.log(`Received response from shufti for zoho ID =${dreamerId}  Status = ${JSON.stringify(response.statusText)} and URL = ${response.data.verification_url}`);
-        return response.data.verification_url;
+            else {
+                request.ttl = 4320;
+            }
+
+            //request.redirect_url = this.registrationUrl + "#leadId=" + dreamerId + "&kycId=" + kycId;
+            const response = await firstValueFrom(this.httpService.post<ShuftiResponseDto>(
+                this.url,
+                request,
+                {
+                    headers: { 'Authorization': 'BASIC ' + this.shuftiAuth }
+                }
+            ));
+            this.logger.log(`Received response from shufti for zoho ID =${dreamerId}  Status = ${JSON.stringify(response.statusText)} and URL = ${response.data.verification_url}`);
+            return response.data.verification_url;
+        } catch (error) {
+            this.logger.error(`SHUFTI SERVICE: ERROR OCCURED WHILE RUNNING InitiateKyc :  ${error}`);
+        }
     }
 
     async fetchKycData(kycId: string): Promise<ShuftiResponseDto> {
-        const request = { reference: kycId };
-        this.logger.log(`fetching KYC Data from ShuftiPro kyc id ${kycId}`);
-
         try {
+            const request = { reference: kycId };
+            this.logger.log(`fetching KYC Data from ShuftiPro kyc id ${kycId}`);
             const response = await firstValueFrom(this.httpService.post<ShuftiResponseDto>(
                 this.url + '/status',
                 request,
@@ -68,51 +71,60 @@ export class ShuftiService {
             return response.data;
         }
         catch (e) {
-            this.logger.log("Error Fetching kyc details from shufti" + e);
+            this.logger.error(`SHUFTI SERVICE: ERROR OCCURED WHILE RUNNING FetchKycData :  ${e}`);
             throw new HttpException({
                 status: HttpStatus.BAD_REQUEST,
                 error: 'ShuftiPro Error',
             }, HttpStatus.BAD_REQUEST);
         }
+
     }
 
     async kycCallback(dreamerId: string, kycId: string, response: ShuftiResponseDto) {
-        this.logger.log("KYC Callback called response =" + JSON.stringify(response));
-        const event: KycEventDto = this.buildEvent(dreamerId, kycId, response);
-        if (response.event === 'verification.accepted') {
-            const data: ShuftiResponseDto = await this.fetchKycData(kycId);
-            this.logger.log(`Verification accepted for ${dreamerId} with kyc id ${kycId}`);
-            event.documentProof = data.proofs.document.proof;
-            event.faceProof = data.proofs.face.proof;
-            event.status = KYCStatus.SUCCESS;
-            this.eventEmitter.emit('kyc.callback', event);
-        } else if (response.event === 'verification.declined' || response.event === 'verification.rejected') {
-            const data: ShuftiResponseDto = await this.fetchKycData(kycId);
-            this.logger.log(`Verification rejected for ${dreamerId} with kyc id ${kycId}`);
-            event.documentProof = data.proofs?.document?.proof;
-            event.faceProof = data.proofs?.face?.proof;
-            event.status = KYCStatus.REJECTED;
-            event.rejectionReason = data.declined_reason;
-            this.eventEmitter.emit('kyc.callback', event);
-        } else if (response.event === 'request.timeout' || response.event === 'verification.cancelled') {
-            this.logger.log(`Verification ${response.event} for ${dreamerId} with kyc id ${kycId}`);
-            event.status = response.event === 'request.timeout' ? KYCStatus.TIMED_OUT : KYCStatus.CANCELED;
-            event.rejectionReason = 'Verification either timed-out or cancelled by the user';
-            this.eventEmitter.emit('kyc.callback', event);
+        try {
+            this.logger.log("KYC Callback called response =" + JSON.stringify(response));
+            const event: KycEventDto = this.buildEvent(dreamerId, kycId, response);
+            if (response.event === 'verification.accepted') {
+                const data: ShuftiResponseDto = await this.fetchKycData(kycId);
+                this.logger.log(`Verification accepted for ${dreamerId} with kyc id ${kycId}`);
+                event.documentProof = data.proofs.document.proof;
+                event.faceProof = data.proofs.face.proof;
+                event.status = KYCStatus.SUCCESS;
+                this.eventEmitter.emit('kyc.callback', event);
+            } else if (response.event === 'verification.declined' || response.event === 'verification.rejected') {
+                const data: ShuftiResponseDto = await this.fetchKycData(kycId);
+                this.logger.log(`Verification rejected for ${dreamerId} with kyc id ${kycId}`);
+                event.documentProof = data.proofs?.document?.proof;
+                event.faceProof = data.proofs?.face?.proof;
+                event.status = KYCStatus.REJECTED;
+                event.rejectionReason = data.declined_reason;
+                this.eventEmitter.emit('kyc.callback', event);
+            } else if (response.event === 'request.timeout' || response.event === 'verification.cancelled') {
+                this.logger.log(`Verification ${response.event} for ${dreamerId} with kyc id ${kycId}`);
+                event.status = response.event === 'request.timeout' ? KYCStatus.TIMED_OUT : KYCStatus.CANCELED;
+                event.rejectionReason = 'Verification either timed-out or cancelled by the user';
+                this.eventEmitter.emit('kyc.callback', event);
+            }
+        } catch (error) {
+            this.logger.error(`SHUFTI SERVICE: ERROR OCCURED WHILE RUNNING KycCallback :  ${error}`);
         }
     }
 
     private buildEvent(dreamerId: string, kycId: string, response: ShuftiResponseDto): KycEventDto {
-        const event: KycEventDto = new KycEventDto();
-        event.dreamerId = dreamerId;
-        event.kycId = kycId;
-        event.first = response.verification_data?.document?.name.first_name;
-        event.last = response.verification_data?.document?.name.last_name;
-        event.full = response.verification_data?.document?.name.full_name;
-        event.dob = response.verification_data?.document?.dob;
-        event.documentNumber = response.verification_data?.document?.document_number;
-        event.gender = this.retrieveGender(response.verification_data?.document?.gender);
-        return event;
+        try {
+            const event: KycEventDto = new KycEventDto();
+            event.dreamerId = dreamerId;
+            event.kycId = kycId;
+            event.first = response.verification_data?.document?.name.first_name;
+            event.last = response.verification_data?.document?.name.last_name;
+            event.full = response.verification_data?.document?.name.full_name;
+            event.dob = response.verification_data?.document?.dob;
+            event.documentNumber = response.verification_data?.document?.document_number;
+            event.gender = this.retrieveGender(response.verification_data?.document?.gender);
+            return event;
+        } catch (error) {
+            this.logger.error(`SHUFTI SERVICE: ERROR OCCURED WHILE RUNNING BuildEvent  :  ${error}`);
+        }
     }
 
 

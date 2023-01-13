@@ -22,12 +22,16 @@ export class UpdateRepaymentDateUsecase {
   ) { }
 
   async updateRepaymentDate(updateRepaymentDateDto: UpdateRepaymentDateDto) {
-    this.log.log(`Handle Repayment Date Updation =  ${JSON.stringify(updateRepaymentDateDto)}`);
-    const loan = await this.fetchtLoan(updateRepaymentDateDto.loan_id);
+    try {
+      this.log.log(`Handle Repayment Date Updation =  ${JSON.stringify(updateRepaymentDateDto)}`);
+      const loan = await this.fetchtLoan(updateRepaymentDateDto.loan_id);
 
-    await this.updateLoanDataInDB(loan, updateRepaymentDateDto);
-    await this.updateLoanDataInZoho(loan, updateRepaymentDateDto);
-    return 'Loan Updated Successfully';
+      await this.updateLoanDataInDB(loan, updateRepaymentDateDto);
+      await this.updateLoanDataInZoho(loan, updateRepaymentDateDto);
+      return 'Loan Updated Successfully';
+    } catch (error) {
+      this.log.error(`LOAN SERVICE: ERROR OCCURED WHILE RUNNING updateRepaymentDate:  ${error}`);
+    }
 
   }
 

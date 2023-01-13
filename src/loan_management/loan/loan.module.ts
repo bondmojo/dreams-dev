@@ -17,9 +17,12 @@ import { ZohoLoanHelperService } from './usecases/zoho-loan-helper.service';
 import { SendpulseLoanHelperService } from './usecases/sendpulse-loan-helper.service';
 import { HandleLatePaymentService } from './usecases/handle-late-payment.service';
 import { UpdateRepaymentDateUsecase } from './usecases/update-repayment-date.usecase';
+import { RepaymentScheduleModule } from '../repayment_schedule/repayment_schedule.module';
+import { CreateRepaymentScheduleUsecase } from '../repayment_schedule/usecases/create_repayment_schedule.service';
 
 @Module({
-  imports: [forwardRef(() => ClientModule), forwardRef(() => DreamerModule), TransactionModule, TypeOrmModule.forFeature([Loan]), SendpulseModule, GlobalModule],
+  imports: [forwardRef(() => ClientModule), forwardRef(() => DreamerModule), TransactionModule,
+  TypeOrmModule.forFeature([Loan]), SendpulseModule, GlobalModule, RepaymentScheduleModule],
   controllers: [LoanController],
   providers: [
     LoanService, LoanMigrationService, LoanHelperService, HandleLatePaymentService, PaymentReminderService, ZohoLoanHelperService, SendpulseLoanHelperService, UpdateRepaymentDateUsecase],

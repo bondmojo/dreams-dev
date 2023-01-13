@@ -9,6 +9,7 @@ import { SendpulseHelperService } from './sendpulse-helper.service';
 import { CalculationResultDto } from './dto/calculation-result.dto';
 import { RunFlowModel } from './model/run-flow-model';
 import { GlobalService } from "../../globals/usecases/global.service";
+import { SendPulseContactDto } from './dto/send-pulse-contact.dto';
 
 
 @Controller('sendpulse')
@@ -40,7 +41,6 @@ export class SendpulseController {
     return { number: this.sendpulseHelperService.convertToKhmerNumber(id) };
   }
 
-
   @Post('/calculator/loan')
   loanCalculator(@Body() calculateLoanDto: CalculateLoanDto): CalculationResultDto {
     this.log.log(`Received request to calculate loan ${JSON.stringify(calculateLoanDto)}`);
@@ -49,23 +49,27 @@ export class SendpulseController {
 
   @Post('/runFlowV1')
   async runFlowV1(@Body() runFlowDto: RunFlowModel) {
-    //FIXME: merge Runflow and RunflowV2 methods in sendpulse service. Also mer RunflowModel and DreamerModel.
-    this.log.log(JSON.stringify(runFlowDto));
+    try {
+      //FIXME: merge Runflow and RunflowV2 methods in sendpulse service. Also mer RunflowModel and DreamerModel.
+      this.log.log(JSON.stringify(runFlowDto));
 
-    let model = new DreamerModel();
-    let flow_id;
-    model.externalId = runFlowDto.contact_id;
-    model.external_data = runFlowDto.external_data;
+      let model = new DreamerModel();
+      let flow_id;
+      model.externalId = runFlowDto.contact_id;
+      model.external_data = runFlowDto.external_data;
 
-    if (runFlowDto.flow_name) {
-      flow_id = this.globalService.SENDPULSE_FLOW[runFlowDto.flow_name];
+      if (runFlowDto.flow_name) {
+        flow_id = this.globalService.SENDPULSE_FLOW[runFlowDto.flow_name];
+      }
+      else if (runFlowDto.flow_id) {
+        flow_id = runFlowDto.flow_id;
+      }
+
+      this.log.log("Running Sendpulse Flow " + runFlowDto.flow_id + " flow_id =" + flow_id);
+      return await this.sendpulseService.runFlow(model, flow_id);
+    } catch (error) {
+      this.log.error(`SENDPUSLE CONTROLLER: ERROR OCCURED WHILE RUNNING runFlowV1:  ${error}`);
     }
-    else if (runFlowDto.flow_id) {
-      flow_id = runFlowDto.flow_id;
-    }
-
-    this.log.log("Running Sendpulse Flow " + runFlowDto.flow_id + " flow_id =" + flow_id);
-    return await this.sendpulseService.runFlow(model, flow_id);
   }
 
   @Post('/updateApplicationStatus')
@@ -74,4 +78,13 @@ export class SendpulseController {
 
     return this.sendpulseService.updateApplicationStatus(reqData);
   }
+
+  @Get('/getContact/:id')
+  async getContact(@Param('id') id: string) {
+    const data: SendPulseContactDto = await this.sendpulseService.getContact(id);
+    this.log.log(JSON.stringify(data as SendPulseContactDto));
+
+    return data;
+  }
+
 }

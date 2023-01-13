@@ -22,8 +22,12 @@ export class ZohoLoanHelperService {
     }
 
     async updateZohoFields(module_id: string, zohoKeyValuePairs: object, module_name: string): Promise<any> {
-        await this.updateFieldsOnZohoUsecase.update(module_id, zohoKeyValuePairs, module_name);
-        return false;
+        try {
+            await this.updateFieldsOnZohoUsecase.update(module_id, zohoKeyValuePairs, module_name);
+            return false;
+        } catch (error) {
+            this.log.error("Error in Zoho Loan Helper(Update Zoho Fields) " + JSON.stringify(error));
+        }
     }
 
 }

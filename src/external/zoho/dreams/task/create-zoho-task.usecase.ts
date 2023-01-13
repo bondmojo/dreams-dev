@@ -21,46 +21,54 @@ export class CreateZohoTaskUsecase {
     ) { }
 
     async createTask(task: ZohoTaskRequest): Promise<string> {
-        if (!task.dreamer_id && task.sendpulse_id) {
-            const client = await this.clientService.findbySendpulseId(task.sendpulse_id);
-            task.dreamer_id = client.zoho_id;
-        }
-
-        if (task.retool_url_required && task.retool_url_required === "true" && task.dreamer_id) {
-            const client = await this.clientService.findbyZohoId(task.dreamer_id);
-            task.dreamservice_customer_id = client.id;
-        }
-
-        task.due_date = new Date();
-        if (!task.assign_to)
-            task.assign_to = this.global.DISBURSEMENT_TASK_ASSIGNEE;
-        task.status = "Not Started";
-        const id = await this.repository.createTask(task.dreamer_id, task);
-
-        // Do other actions on behalf of type
-        if (task?.type) {
-            switch (task.type) {
-                case this.TASK_TYPE.RECEIVED_VIDEO:
-                    this.triggerSendpulseFlow(task, this.global.SENDPULSE_FLOW['FLOW_4.9']);
+        try {
+            if (!task.dreamer_id && task.sendpulse_id) {
+                const client = await this.clientService.findbySendpulseId(task.sendpulse_id);
+                task.dreamer_id = client.zoho_id;
             }
+
+            if (task.retool_url_required && task.retool_url_required === "true" && task.dreamer_id) {
+                const client = await this.clientService.findbyZohoId(task.dreamer_id);
+                task.dreamservice_customer_id = client.id;
+            }
+
+            task.due_date = new Date();
+            if (!task.assign_to)
+                task.assign_to = this.global.DISBURSEMENT_TASK_ASSIGNEE;
+            task.status = "Not Started";
+            const id = await this.repository.createTask(task.dreamer_id, task);
+
+            // Do other actions on behalf of type
+            if (task?.type) {
+                switch (task.type) {
+                    case this.TASK_TYPE.RECEIVED_VIDEO:
+                        this.triggerSendpulseFlow(task, this.global.SENDPULSE_FLOW['FLOW_4.9']);
+                }
+            }
+            return id;
+        } catch (error) {
+            this.log.error(`DREAMER: ERROR OCCURED WHILE RUNNING createTask:  ${error}`);
         }
-        return id;
     }
 
     //FIXME: Replace this with generic Task
     async createPaymentRecievedTask(zoho_id: string): Promise<string> {
-        const client = await this.clientService.findbyZohoId(zoho_id);
-        if (!client) {
-            return 'User Not Found For Current Zoho Id'
+        try {
+            const client = await this.clientService.findbyZohoId(zoho_id);
+            if (!client) {
+                return 'User Not Found For Current Zoho Id'
+            }
+            const task = new ZohoTaskRequest();
+            task.dreamservice_customer_id = client.id;
+            //task.due_date = new Date();
+            task.assign_to = this.global.DISBURSEMENT_TASK_ASSIGNEE;
+            task.subject = "Action Required: Payment Received from " + client.full_en;
+            task.status = "Not Started";
+            const id = await this.repository.createTask(client.zoho_id, task);
+            return id;
+        } catch (error) {
+            this.log.error(`DREAMER: ERROR OCCURED WHILE RUNNING createPaymentRecievedTask:  ${error}`);
         }
-        const task = new ZohoTaskRequest();
-        task.dreamservice_customer_id = client.id;
-        //task.due_date = new Date();
-        task.assign_to = this.global.DISBURSEMENT_TASK_ASSIGNEE;
-        task.subject = "Action Required: Payment Received from " + client.full_en;
-        task.status = "Not Started";
-        const id = await this.repository.createTask(client.zoho_id, task);
-        return id;
     }
 
     async triggerSendpulseFlow(task: ZohoTaskRequest, flow_id: string) {
