@@ -18,7 +18,6 @@ export class DreamerController {
   private readonly logger = new CustomLogger(DreamerController.name);
   constructor(
     private readonly createDreamerUsecase: CreateDreamerUsecase,
-    private readonly createTaskUsecase: CreateZohoTaskUsecase,
     private readonly updatePaymentDetailsUsecase: UpdatePaymentDetailsUsecase,
     private readonly updateAdditionalDetailsUsecase: UpdateAdditionalDetailsUsecase,
     private readonly initateKycUsecase: InitiateKycUsecase,
@@ -60,4 +59,10 @@ export class DreamerController {
     this.logger.log(`Generating KYC for dreamer ${params.dreamerId}`);
     return await this.initateKycUsecase.initiate(params.dreamerId);
   }
+
+  @Post(':dreamerId/update_status')
+  async update_status(@Param() params: any) {
+    //TODO
+  }
+
 }

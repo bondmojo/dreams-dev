@@ -19,6 +19,7 @@ import { SendpulseLoanHelperService } from "./sendpulse-loan-helper.service";
 import { Choice } from "@zohocrm/typescript-sdk-2.0/utils/util/choice";
 import { CreateRepaymentScheduleUsecase } from "src/loan_management/repayment_schedule/usecases/create_repayment_schedule.service";
 import { CreateRepaymentScheduleDto } from "src/loan_management/repayment_schedule/dto/create-repayment-schedule.dto";
+import { timeEnd } from "console";
 
 @Injectable()
 export class LoanService {
@@ -41,8 +42,11 @@ export class LoanService {
     //FIXME3: Error Handling needs to be done.
     async create(createLoanDto: any): Promise<Loan> {
         try {
-            this.log.log("Creating Loan in LMS. Zoho Loan Required =" + createLoanDto.do_create_zoho_loan);
+            this.log.log("Creating Loan in LMS. =" + JSON.stringify(createLoanDto));
 
+            if (!createLoanDto.tenure_in_months) {
+                createLoanDto.tenure_in_months = 1;
+            }
             createLoanDto.id = 'LN' + Math.floor(Math.random() * 100000000);
             createLoanDto.loan_fee = createLoanDto.tenure_in_months * this.globalService.LOAN_FEES;
 
