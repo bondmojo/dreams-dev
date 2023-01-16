@@ -5,7 +5,7 @@ import { KycEventDto, KYCStatus } from "../../../../shufti/dto/kyc-event.dto";
 import { CustomLogger } from "../../../../../custom_logger";
 import { SendpluseService } from "../../../../sendpulse/sendpluse.service";
 import { GlobalService } from "../../../../../globals/usecases/global.service";
-
+import { MethodParamsRespLogger } from "src/decorator";
 @Injectable()
 export class KycCompletionUpdateUsecase {
         private readonly log = new CustomLogger(KycCompletionUpdateUsecase.name);
@@ -13,6 +13,7 @@ export class KycCompletionUpdateUsecase {
                 private readonly globalService: GlobalService) { }
 
         @OnEvent('kyc.callback')
+        @MethodParamsRespLogger(new CustomLogger(KycCompletionUpdateUsecase.name))
         async updateKycDetails(event: KycEventDto) {
                 try {
                         const dreamer = await this.repository.getDreamer(event.dreamerId);

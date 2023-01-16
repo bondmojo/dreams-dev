@@ -9,7 +9,7 @@ import { ZohoService } from "../../../core/zoho.service";
 import { PaymentDetailsRequestDto } from "../dto/payment-details-request.dto";
 import { CreateZohoLoanApplicationDto } from "../dto/create-loan-appl.dto";
 import { DreamerRepository } from "../../dreamer/repository/dreamer.repository";
-
+import { MethodParamsRespLogger } from "src/decorator";
 @Injectable()
 export class ZohoLoanRepository {
     private readonly log = new CustomLogger(ZohoLoanRepository.name);
@@ -19,7 +19,7 @@ export class ZohoLoanRepository {
         private readonly dreamerRepository: DreamerRepository
     ) { }
 
-
+    @MethodParamsRespLogger(new CustomLogger(ZohoLoanRepository.name))
     async createLoanApplication(dreamerId: string, loanDto: CreateZohoLoanApplicationDto): Promise<CreateZohoLoanApplicationDto> {
 
         const dreamerModel = this.dreamerRepository.getDreamer(dreamerId);

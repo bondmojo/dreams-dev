@@ -40,6 +40,7 @@ export class ZohoService {
 
         //Add Record instance to the array
         recordsArray.push(record);
+        this.log.log(`ZOHO SERVICE: Trying to saveRecord on zoho: ${JSON.stringify(Object.fromEntries(record.getKeyValues()))}`);
         return (await this.saveRecordArray(recordsArray, moduleName))[0];
     }
 
@@ -50,13 +51,12 @@ export class ZohoService {
             //Set the array to data in BodyWrapper instance
             request.setData(recordsArray);
 
-            //        this.log.log("record:" + JSON.stringify(record.re))
-            this.log.log("Trying to post the record: REQUEST=" + JSON.stringify(request));
+            this.log.log(`Trying to post the record: REQUEST:  ${JSON.stringify(request)}`);
 
             //Call createRecords method that takes BodyWrapper instance and moduleAPIName as parameters
             let response = await recordOperations.createRecords(moduleName, request);
 
-            this.log.log(":" + JSON.stringify(response));
+            this.log.log(`Response : + ${JSON.stringify(response)}`);
             let responseArray = this.extractResponseArray(response);
 
             const successResponses = responseArray.map(e => (e as SuccessResponse).getDetails());
@@ -78,8 +78,7 @@ export class ZohoService {
             //Set the array to data in BodyWrapper instance
             request.setData(recordsArray);
 
-            this.log.log("Trying to update the record");
-
+            this.log.log(`Trying to update record on zoho: ${JSON.stringify(Object.fromEntries(record.getKeyValues()))}`);
             //Call createRecords method that takes BodyWrapper instance and moduleAPIName as parameters
             let response = await recordOperations.updateRecord(BigInt(dreamerId), moduleName, request);
 

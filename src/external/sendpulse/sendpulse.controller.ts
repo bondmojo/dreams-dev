@@ -10,7 +10,7 @@ import { CalculationResultDto } from './dto/calculation-result.dto';
 import { RunFlowModel } from './model/run-flow-model';
 import { GlobalService } from "../../globals/usecases/global.service";
 import { SendPulseContactDto } from './dto/send-pulse-contact.dto';
-
+import { MethodParamsRespLogger } from 'src/decorator';
 
 @Controller('sendpulse')
 export class SendpulseController {
@@ -24,26 +24,26 @@ export class SendpulseController {
   ) { }
 
   @Post('/calculator')
+  @MethodParamsRespLogger(new CustomLogger(SendpulseController.name))
   calculator(@Body() calculationDto: CalculationDto): CalculationResultDto {
-    this.log.log(`Received request to calculate ${JSON.stringify(calculationDto)}`);
     return this.sendpulseHelperService.calculate(calculationDto);
   }
 
   @Get('/convertToRomanNumber/:id')
+  @MethodParamsRespLogger(new CustomLogger(SendpulseController.name))
   convertToRomanNumber(@Param('id') id: string) {
-    this.log.log(`convertToRomanNumber request data ${id}`);
     return { number: this.sendpulseHelperService.convertToRomanNumber(id) };
   }
 
   @Get('/convertToKhmerNumber/:id')
+  @MethodParamsRespLogger(new CustomLogger(SendpulseController.name))
   convertToKhmerNumber(@Param('id') id: string) {
-    this.log.log(`convertToKhmerNumber request data ${id}`);
     return { number: this.sendpulseHelperService.convertToKhmerNumber(id) };
   }
 
   @Post('/calculator/loan')
+  @MethodParamsRespLogger(new CustomLogger(SendpulseController.name))
   loanCalculator(@Body() calculateLoanDto: CalculateLoanDto): CalculationResultDto {
-    this.log.log(`Received request to calculate loan ${JSON.stringify(calculateLoanDto)}`);
     return this.sendpulseHelperService.calculateLoan(calculateLoanDto);
   }
 
@@ -73,13 +73,13 @@ export class SendpulseController {
   }
 
   @Post('/updateApplicationStatus')
+  @MethodParamsRespLogger(new CustomLogger(SendpulseController.name))
   async updateApplicationStatus(@Body() reqData: UpdateApplicationStatusRequestDto) {
-    this.log.log(JSON.stringify(reqData));
-
     return this.sendpulseService.updateApplicationStatus(reqData);
   }
 
   @Get('/getContact/:id')
+  @MethodParamsRespLogger(new CustomLogger(SendpulseController.name))
   async getContact(@Param('id') id: string) {
     const data: SendPulseContactDto = await this.sendpulseService.getContact(id);
     this.log.log(JSON.stringify(data as SendPulseContactDto));
