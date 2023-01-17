@@ -204,7 +204,7 @@ export class LoanService {
             });
 
             if (!loan || loan.status != this.globalService.LOAN_STATUS.APPROVED) {
-                throw new BadRequestException('Forbidden', 'No Approved loan found for loan id');
+                throw new BadRequestException('No Approved loan found for loan id');
             }
             await this.loanHelperService.createCreditDisbursementTransaction(loan, disbursedLoanDto);
             await this.loanHelperService.checkAndCreateWingTransferFeeTransaction(loan, disbursedLoanDto);
