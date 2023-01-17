@@ -6,7 +6,7 @@ import { DreamerRepository } from "../repository/dreamer.repository";
 export class UpdatePaymentDetailsUsecase {
     constructor(private readonly repository: DreamerRepository) { }
 
-    async update(dreamerId: string, request: PaymentDetailsRequestDto, moduleName: string): Promise<string> {
-        return await this.repository.updatePaymentDetails(dreamerId, request, moduleName);
+    async update(dreamerId: string, request: PaymentDetailsRequestDto): Promise<string> {
+        return await this.repository.updatePaymentDetails(dreamerId, request);
     }
 }

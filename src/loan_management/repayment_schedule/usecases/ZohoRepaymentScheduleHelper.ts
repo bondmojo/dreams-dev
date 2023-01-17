@@ -1,6 +1,6 @@
 import { CustomLogger } from "../../../custom_logger";
 import { RepaymentSchedule } from "../entities/repayment_schedule.entity";
-import { CreateZohoRepaymentScheduleUsecase } from '../../../dreamer/usecases/create-repayment-schedule.usecase';
+import { CreateZohoRepaymentScheduleUsecase } from "src/external/zoho/dreams/repayment_schedule/create-repayment-schedule.usecase";
 import { Injectable } from "@nestjs/common";
 import { Record } from "@zohocrm/typescript-sdk-2.0/core/com/zoho/crm/api/record/record";
 import { Choice } from "@zohocrm/typescript-sdk-2.0/utils/util/choice";

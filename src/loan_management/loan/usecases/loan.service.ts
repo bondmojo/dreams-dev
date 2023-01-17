@@ -7,10 +7,9 @@ import { LoanHelperService } from "./loan-helper.service";
 import { GlobalService } from "../../../globals/usecases/global.service"
 import { GetLoanResponse } from "../dto/get-loan-response.dto";
 import { Repository, In, Between } from 'typeorm';
-import { Cron } from '@nestjs/schedule';
 import { add, addDays, endOfDay, format } from "date-fns";
-import { CreateLoanApplicationUsecase } from "src/dreamer/usecases/create-loan-application.usecase";
-import { CreateZohoLoanApplicationDto } from "src/dreamer/usecases/dto/create-loan-appl.dto";
+import { CreateLoanApplicationUsecase } from "src/external/zoho/dreams/zoho-loans/usecases/create-loan-application.usecase";
+import { CreateZohoLoanApplicationDto } from "src/external/zoho/dreams/zoho-loans/dto/create-loan-appl.dto";
 import { EventEmitter2 } from "@nestjs/event-emitter";
 import { UpdateApplicationStatusRequestDto } from "src/external/sendpulse/dto/update-application-status-request.dto";
 import { UpdateLoanDto } from "../dto/update-loan.dto";
@@ -19,7 +18,7 @@ import { SendpulseLoanHelperService } from "./sendpulse-loan-helper.service";
 import { Choice } from "@zohocrm/typescript-sdk-2.0/utils/util/choice";
 import { CreateRepaymentScheduleUsecase } from "src/loan_management/repayment_schedule/usecases/create_repayment_schedule.service";
 import { CreateRepaymentScheduleDto } from "src/loan_management/repayment_schedule/dto/create-repayment-schedule.dto";
-
+import { MethodParamsRespLogger } from "src/decorator";
 @Injectable()
 export class LoanService {
     private readonly log = new CustomLogger(LoanService.name);
@@ -39,85 +38,94 @@ export class LoanService {
     //FIXME2: Atomic property is critical here. we are performing multiple actions here.
     //Even, If one Query/Insert in DB fails. all Insertion needs to be reverted. TODO later on
     //FIXME3: Error Handling needs to be done.
+
     async create(createLoanDto: any): Promise<Loan> {
-        this.log.log("Creating Loan in LMS. Zoho Loan Required =" + createLoanDto.do_create_zoho_loan);
+        try {
+            if (!createLoanDto.tenure_in_months) {
+                createLoanDto.tenure_in_months = 1;
+            }
+            createLoanDto.id = 'LN' + Math.floor(Math.random() * 100000000);
+            createLoanDto.loan_fee = createLoanDto.tenure_in_months * this.globalService.LOAN_FEES;
 
-        createLoanDto.id = 'LN' + Math.floor(Math.random() * 100000000);
-        createLoanDto.loan_fee = createLoanDto.tenure_in_months * this.globalService.LOAN_FEES;
+            // calculate outstanding balance & wing_wei_luy_transfer_fee
+            createLoanDto.wing_wei_luy_transfer_fee = 0;
+            createLoanDto.outstanding_amount = +createLoanDto.amount + +createLoanDto.loan_fee;
+            const today = new Date(); // current time
+            createLoanDto.repayment_date = add(today, { months: 1 }); // today + tenure_in_months
+            // if wire_transfer_type is mobile then calc wing_wei_luy_transfer_fee and add it into outstanding_amount
+            if (createLoanDto?.wire_transfer_type == this.globalService.WIRE_TRANSFER_TYPES.MOBILE) {
+                const disbursed_amount = +createLoanDto.amount - +createLoanDto.dream_point;
+                createLoanDto.wing_wei_luy_transfer_fee = +this.globalService.CALC_WING_WEI_LUY_TRANSFER_FEE(disbursed_amount);
+                createLoanDto.outstanding_amount = +createLoanDto.outstanding_amount + +createLoanDto.wing_wei_luy_transfer_fee;
+            }
+            //Step 1; Create Loan in Dreams DB
+            const loanFromDb = await this.loanRepository.save(createLoanDto);
+            this.log.log("Loan Created in LMS. " + loanFromDb.id);
 
-        // calculate outstanding balance & wing_wei_luy_transfer_fee
-        createLoanDto.wing_wei_luy_transfer_fee = 0;
-        createLoanDto.outstanding_amount = +createLoanDto.amount + +createLoanDto.loan_fee;
-        const today = new Date(); // current time
-        createLoanDto.repayment_date = add(today, { months: 1 }); // today + tenure_in_months
-        // if wire_transfer_type is mobile then calc wing_wei_luy_transfer_fee and add it into outstanding_amount
-        if (createLoanDto?.wire_transfer_type == this.globalService.WIRE_TRANSFER_TYPES.MOBILE) {
-            const disbursed_amount = +createLoanDto.amount - +createLoanDto.dream_point;
-            createLoanDto.wing_wei_luy_transfer_fee = +this.globalService.CALC_WING_WEI_LUY_TRANSFER_FEE(disbursed_amount);
-            createLoanDto.outstanding_amount = +createLoanDto.outstanding_amount + +createLoanDto.wing_wei_luy_transfer_fee;
+            if (createLoanDto.do_create_zoho_loan) {
+                //Step 2: Create Loan in Zoho
+                const zohoLoanDto: CreateZohoLoanApplicationDto = await this.createLoanInZoho(createLoanDto);
+                this.log.log("Loan Created in zoho. " + zohoLoanDto.dreamerId);
+
+                //Step 3: Update Zoho loan ID in Dreams DB
+                //once loan is created in zoho, update zohoLoanID in our DB for future reference.
+                // Haven't put "await" here as this action can happen be in parallel.
+                this.loanHelperService.updateZohoLoanId(createLoanDto.id, zohoLoanDto.loanId);
+                this.log.log("Loan Updated in zoho. " + zohoLoanDto.dreamerId);
+            }
+
+            this.sendpulseLoanHelperService.triggerVideoVerificationFlowIfClientHasSuccessfullyPaidLoan(createLoanDto);
+            //Step 4: Emit Loan Status 
+            //emitting loan approved event in  order to notify admin
+            if (createLoanDto.status === "Approved" || createLoanDto.status === "Not Qualified") {
+                const updateApplStatus = new UpdateApplicationStatusRequestDto();
+                updateApplStatus.sendpulse_user_id = createLoanDto.sendpulse_id;
+                updateApplStatus.application_status = createLoanDto.status;
+                this.eventEmitter.emit('loan.status.changed', (updateApplStatus));
+                this.log.log("emit:loan.status.changed");
+
+            }
+
+            //Step 5: Create transactions in Dreams DB
+            //create transaction for dream_point_commited in database
+            await this.loanHelperService.manageDreamPointCommitedAfterLoanCreation(createLoanDto);
+            this.log.log("Created Transaction");
+
+            return loanFromDb;
+        } catch (error) {
+            this.log.error(`LOAN SERVICE: ERROR OCCURED WHILE RUNNING create:  ${error}`);
         }
-        //Step 1; Create Loan in Dreams DB
-        const loanFromDb = await this.loanRepository.save(createLoanDto);
-        this.log.log("Loan Created in LMS. " + loanFromDb.id);
-
-        if (createLoanDto.do_create_zoho_loan) {
-            //Step 2: Create Loan in Zoho
-            const zohoLoanDto: CreateZohoLoanApplicationDto = await this.createLoanInZoho(createLoanDto);
-            this.log.log("Loan Created in zoho. " + zohoLoanDto.dreamerId);
-
-            //Step 3: Update Zoho loan ID in Dreams DB
-            //once loan is created in zoho, update zohoLoanID in our DB for future reference.
-            // Haven't put "await" here as this action can happen be in parallel.
-            this.loanHelperService.updateZohoLoanId(createLoanDto.id, zohoLoanDto.loanId);
-            this.log.log("Loan Updated in zoho. " + zohoLoanDto.dreamerId);
-        }
-
-        this.sendpulseLoanHelperService.triggerVideoVerificationFlowIfClientHasSuccessfullyPaidLoan(createLoanDto);
-        //Step 4: Emit Loan Status 
-        //emitting loan approved event in  order to notify admin
-        if (createLoanDto.status === "Approved" || createLoanDto.status === "Not Qualified") {
-            const updateApplStatus = new UpdateApplicationStatusRequestDto();
-            updateApplStatus.sendpulse_user_id = createLoanDto.sendpulse_id;
-            updateApplStatus.application_status = createLoanDto.status;
-            this.eventEmitter.emit('loan.status.changed', (updateApplStatus));
-            this.log.log("emit:loan.status.changed");
-
-        }
-
-        //Step 5: Create transactions in Dreams DB
-        //create transaction for dream_point_commited in database
-        await this.loanHelperService.manageDreamPointCommitedAfterLoanCreation(createLoanDto);
-        this.log.log("Created Transaction");
-
-        return loanFromDb;
     }
-
 
     async update(updateLoanDto: UpdateLoanDto) {
         this.log.log(`Updating Loan with data ${JSON.stringify(updateLoanDto)}`);
         await this.loanRepository.update(updateLoanDto.id, updateLoanDto);
     }
 
+    @MethodParamsRespLogger(new CustomLogger(LoanService.name))
     async createLoanInZoho(createLoanDto: any): Promise<any> {
-
-        const zohoLoanDto = new CreateZohoLoanApplicationDto();
-        zohoLoanDto.lmsLoanId = createLoanDto.id;
-        zohoLoanDto.dreamPoints = createLoanDto.dream_point;
-        zohoLoanDto.dreamerId = createLoanDto.zoho_id;
-        zohoLoanDto.loanAmount = createLoanDto.amount;
-        //FIXME: STATUS Shall come from API body
-        zohoLoanDto.loanStatus = createLoanDto.status;
-        zohoLoanDto.paymentAccountNumber = createLoanDto.acc_number;
-        zohoLoanDto.preferredPaymentMethod = createLoanDto.acc_provider_type;
-        zohoLoanDto.paymentVia = createLoanDto.wire_transfer_type;
-        zohoLoanDto.membershipTier = createLoanDto.membership_tier;
-        zohoLoanDto.disbursed_amount = createLoanDto.amount - createLoanDto.dream_point;
-        zohoLoanDto.wing_wei_luy_transfer_fee = createLoanDto.wing_wei_luy_transfer_fee;
-        zohoLoanDto.loan_fee = createLoanDto.loan_fee;
-        zohoLoanDto.outstanding_amount = createLoanDto.outstanding_amount;
-        zohoLoanDto.sendpulse_url = this.globalService.BASE_SENDPULSE_URL + createLoanDto?.sendpulse_id;;
-        zohoLoanDto.retool_url = this.globalService.BASE_RETOOL_URL + "#customer_id=" + createLoanDto?.client_id;;
-        return await this.dreamerCreateLoanService.create(zohoLoanDto);
+        try {
+            const zohoLoanDto = new CreateZohoLoanApplicationDto();
+            zohoLoanDto.lmsLoanId = createLoanDto.id;
+            zohoLoanDto.dreamPoints = createLoanDto.dream_point;
+            zohoLoanDto.dreamerId = createLoanDto.zoho_id;
+            zohoLoanDto.loanAmount = createLoanDto.amount;
+            //FIXME: STATUS Shall come from API body
+            zohoLoanDto.loanStatus = createLoanDto.status;
+            zohoLoanDto.paymentAccountNumber = createLoanDto.acc_number;
+            zohoLoanDto.preferredPaymentMethod = createLoanDto.acc_provider_type;
+            zohoLoanDto.paymentVia = createLoanDto.wire_transfer_type;
+            zohoLoanDto.membershipTier = createLoanDto.membership_tier;
+            zohoLoanDto.disbursed_amount = createLoanDto.amount - createLoanDto.dream_point;
+            zohoLoanDto.wing_wei_luy_transfer_fee = createLoanDto.wing_wei_luy_transfer_fee;
+            zohoLoanDto.loan_fee = createLoanDto.loan_fee;
+            zohoLoanDto.outstanding_amount = createLoanDto.outstanding_amount;
+            zohoLoanDto.sendpulse_url = this.globalService.BASE_SENDPULSE_URL + createLoanDto?.sendpulse_id;;
+            zohoLoanDto.retool_url = this.globalService.BASE_RETOOL_URL + "#customer_id=" + createLoanDto?.client_id;;
+            return await this.dreamerCreateLoanService.create(zohoLoanDto);
+        } catch (error) {
+            this.log.error(`LOAN SERVICE: ERROR OCCURED WHILE RUNNING createLoanInZoho:  ${error}`);
+        }
     }
 
     async findOneForInternalUse(fields: object): Promise<any> {
@@ -139,45 +147,52 @@ export class LoanService {
     }
 
     async findOne(fields: GetLoanDto): Promise<GetLoanResponse | null> {
-        const loan = await this.loanRepository.findOne({
-            where: fields,
-            relations: ['client']
-        });
-        this.log.log("LOAN DATA =" + JSON.stringify(loan));
+        try {
+            const loan = await this.loanRepository.findOne({
+                where: fields,
+                relations: ['client']
+            });
+            this.log.log("LOAN DATA =" + JSON.stringify(loan));
 
-        const loanResponse = new GetLoanResponse();
-        if (!loan) {
-            loanResponse.status = false;
-            return loanResponse
+            const loanResponse = new GetLoanResponse();
+            if (!loan) {
+                loanResponse.status = false;
+                return loanResponse
+            }
+            const client = loan?.client;
+            loanResponse.status = true;
+            loanResponse.dreamPoints = "" + (client?.dream_points_earned + client?.dream_points_committed);
+            loanResponse.loanAmount = "" + (loan?.amount - loan?.dream_point);
+            loanResponse.wireTransferType = loan?.wire_transfer_type;
+            loanResponse.loanStatus = loan?.status;
+            loanResponse.dueDate = "" + loan?.repayment_date;
+            loanResponse.wingCode = "" + loan?.wing_code;
+            loanResponse.outstandingBalance = "" + loan?.outstanding_amount;
+            loanResponse.membershipTier = client?.tier;
+            loanResponse.lastTransactionAmount = "" + await this.loanHelperService.getLoanLastPartialPaymentAmount(loan.id);
+            loanResponse.dreamPointsEarned = "" + client?.dream_points_earned;
+            loanResponse.nextLoanAmount = "" + this.globalService.TIER_AMOUNT[+client?.tier];
+            return loanResponse;
+        } catch (error) {
+            this.log.error(`LOAN SERVICE: ERROR OCCURED WHILE RUNNING findOne:  ${error}`);
         }
-        const client = loan?.client;
-        loanResponse.status = true;
-        loanResponse.dreamPoints = "" + (client?.dream_points_earned + client?.dream_points_committed);
-        loanResponse.loanAmount = "" + (loan?.amount - loan?.dream_point);
-        loanResponse.wireTransferType = loan?.wire_transfer_type;
-        loanResponse.loanStatus = loan?.status;
-        loanResponse.dueDate = "" + loan?.repayment_date;
-        loanResponse.wingCode = "" + loan?.wing_code;
-        loanResponse.outstandingBalance = "" + loan?.outstanding_amount;
-        loanResponse.membershipTier = client?.tier;
-        loanResponse.lastTransactionAmount = "" + await this.loanHelperService.getLoanLastPartialPaymentAmount(loan.id);
-        loanResponse.dreamPointsEarned = "" + client?.dream_points_earned;
-        loanResponse.nextLoanAmount = "" + this.globalService.TIER_AMOUNT[+client?.tier];
-        return loanResponse;
     }
 
     async updateLoanStatus(updateLoanDto: UpdateLoanDto): Promise<any> {
-        updateLoanDto.status = (updateLoanDto.status === "Rejected") ? "Not Qualified" : updateLoanDto.status;
+        try {
+            updateLoanDto.status = (updateLoanDto.status === "Rejected") ? "Not Qualified" : updateLoanDto.status;
 
-        await this.loanRepository.update(updateLoanDto.id, { status: updateLoanDto.status });
-        if (updateLoanDto.status === "Approved" || updateLoanDto.status === "Rejected") {
+            await this.loanRepository.update(updateLoanDto.id, { status: updateLoanDto.status });
+            if (updateLoanDto.status === "Approved" || updateLoanDto.status === "Rejected") {
 
-            const updateApplStatus = new UpdateApplicationStatusRequestDto();
-            updateApplStatus.sendpulse_user_id = updateLoanDto.sendpulse_user_id;
-            updateApplStatus.application_status = updateLoanDto.status;
-            this.eventEmitter.emit('loan.status.changed', (updateApplStatus));
+                const updateApplStatus = new UpdateApplicationStatusRequestDto();
+                updateApplStatus.sendpulse_user_id = updateLoanDto.sendpulse_user_id;
+                updateApplStatus.application_status = updateLoanDto.status;
+                this.eventEmitter.emit('loan.status.changed', (updateApplStatus));
+            }
+        } catch (error) {
+            this.log.error(`LOAN SERVICE: ERROR OCCURED WHILE RUNNING updateLoanStatus:  ${error}`);
         }
-
     }
 
     async disbursed(disbursedLoanDto: DisbursedLoanDto): Promise<any> {
@@ -216,40 +231,48 @@ export class LoanService {
             return disbursedResponse;
         }
         catch (error) {
-            this.log.error("Error in Loan Disbursement " + JSON.stringify(error));
+            this.log.error(`LOAN SERVICE: ERROR OCCURED WHILE RUNNING disbursed:  ${error}`);
         }
     }
 
     async createRepaymentTransaction(createRepaymentTransactionDto: CreateRepaymentTransactionDto): Promise<any> {
-        if (createRepaymentTransactionDto.type == this.globalService.REPAYMENT_TRANSACTION_TYPE.CLIENT_CREDIT) {
-            return await this.loanHelperService.handleClientCreditRepayments(createRepaymentTransactionDto);
-        }
+        try {
+            if (createRepaymentTransactionDto.type == this.globalService.REPAYMENT_TRANSACTION_TYPE.CLIENT_CREDIT) {
+                return await this.loanHelperService.handleClientCreditRepayments(createRepaymentTransactionDto);
+            }
 
-        if (createRepaymentTransactionDto.type == this.globalService.REPAYMENT_TRANSACTION_TYPE.DREAM_POINT_REFUND) {
-            return await this.loanHelperService.handleDreamPointRefundRepayments(createRepaymentTransactionDto);
-        }
+            if (createRepaymentTransactionDto.type == this.globalService.REPAYMENT_TRANSACTION_TYPE.DREAM_POINT_REFUND) {
+                return await this.loanHelperService.handleDreamPointRefundRepayments(createRepaymentTransactionDto);
+            }
 
-        return false;
+            return false;
+        } catch (error) {
+            this.log.error(`LOAN SERVICE: ERROR OCCURED WHILE RUNNING createRepaymentTransaction:  ${error}`);
+        }
     }
 
     async videoReceivedCallback(videoReceivedCallbackDto: VideoReceivedCallbackDto): Promise<any> {
-        // FIXME: handle if requested loans are more then one
-        const loan = await this.loanRepository.findOne({
-            where: {
-                client_id: videoReceivedCallbackDto.client_id,
-                status: this.globalService.LOAN_STATUS.REQUESTED
-            },
-            order: { ['created_at']: 'DESC' }
-        });
+        try {
+            // FIXME: handle if requested loans are more then one
+            const loan = await this.loanRepository.findOne({
+                where: {
+                    client_id: videoReceivedCallbackDto.client_id,
+                    status: this.globalService.LOAN_STATUS.REQUESTED
+                },
+                order: { ['created_at']: 'DESC' }
+            });
 
-        if (!loan) {
-            this.log.log(`Requested Loan not found for ${videoReceivedCallbackDto.client_id}`);
-            throw new BadRequestException('Forbidden', `No Requested loan found for client id ${videoReceivedCallbackDto.client_id}`);
+            if (!loan) {
+                this.log.log(`Requested Loan not found for ${videoReceivedCallbackDto.client_id}`);
+                throw new BadRequestException(`No Requested loan found for client id ${videoReceivedCallbackDto.client_id}`);
+            }
+
+            await this.zohoLoanHelperService.updateZohoLoanStatus(loan.zoho_loan_id, this.globalService.ZOHO_LOAN_STATUS.VIDEO_REQUEST_SUBMITTED, this.globalService.ZOHO_MODULES.LOAN);
+            await this.sendpulseLoanHelperService.triggerFlow(videoReceivedCallbackDto.sendpulse_id, this.globalService.SENDPULSE_FLOW['FLOW_4.9']);
+            return true;
+        } catch (error) {
+            this.log.error(`LOAN SERVICE: ERROR OCCURED WHILE RUNNING videoReceivedCallback:  ${error}`);
         }
-
-        await this.zohoLoanHelperService.updateZohoLoanStatus(loan.zoho_loan_id, this.globalService.ZOHO_LOAN_STATUS.VIDEO_REQUEST_SUBMITTED, this.globalService.ZOHO_MODULES.LOAN);
-        await this.sendpulseLoanHelperService.triggerFlow(videoReceivedCallbackDto.sendpulse_id, this.globalService.SENDPULSE_FLOW['FLOW_4.9']);
-        return true;
     }
 
 

@@ -7,7 +7,7 @@ export class HealthCheckController {
     private readonly logger = new CustomLogger(HealthCheckController.name);
     @Get("health")
     check() {
-        this.logger.log("HealthCheckController ENV vairable =" + process.env.dbname);
+        this.logger.log(`HealthCheckController ENV vairable = ${process.env.NODE_ENV}`);
         return {
             status: 'OK'
         }

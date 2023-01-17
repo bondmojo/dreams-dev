@@ -11,7 +11,7 @@ import { HandleEqualRepaymentUsecase } from './usecases/handle-equal-repayment.u
 import { HandleUnderRepaymentUsecase } from './usecases/handle-under-repayment.usecase';
 import { HandleOverRepaymentUsecase } from './usecases/handle-over-repayment.usecase';
 import { ZohoRepaymentHelperService } from './services/zoho-repayment-helper.service';
-import { DreamerModule } from 'src/dreamer/dreamer.module';
+import { DreamerModule } from 'src/external/zoho/dreams/dreamer.module';
 import { GetHandleRepaymentFactory } from './factory/get-handle-repayment.factory';
 
 @Module({

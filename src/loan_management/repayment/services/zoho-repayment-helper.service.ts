@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { CustomLogger } from "../../../custom_logger";
 import { GlobalService } from "../../../globals/usecases/global.service"
-import { UpdateFieldsOnZohoUsecase } from "src/dreamer/usecases/update-fields-on-zoho.usecase";
+import { UpdateFieldsOnZohoUsecase } from "src/external/zoho/dreams/utility/update-fields-on-zoho.usecase";
 
 @Injectable()
 export class ZohoRepaymentHelperService {

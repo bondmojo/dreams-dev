@@ -5,8 +5,6 @@ import { CustomLogger } from "../../custom_logger";
 import { CalculateLoanDto } from "./dto/calculate-loan.dto";
 import { CalculateLoanResultDto } from "./dto/calculate-loan-result.dto";
 import { format, add } from 'date-fns'
-import { UpdateApplicationStatusRequestDto } from "./dto/update-application-status-request.dto";
-
 
 @Injectable()
 export class SendpulseHelperService {
