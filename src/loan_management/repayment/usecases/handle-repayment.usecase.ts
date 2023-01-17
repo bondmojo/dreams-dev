@@ -43,4 +43,8 @@ export abstract class HandleRepaymentUsecase {
         }
         return this.globalService.LOAN_PAYMENT_STATUS.PAID_ON_TIME;
     }
+
+    async getLoanTotalPaidAmount(loan_id: string): Promise<number> {
+        return await this.transactionService.getTotalPaidAmount(loan_id)
+    }
 }

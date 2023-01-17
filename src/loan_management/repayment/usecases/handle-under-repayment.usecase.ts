@@ -30,6 +30,8 @@ export class HandleUnderRepaymentUsecase extends HandleRepaymentUsecase {
         zohoKeyValuePairs = {
             Outstanding_Balance: outstanding_amount,
         };
+        zohoKeyValuePairs.Paid_Amount = await this.getLoanTotalPaidAmount(loan.id);
+
         this.logger.log(`Updating Loan On Zoho ${loan.zoho_loan_id} ${JSON.stringify(zohoKeyValuePairs)} `);
         await this.zohoRepaymentHelperService.updateZohoFields(loan.zoho_loan_id, zohoKeyValuePairs, this.globalService.ZOHO_MODULES.LOAN);
 
