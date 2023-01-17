@@ -5,6 +5,8 @@ import { CreateZohoLoanApplicationDto } from './zoho-loans/dto/create-loan-appl.
 import { UpdatePaymentDetailsUsecase } from "./dreamer/usecases/update-payment-details.usecase";
 import { PaymentDetailsRequestDto } from "./zoho-loans/dto/payment-details-request.dto";
 import { UpdateLoanPaymentDetailsUsecase } from './zoho-loans/usecases/update-loan-payment-details.usecase';
+import { ZohoHelperService } from './utility/zoho-helper.service';
+import { Status } from './utility/status.dto';
 
 //FIXME: This file can be deleted in future. Kept it to create zoho loan using restAPI
 
@@ -13,8 +15,8 @@ export class DreamerLoanApplController {
   private readonly logger = new CustomLogger(DreamerLoanApplController.name);
   constructor(
     private readonly createLoanApplUsecase: CreateLoanApplicationUsecase,
-    private readonly updatePaymentDetailsUsecase: UpdatePaymentDetailsUsecase,
     private readonly updateLoanPaymentDetailsUsecase: UpdateLoanPaymentDetailsUsecase,
+    private readonly zohoHelper: ZohoHelperService,
   ) { }
 
 
@@ -35,5 +37,4 @@ export class DreamerLoanApplController {
       id: updatedUserId,
     };
   }
-
 }

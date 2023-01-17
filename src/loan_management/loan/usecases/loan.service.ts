@@ -1,25 +1,23 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
+import { EventEmitter2 } from "@nestjs/event-emitter";
 import { InjectRepository } from '@nestjs/typeorm';
-import { DisbursedLoanDto, CreateRepaymentTransactionDto, GetLoanDto, VideoReceivedCallbackDto } from "../dto";
+import { Choice } from "@zohocrm/typescript-sdk-2.0/utils/util/choice";
+import { add } from "date-fns";
+import { UpdateApplicationStatusRequestDto } from "src/external/sendpulse/dto/update-application-status-request.dto";
+import { CreateZohoLoanApplicationDto } from "src/external/zoho/dreams/zoho-loans/dto/create-loan-appl.dto";
+import { CreateLoanApplicationUsecase } from "src/external/zoho/dreams/zoho-loans/usecases/create-loan-application.usecase";
+import { CreateRepaymentScheduleDto } from "src/loan_management/repayment_schedule/dto/create-repayment-schedule.dto";
+import { CreateRepaymentScheduleUsecase } from "src/loan_management/repayment_schedule/usecases/create_repayment_schedule.service";
+import { Repository } from 'typeorm';
 import { CustomLogger } from "../../../custom_logger";
+import { GlobalService } from "../../../globals/usecases/global.service";
+import { CreateRepaymentTransactionDto, DisbursedLoanDto, GetLoanDto, VideoReceivedCallbackDto } from "../dto";
+import { GetLoanResponse } from "../dto/get-loan-response.dto";
+import { UpdateLoanDto } from "../dto/update-loan.dto";
 import { Loan } from '../entities/loan.entity';
 import { LoanHelperService } from "./loan-helper.service";
-import { GlobalService } from "../../../globals/usecases/global.service"
-import { GetLoanResponse } from "../dto/get-loan-response.dto";
-import { Repository, In, Between } from 'typeorm';
-import { Cron } from '@nestjs/schedule';
-import { add, addDays, endOfDay, format } from "date-fns";
-import { CreateLoanApplicationUsecase } from "src/external/zoho/dreams/zoho-loans/usecases/create-loan-application.usecase";
-import { CreateZohoLoanApplicationDto } from "src/external/zoho/dreams/zoho-loans/dto/create-loan-appl.dto";
-import { EventEmitter2 } from "@nestjs/event-emitter";
-import { UpdateApplicationStatusRequestDto } from "src/external/sendpulse/dto/update-application-status-request.dto";
-import { UpdateLoanDto } from "../dto/update-loan.dto";
-import { ZohoLoanHelperService } from "./zoho-loan-helper.service";
 import { SendpulseLoanHelperService } from "./sendpulse-loan-helper.service";
-import { Choice } from "@zohocrm/typescript-sdk-2.0/utils/util/choice";
-import { CreateRepaymentScheduleUsecase } from "src/loan_management/repayment_schedule/usecases/create_repayment_schedule.service";
-import { CreateRepaymentScheduleDto } from "src/loan_management/repayment_schedule/dto/create-repayment-schedule.dto";
-import { timeEnd } from "console";
+import { ZohoLoanHelperService } from "./zoho-loan-helper.service";
 
 @Injectable()
 export class LoanService {
@@ -80,7 +78,8 @@ export class LoanService {
             this.sendpulseLoanHelperService.triggerVideoVerificationFlowIfClientHasSuccessfullyPaidLoan(createLoanDto);
             //Step 4: Emit Loan Status 
             //emitting loan approved event in  order to notify admin
-            if (createLoanDto.status === "Approved" || createLoanDto.status === "Not Qualified") {
+            if (createLoanDto.status === this.globalService.LOAN_STATUS.APPROVED
+                || createLoanDto.status === this.globalService.LOAN_STATUS.NOT_QUALIFIED) {
                 const updateApplStatus = new UpdateApplicationStatusRequestDto();
                 updateApplStatus.sendpulse_user_id = createLoanDto.sendpulse_id;
                 updateApplStatus.application_status = createLoanDto.status;
@@ -183,15 +182,20 @@ export class LoanService {
 
     async updateLoanStatus(updateLoanDto: UpdateLoanDto): Promise<any> {
         try {
-            updateLoanDto.status = (updateLoanDto.status === "Rejected") ? "Not Qualified" : updateLoanDto.status;
+            updateLoanDto.status = (updateLoanDto.status === "Rejected") ? this.globalService.LOAN_STATUS.NOT_QUALIFIED : updateLoanDto.status;
 
             await this.loanRepository.update(updateLoanDto.id, { status: updateLoanDto.status });
-            if (updateLoanDto.status === "Approved" || updateLoanDto.status === "Rejected") {
+            if (updateLoanDto.status === this.globalService.LOAN_STATUS.APPROVED
+                || updateLoanDto.status === this.globalService.LOAN_STATUS.NOT_QUALIFIED) {
 
                 const updateApplStatus = new UpdateApplicationStatusRequestDto();
                 updateApplStatus.sendpulse_user_id = updateLoanDto.sendpulse_user_id;
                 updateApplStatus.application_status = updateLoanDto.status;
                 this.eventEmitter.emit('loan.status.changed', (updateApplStatus));
+            }
+            else if (updateLoanDto.status === this.globalService.LOAN_STATUS.CONTRACT_SIGNED) {
+                this.log.log(`LOAN SERVICE: Contract Signed: now running Flow_4.8`);
+                this.sendpulseLoanHelperService.triggerFlow(updateLoanDto.sendpulse_user_id, this.globalService.SENDPULSE_FLOW.['FLOW_4.8']);
             }
         } catch (error) {
             this.log.error(`LOAN SERVICE: ERROR OCCURED WHILE RUNNING updateLoanStatus:  ${error}`);

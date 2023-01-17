@@ -16,13 +16,37 @@ export class ZohoHelperService {
 
     ) { }
 
-    async updateDreamerStatus(zoho_dremer_id: string, status: string): Promise<any> {
+    /* async updateDreamerStatus(zoho_dremer_id: string, status: string): Promise<any> {
         const zohoKeyValuePairs = {
             Lead_Status: new Choice(status)
         };
-        await this.updateZohoFields(zoho_dremer_id, zohoKeyValuePairs, "Leads");
-        return false;
+        try {
+            await this.updateZohoFields(zoho_dremer_id, zohoKeyValuePairs, "Leads");
+        }
+        catch {
+            return { status: false }
+
+        }
+        return { status: true };
     }
+
+    async updateLoanStatus(zoho_loan_id: string, status: string) {
+        const zohoKeyValuePairs = {
+            Loan_Status: new Choice(status)
+        };
+        try {
+            await this.updateZohoFields(zoho_loan_id, zohoKeyValuePairs, "Loans");
+        }
+        catch {
+            return { status: false }
+
+        }
+        return { status: true };
+    } */
+
+    /* async updateInstalmentStatus(){
+        Repayment_Schedules Installment_Status Repayment_Status Repayment_Date
+    } */
 
     private async updateZohoFields(record_id: string, zohoKeyValuePairs: object, module_name: string): Promise<any> {
         await this.updateFieldsOnZohoUsecase.update(record_id, zohoKeyValuePairs, module_name);
@@ -48,7 +72,5 @@ export class ZohoHelperService {
         const response = saveRecordResponse.map((map: Map<string, any>) => (map.get('id') as bigint).toString())
         return response;
     }
-
-
 
 }
