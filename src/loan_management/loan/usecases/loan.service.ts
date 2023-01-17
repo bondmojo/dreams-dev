@@ -7,7 +7,6 @@ import { LoanHelperService } from "./loan-helper.service";
 import { GlobalService } from "../../../globals/usecases/global.service"
 import { GetLoanResponse } from "../dto/get-loan-response.dto";
 import { Repository, In, Between } from 'typeorm';
-import { Cron } from '@nestjs/schedule';
 import { add, addDays, endOfDay, format } from "date-fns";
 import { CreateLoanApplicationUsecase } from "src/external/zoho/dreams/zoho-loans/usecases/create-loan-application.usecase";
 import { CreateZohoLoanApplicationDto } from "src/external/zoho/dreams/zoho-loans/dto/create-loan-appl.dto";
@@ -19,8 +18,7 @@ import { SendpulseLoanHelperService } from "./sendpulse-loan-helper.service";
 import { Choice } from "@zohocrm/typescript-sdk-2.0/utils/util/choice";
 import { CreateRepaymentScheduleUsecase } from "src/loan_management/repayment_schedule/usecases/create_repayment_schedule.service";
 import { CreateRepaymentScheduleDto } from "src/loan_management/repayment_schedule/dto/create-repayment-schedule.dto";
-import { timeEnd } from "console";
-
+import { MethodParamsRespLogger } from "src/decorator";
 @Injectable()
 export class LoanService {
     private readonly log = new CustomLogger(LoanService.name);
@@ -40,10 +38,9 @@ export class LoanService {
     //FIXME2: Atomic property is critical here. we are performing multiple actions here.
     //Even, If one Query/Insert in DB fails. all Insertion needs to be reverted. TODO later on
     //FIXME3: Error Handling needs to be done.
+
     async create(createLoanDto: any): Promise<Loan> {
         try {
-            this.log.log("Creating Loan in LMS. =" + JSON.stringify(createLoanDto));
-
             if (!createLoanDto.tenure_in_months) {
                 createLoanDto.tenure_in_months = 1;
             }
@@ -100,12 +97,12 @@ export class LoanService {
         }
     }
 
-
     async update(updateLoanDto: UpdateLoanDto) {
         this.log.log(`Updating Loan with data ${JSON.stringify(updateLoanDto)}`);
         await this.loanRepository.update(updateLoanDto.id, updateLoanDto);
     }
 
+    @MethodParamsRespLogger(new CustomLogger(LoanService.name))
     async createLoanInZoho(createLoanDto: any): Promise<any> {
         try {
             const zohoLoanDto = new CreateZohoLoanApplicationDto();

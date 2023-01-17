@@ -11,7 +11,7 @@ import { SendpluseService } from "src/external/sendpulse/sendpluse.service";
 import { ZohoLoanHelperService } from "./zoho-loan-helper.service";
 import { Choice } from "@zohocrm/typescript-sdk-2.0/utils/util/choice";
 import { differenceInCalendarDays, compareAsc, startOfDay, addDays } from "date-fns"
-
+import { MethodParamsRespLogger } from "src/decorator";
 @Injectable()
 export class LoanHelperService {
     private readonly log = new CustomLogger(LoanHelperService.name);
@@ -83,8 +83,7 @@ export class LoanHelperService {
         }
 
         this.log.log(`Updating loan with data ${JSON.stringify(fields_to_be_update)}`);
-        await this.loanRepository.update(loan.id, fields_to_be_update);
-        return;
+        return await this.loanRepository.update(loan.id, fields_to_be_update);
     }
 
     //The Zoho loan ID is updated, once loan is created in zoho 
@@ -149,6 +148,7 @@ export class LoanHelperService {
         this.zohoLoanHelperService.updateZohoFields(loan.zoho_loan_id, zohoKeyValuePairs, this.globalService.ZOHO_MODULES.LOAN);
         return creditRepaymentResponse;
     }
+
 
     async createCreditRepaymentTransaction(loan: Loan, createRepaymentTransactionDto: CreateRepaymentTransactionDto): Promise<any> {
         const credit_amount = loan.amount - loan.dream_point;
@@ -283,7 +283,6 @@ export class LoanHelperService {
     }
 
     /** -----------------------   Repayment Transaction status dream point refund functions     ---------------------------- */
-
     async handleDreamPointRefundRepayments(createRepaymentTransactionDto: CreateRepaymentTransactionDto): Promise<any> {
         const response = { status: true, error: '' };
         const loan = await this.loanRepository.findOne({
@@ -324,6 +323,7 @@ export class LoanHelperService {
         return response;
     }
 
+    @MethodParamsRespLogger(new CustomLogger(LoanHelperService.name))
     async getLoanLastPartialPaymentAmount(loan_id: string): Promise<any> {
         const transaction = await this.transactionService.findOne({
             loan_id: loan_id,

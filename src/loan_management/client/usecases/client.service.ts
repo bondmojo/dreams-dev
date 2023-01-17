@@ -8,7 +8,8 @@ import { LoanService } from "../../loan/usecases/loan.service";
 import { OnEvent } from "@nestjs/event-emitter";
 import { GlobalService } from "../../../globals/usecases/global.service"
 import { SendpluseService } from "src/external/sendpulse/sendpluse.service";
-import { format } from 'date-fns'
+import { format } from 'date-fns';
+import { MethodParamsRespLogger } from "src/decorator";
 @Injectable()
 export class ClientService {
     private readonly log = new CustomLogger(ClientService.name);
@@ -41,7 +42,6 @@ export class ClientService {
 
     async get(fields: GetClientDto): Promise<any> {
         try {
-            this.log.log("findOne =" + JSON.stringify(fields));
             const client = await this.clientRepository.findOne({
                 where: fields,
             });
@@ -55,27 +55,24 @@ export class ClientService {
     }
 
     async findbySendpulseId(id: string): Promise<Client[] | any> {
-        this.log.log("findbySendpulseId =" + id);
         const client = await this.clientRepository.findOneBy({ sendpulse_id: id });
         return client;
     }
 
     async findbyZohoId(id: string): Promise<Client[] | any> {
-        this.log.log("findbyZohoId =" + id);
         const client = await this.clientRepository.findOneBy({ zoho_id: id });
         return client;
     }
 
     async findbyId(clientId: string): Promise<Client[] | any> {
-        this.log.log("findbyId =" + clientId);
         const client = await this.clientRepository.findOneBy({ id: clientId });
         return client;
     }
 
     @OnEvent('client.update')
+    @MethodParamsRespLogger(new CustomLogger(ClientService.name))
     async update(updateClientDto: UpdateClientDto) {
-        this.log.log(`Updating client with data ${JSON.stringify(updateClientDto)}`);
-        await this.clientRepository.update(updateClientDto.id, updateClientDto);
+        return await this.clientRepository.update(updateClientDto.id, updateClientDto);
     }
 
     async getContracturl(clientId: string): Promise<Client[] | any> {
