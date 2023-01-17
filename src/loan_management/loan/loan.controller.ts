@@ -9,6 +9,7 @@ import { UpdateLoanDto } from './dto/update-loan.dto';
 import { ClientService } from '../client/usecases/client.service';
 import { GlobalService } from 'src/globals/usecases/global.service';
 import { UpdateRepaymentDateUsecase } from "./usecases/update-repayment-date.usecase";
+import { MethodParamsRespLogger } from 'src/decorator';
 @Controller('loan')
 export class LoanController {
   private readonly logger = new CustomLogger(LoanController.name);
@@ -23,46 +24,47 @@ export class LoanController {
   ) { }
 
   @Post()
+  @MethodParamsRespLogger(new CustomLogger(LoanController.name))
   async createLoan(@Body() createLoanDto: CreateLoanDto) {
-    this.logger.log(`Creating loan with request ${JSON.stringify(createLoanDto)}`);
     const client = await this.clientService.findbyId(createLoanDto.client_id);
     createLoanDto.sendpulse_id = client.sendpulse_id;
     return await this.loanService.create(createLoanDto);
   }
 
   @Post('status')
+  @MethodParamsRespLogger(new CustomLogger(LoanController.name))
   async updateLoanStatus(
     @Body() updateloanDto: UpdateLoanDto) {
-    this.logger.log(`Updating loan Status. request ${JSON.stringify(updateloanDto)}`);
     return await this.loanService.updateLoanStatus(updateloanDto);
   }
 
   @Post('disbursed')
+  @MethodParamsRespLogger(new CustomLogger(LoanController.name))
   async disbursed(@Body() disbursedLoanDto: DisbursedLoanDto) {
-    this.logger.log(`Disbursed loan with request ${JSON.stringify(disbursedLoanDto)}`);
     return await this.loanService.disbursed(disbursedLoanDto);
   }
 
   @Post('repayment/transaction/create')
+  @MethodParamsRespLogger(new CustomLogger(LoanController.name))
   async createRepaymentTransaction(@Body() createRepaymentTransactionDto: CreateRepaymentTransactionDto) {
-    this.logger.log(`Creating Loan Repayment Transaction with request ${JSON.stringify(createRepaymentTransactionDto)}`);
     //  FIXME:: add for transaction type dream_point_refund
     return await this.loanService.createRepaymentTransaction(createRepaymentTransactionDto);
   }
 
   @Get('runCronApis/:id')
+  @MethodParamsRespLogger(new CustomLogger(LoanController.name))
   async runCronApis(@Param('id') id: number) {
-    this.logger.log('Running Cron Job Api');
     return await this.paymentReminderService.runCronApis(id);
   }
 
   @Get(':id')
+  @MethodParamsRespLogger(new CustomLogger(LoanController.name))
   async findOne(@Param('id') id: string) {
-    this.logger.log('Getting loan with request id =' + id);
     return await this.loanService.findOne({ id: id });
   }
 
   @Post('videoReceivedCallback')
+  @MethodParamsRespLogger(new CustomLogger(LoanController.name))
   async videoReceivedCallback(
     @Body() videoReceivedCallbackDto: VideoReceivedCallbackDto) {
     if (!videoReceivedCallbackDto.sendpulse_id) {
@@ -79,21 +81,20 @@ export class LoanController {
   }
 
   @Post('migrateData')
+  @MethodParamsRespLogger(new CustomLogger(LoanController.name))
   async migrateData() {
-    this.logger.log(`Migrating Zoho Loan data with Database Loan Data `);
     return await this.loanMigrationService.migrateData();
   }
 
   @Post('runHandlePaymentDueLoansCron')
+  @MethodParamsRespLogger(new CustomLogger(LoanController.name))
   async runHandlePaymentDueLoansCron(@Body() handlePaymentDueLoansDto: HandlePaymentDueLoansDto) {
-    this.logger.log(`Marking Loan Payment Status to Payment Due  ${JSON.stringify(handlePaymentDueLoansDto)}`);
     return await this.handleLatePaymentService.runHandlePaymentDueLoansCron(handlePaymentDueLoansDto);
   }
 
 
   @Post('updateRepaymentDate')
   async updateRepaymentDate(@Body() updateRepaymentDateDto: UpdateRepaymentDateDto) {
-    this.logger.log(`Updating Repayment Date ${JSON.stringify(updateRepaymentDateDto)}`);
     return await this.updateRepaymentDateUsecase.updateRepaymentDate(updateRepaymentDateDto);
   }
 }

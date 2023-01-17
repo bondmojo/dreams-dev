@@ -12,7 +12,7 @@ import { OnEvent } from "@nestjs/event-emitter";
 import { Client } from "../../loan_management/client/entities/client.entity";
 import { UpdateApplicationStatusRequestDto } from './dto/update-application-status-request.dto';
 import { GlobalService } from "../../globals/usecases/global.service";
-
+import { MethodParamsRespLogger } from "src/decorator";
 
 
 
@@ -52,6 +52,7 @@ export class SendpluseService {
 
     }
 
+    @MethodParamsRespLogger(new CustomLogger(SendpluseService.name))
     async runFlowV2(model: RunFlowModel) {
         try {
             await this.checkAndGenerateToken();
@@ -68,6 +69,7 @@ export class SendpluseService {
         }
     }
 
+    @MethodParamsRespLogger(new CustomLogger(SendpluseService.name))
     async runFlow(model: DreamerModel, flow: string): Promise<any> {
         try {
             await this.checkAndGenerateToken();
@@ -89,6 +91,7 @@ export class SendpluseService {
         }
     }
 
+    @MethodParamsRespLogger(new CustomLogger(SendpluseService.name))
     async setVariable(variableDto: SetVariableRequestDto): Promise<string> {
 
         try {
@@ -111,14 +114,11 @@ export class SendpluseService {
     }
 
     async updateSendpulseVariable(setVariableRequestDto: SetVariableRequestDto): Promise<string> {
-        this.log.log(`SENDPULSE :: Updating variable ${setVariableRequestDto?.variable_name}(${setVariableRequestDto?.variable_id}) with variable value =` + setVariableRequestDto.variable_value);
         return await this.setVariable(setVariableRequestDto);
     }
 
     async createClientId(client: Client): Promise<string> {
         try {
-            this.log.log("Creating ClientID in Sendpulse =" + JSON.stringify(client));
-
             const variableDto = new SetVariableRequestDto();
             //Client ID Variable
             variableDto.variable_id = this.globalService.SENDPULSE_VARIABLE_ID.CLIENT_ID;
@@ -134,8 +134,6 @@ export class SendpluseService {
     @OnEvent('loan.status.changed')
     async updateApplicationStatus(reqData: UpdateApplicationStatusRequestDto) {
         try {
-            this.log.log(`Running flow for sendpulse user ${reqData.sendpulse_user_id} with application status =` + reqData.application_status);
-
             let flowId;
             const applStatus = reqData.application_status;
 

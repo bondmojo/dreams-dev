@@ -3,7 +3,7 @@ import { Record } from "@zohocrm/typescript-sdk-2.0/core/com/zoho/crm/api/record
 import { GlobalService } from "src/globals/usecases/global.service";
 import { CustomLogger } from "src/custom_logger";
 import { ZohoService } from "../../core/zoho.service";
-
+import { MethodParamsRespLogger } from "src/decorator";
 @Injectable()
 export class ZohoRepaymentScheduleRepository {
     private readonly log = new CustomLogger(ZohoRepaymentScheduleRepository.name);
@@ -12,10 +12,9 @@ export class ZohoRepaymentScheduleRepository {
         private readonly globalService: GlobalService,
     ) { }
 
-
+    @MethodParamsRespLogger(new CustomLogger(ZohoRepaymentScheduleRepository.name))
     async createBulkRecordOnZoho(zohoRecordList: [], moduleName: string): Promise<string[]> {
         // zohoDataKeyValuePair should be key value pair
-        this.log.log(`Creating Zoho field with data at ${JSON.stringify(zohoRecordList)}`);
 
         const recordArray: Record[] = [];
 

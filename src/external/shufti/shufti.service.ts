@@ -6,6 +6,7 @@ import { ShuftiResponseDto } from "./dto/shufti-response.dto";
 import { EventEmitter2 } from "@nestjs/event-emitter";
 import { KycEventDto, KYCStatus } from "./dto/kyc-event.dto";
 import { GlobalService } from "../../globals/usecases/global.service";
+import { MethodParamsRespLogger } from "src/decorator";
 
 @Injectable()
 export class ShuftiService {
@@ -25,6 +26,7 @@ export class ShuftiService {
         private eventEmitter: EventEmitter2, private readonly globalService: GlobalService) {
     }
 
+    @MethodParamsRespLogger(new CustomLogger(ShuftiService.name))
     async initiateKyc(dreamerId: string, kycId: string): Promise<string> {
         try {
             const request = structuredClone(this.TEMPLATE);
@@ -56,6 +58,7 @@ export class ShuftiService {
         }
     }
 
+    @MethodParamsRespLogger(new CustomLogger(ShuftiService.name))
     async fetchKycData(kycId: string): Promise<ShuftiResponseDto> {
         try {
             const request = { reference: kycId };
@@ -80,6 +83,7 @@ export class ShuftiService {
 
     }
 
+    @MethodParamsRespLogger(new CustomLogger(ShuftiService.name))
     async kycCallback(dreamerId: string, kycId: string, response: ShuftiResponseDto) {
         try {
             this.logger.log("KYC Callback called response =" + JSON.stringify(response));
@@ -110,6 +114,7 @@ export class ShuftiService {
         }
     }
 
+    @MethodParamsRespLogger(new CustomLogger(ShuftiService.name))
     private buildEvent(dreamerId: string, kycId: string, response: ShuftiResponseDto): KycEventDto {
         try {
             const event: KycEventDto = new KycEventDto();

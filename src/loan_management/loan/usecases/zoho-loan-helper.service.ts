@@ -4,7 +4,7 @@ import { CustomLogger } from "../../../custom_logger";
 import { GlobalService } from "../../../globals/usecases/global.service"
 import { UpdateFieldsOnZohoUsecase } from "../../../external/zoho/dreams/utility/update-fields-on-zoho.usecase";
 import { Choice } from "@zohocrm/typescript-sdk-2.0/utils/util/choice";
-
+import { MethodParamsRespLogger } from "src/decorator";
 @Injectable()
 export class ZohoLoanHelperService {
     private readonly log = new CustomLogger(ZohoLoanHelperService.name);

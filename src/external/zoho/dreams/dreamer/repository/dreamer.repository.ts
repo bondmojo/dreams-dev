@@ -16,7 +16,7 @@ import { ZohoService } from "../../../core/zoho.service";
 import { AdditionalDetailsRequestDto } from "../dto/additional-details-request.dto";
 import { PaymentDetailsRequestDto } from "../dto/payment-details-request.dto";
 import { DreamerModel } from "../usecases/model/dreamer.model";
-
+import { MethodParamsRespLogger } from "src/decorator";
 @Injectable()
 export class DreamerRepository {
     private readonly COMPANY_NAME = 'GOJO';
@@ -26,6 +26,7 @@ export class DreamerRepository {
         private readonly globalService: GlobalService,
     ) { }
 
+    @MethodParamsRespLogger(new CustomLogger(DreamerRepository.name))
     async getDreamer(dreamer: string): Promise<DreamerModel> {
         try {
             const dreamerModel = new DreamerModel();
@@ -91,6 +92,7 @@ export class DreamerRepository {
         record.addKeyValue('Account_Number', paymentDetails.paymentAccountNumber);
         record.addKeyValue('Provider', new Choice(paymentDetails.preferredPaymentMethod));
 
+        this.log.log(`Trying to update payment details on zoho: ${JSON.stringify(Object.fromEntries(record.getKeyValues()))}`);
         const map: Map<string, any> = await this.zohoservice.updateRecord(id, record, "Leads");
 
         this.log.log(`Successfully updated user ${id} data`);
@@ -98,6 +100,7 @@ export class DreamerRepository {
         return (map.get('id') as bigint).toString();
     }
 
+    @MethodParamsRespLogger(new CustomLogger(DreamerRepository.name))
     async updateAdditionalDetails(dreamerId: string, additionalDetails: AdditionalDetailsRequestDto): Promise<string> {
         try {
             // FIXME :: replace with updateFieldsOnZoho
@@ -144,9 +147,9 @@ export class DreamerRepository {
         }
     }
 
+    @MethodParamsRespLogger(new CustomLogger(DreamerRepository.name))
     async updatekycDetails(event: KycEventDto): Promise<string> {
         try {
-            this.log.log("Event received");
             const filesToDeletes: string[] = [];
             const record = new Record();
             record.addKeyValue('KYC_End_Time', new Date());

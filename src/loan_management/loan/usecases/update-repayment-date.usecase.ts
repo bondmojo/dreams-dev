@@ -8,8 +8,7 @@ import { GlobalService } from "../../../globals/usecases/global.service";
 import { ZohoLoanHelperService } from "./zoho-loan-helper.service";
 import { Choice } from "@zohocrm/typescript-sdk-2.0/utils/util/choice";
 import { UpdateRepaymentDateDto } from '../dto';
-import { join } from 'path';
-
+import { MethodParamsRespLogger } from 'src/decorator';
 @Injectable()
 export class UpdateRepaymentDateUsecase {
   private readonly log = new CustomLogger(UpdateRepaymentDateUsecase.name);
@@ -21,9 +20,9 @@ export class UpdateRepaymentDateUsecase {
     private readonly globalService: GlobalService
   ) { }
 
+  @MethodParamsRespLogger(new CustomLogger(UpdateRepaymentDateUsecase.name))
   async updateRepaymentDate(updateRepaymentDateDto: UpdateRepaymentDateDto) {
     try {
-      this.log.log(`Handle Repayment Date Updation =  ${JSON.stringify(updateRepaymentDateDto)}`);
       const loan = await this.fetchtLoan(updateRepaymentDateDto.loan_id);
 
       await this.updateLoanDataInDB(loan, updateRepaymentDateDto);
@@ -93,7 +92,7 @@ export class UpdateRepaymentDateUsecase {
       payment_status: this.globalService.LOAN_PAYMENT_STATUS.PAYMENT_RESCHEDULED
     }
 
-    console.log(`Updating Database Loan Data For Loan = ${loan.id} ${JSON.stringify(fields_to_be_update)} `);
+    this.log.log(`Updating Database Loan Data For Loan = ${loan.id} ${JSON.stringify(fields_to_be_update)} `);
     await this.loanRepository.update(loan.id, fields_to_be_update);
   }
 
@@ -108,7 +107,6 @@ export class UpdateRepaymentDateUsecase {
       Outstanding_Balance: latest_loan.outstanding_amount,
       Late_Fee: latest_loan.late_fee
     };
-    this.log.log(`Updating Zoho Loan Data For Loan ID = ${loan.id} ${JSON.stringify(zohoKeyValuePairs)}`);
     await this.zohoLoanHelperService.updateZohoFields(loan.zoho_loan_id, zohoKeyValuePairs, this.globalService.ZOHO_MODULES.LOAN);
   }
 

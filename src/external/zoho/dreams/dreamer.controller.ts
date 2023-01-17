@@ -1,4 +1,5 @@
 import { Body, Controller, Param, Post } from '@nestjs/common';
+import { MethodParamsRespLogger } from 'src/decorator';
 import { CustomLogger } from "../../../custom_logger";
 import { AdditionalDetailsRequestDto } from "./dreamer/dto/additional-details-request.dto";
 import { CreateDreamerDto } from './dreamer/dto/create-dreamer.dto';
@@ -7,8 +8,6 @@ import { CreateDreamerUsecase } from "./dreamer/usecases/create-dreamer.usecase"
 import { InitiateKycUsecase } from "./dreamer/usecases/initiate-kyc.usecase";
 import { UpdateAdditionalDetailsUsecase } from "./dreamer/usecases/update-additional-details.usecase";
 import { UpdatePaymentDetailsUsecase } from "./dreamer/usecases/update-payment-details.usecase";
-import { ZohoHelperService } from './utility/zoho-helper.service';
-import { Status } from './utility/status.dto';
 
 @Controller('dreamers')
 export class DreamerController {
@@ -21,17 +20,17 @@ export class DreamerController {
   ) { }
 
   @Post()
+  @MethodParamsRespLogger(new CustomLogger(DreamerController.name))
   async createDreamer(@Body() createDreamerRequestDto: CreateDreamerDto) {
-    this.logger.log(`Creating dreamers with request ${JSON.stringify(createDreamerRequestDto)}`);
     return await this.createDreamerUsecase.create(createDreamerRequestDto);
   }
 
   @Post(':dreamerId/additional_details')
+  @MethodParamsRespLogger(new CustomLogger(DreamerController.name))
   async updateAdditionalDetails(
     @Param() params: any,
     @Body() request: AdditionalDetailsRequestDto,
   ) {
-    this.logger.log(`Updating additional details for request ${JSON.stringify(request)}`);
     const updatedUserId = await this.updateAdditionalDetailsUsecase.update(params.dreamerId, request);
     return {
       id: updatedUserId,
@@ -39,11 +38,11 @@ export class DreamerController {
   }
 
   @Post(':dreamerId/payment_details')
+  @MethodParamsRespLogger(new CustomLogger(DreamerController.name))
   async updatePaymentDetails(
     @Param() params: any,
     @Body() request: PaymentDetailsRequestDto,
   ) {
-    this.logger.log(`Updating payment details for request ${JSON.stringify(request)}`);
     //FIXME: Update Module name from GlobalService
     const updatedUserId = await this.updatePaymentDetailsUsecase.update(params.dreamerId, request);
     return {
@@ -52,8 +51,8 @@ export class DreamerController {
   }
 
   @Post(':dreamerId/kyc')
+  @MethodParamsRespLogger(new CustomLogger(DreamerController.name))
   async initiateKyc(@Param() params: any) {
-    this.logger.log(`Generating KYC for dreamer ${params.dreamerId}`);
     return await this.initateKycUsecase.initiate(params.dreamerId);
   }
 }

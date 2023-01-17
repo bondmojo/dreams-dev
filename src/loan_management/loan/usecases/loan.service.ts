@@ -19,6 +19,7 @@ import { LoanHelperService } from "./loan-helper.service";
 import { SendpulseLoanHelperService } from "./sendpulse-loan-helper.service";
 import { ZohoLoanHelperService } from "./zoho-loan-helper.service";
 
+import { MethodParamsRespLogger } from "src/decorator";
 @Injectable()
 export class LoanService {
     private readonly log = new CustomLogger(LoanService.name);
@@ -38,10 +39,9 @@ export class LoanService {
     //FIXME2: Atomic property is critical here. we are performing multiple actions here.
     //Even, If one Query/Insert in DB fails. all Insertion needs to be reverted. TODO later on
     //FIXME3: Error Handling needs to be done.
+
     async create(createLoanDto: any): Promise<Loan> {
         try {
-            this.log.log("Creating Loan in LMS. =" + JSON.stringify(createLoanDto));
-
             if (!createLoanDto.tenure_in_months) {
                 createLoanDto.tenure_in_months = 1;
             }
@@ -99,12 +99,12 @@ export class LoanService {
         }
     }
 
-
     async update(updateLoanDto: UpdateLoanDto) {
         this.log.log(`Updating Loan with data ${JSON.stringify(updateLoanDto)}`);
         await this.loanRepository.update(updateLoanDto.id, updateLoanDto);
     }
 
+    @MethodParamsRespLogger(new CustomLogger(LoanService.name))
     async createLoanInZoho(createLoanDto: any): Promise<any> {
         try {
             const zohoLoanDto = new CreateZohoLoanApplicationDto();
