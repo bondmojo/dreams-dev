@@ -8,4 +8,5 @@ export const ZohoInstallmentFields = {
     total_paid_amount: 'Total_Paid_Amount',
     principal_amount: 'Principal_Amount',
     installment_status: 'Installment_Status',
+    installment_fees: 'Installment_Fees'
 }
