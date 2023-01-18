@@ -195,7 +195,7 @@ export class LoanService {
             }
             else if (updateLoanDto.status === this.globalService.LOAN_STATUS.CONTRACT_SIGNED) {
                 this.log.log(`LOAN SERVICE: Contract Signed: now running Flow_4.8`);
-                this.sendpulseLoanHelperService.triggerFlow(updateLoanDto.sendpulse_user_id, this.globalService.SENDPULSE_FLOW.['FLOW_4.8']);
+                this.sendpulseLoanHelperService.triggerFlow(updateLoanDto.sendpulse_user_id, this.globalService.SENDPULSE_FLOW['FLOW_4.8']);
             }
         } catch (error) {
             this.log.error(`LOAN SERVICE: ERROR OCCURED WHILE RUNNING updateLoanStatus:  ${error}`);
