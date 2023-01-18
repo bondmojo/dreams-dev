@@ -31,7 +31,7 @@ export class ZohoRepaymentScheduleHelper {
         zohoRepaymentSchedulePair[ZohoInstallmentFields.overdue_amount] = Number(repaymentScheduleModel.ins_overdue_amount);
         zohoRepaymentSchedulePair[ZohoInstallmentFields.repayment_status] = new Choice(this.globalService.INSTALMENT_PAYMENT_STATUS_STR[repaymentScheduleModel.repayment_status]);
 
-        zohoRepaymentSchedulePair[ZohoInstallmentFields.due_principal_amount] = Number(repaymentScheduleModel.ins_principal_amount);
+        zohoRepaymentSchedulePair[ZohoInstallmentFields.principal_amount] = Number(repaymentScheduleModel.ins_principal_amount);
         zohoRepaymentSchedulePair[ZohoInstallmentFields.repayment_date] = repaymentScheduleModel.due_date;
         zohoRepaymentSchedulePair[ZohoInstallmentFields.installment_status] = new Choice(this.globalService.INSTALMENT_SCHEDULING_STATUS_STR[repaymentScheduleModel.scheduling_status]);
 

@@ -79,6 +79,7 @@ export class HandleEqualRepaymentUsecase extends HandleRepaymentUsecase {
             Overdue_Amount: updateRepaymentScheduleDto.ins_overdue_amount,
             Last_Paid_Date: new Date(),
         };
+        zohoKeyValuePairs.Paid_Amount = await this.getInstallmentTotalPaidAmount(scheudle_instalment.id);
         this.logger.log(`Updating Repayment Schedule On Zoho ${updateRepaymentScheduleDto.id} ${JSON.stringify(zohoKeyValuePairs)} ${this.globalService.ZOHO_MODULES.REPAYMENT_SCHEDULES}`);
         await this.zohoRepaymentHelperService.updateZohoFields(scheudle_instalment.zoho_repayment_schedule_id, zohoKeyValuePairs, this.globalService.ZOHO_MODULES.REPAYMENT_SCHEDULES);
     }
@@ -98,7 +99,7 @@ export class HandleEqualRepaymentUsecase extends HandleRepaymentUsecase {
         // Partial Paid Transaction
         const createPartialPaidTxnDto = {
             loan_id: processRepaymentDto.loan_id,
-            scheudle_instalment_id: scheudle_instalment.id,
+            repayment_schedule_id: scheudle_instalment.id,
             amount: processRepaymentDto.amount,
             image: processRepaymentDto.image,
             type: this.globalService.INSTALMENT_TRANSACTION_TYPE.PARTIAL_PAYMENT,
@@ -108,7 +109,7 @@ export class HandleEqualRepaymentUsecase extends HandleRepaymentUsecase {
         // Credit Repayment Transaction
         const createCreditRepaymentTxnDto = {
             loan_id: processRepaymentDto.loan_id,
-            scheudle_instalment_id: scheudle_instalment.id,
+            repayment_schedule_id: scheudle_instalment.id,
             amount: scheudle_instalment.ins_principal_amount,
             image: processRepaymentDto.image,
             type: this.globalService.INSTALMENT_TRANSACTION_TYPE.CREDIT_REPAYMENT,
@@ -118,7 +119,7 @@ export class HandleEqualRepaymentUsecase extends HandleRepaymentUsecase {
         // Membership Fee Payment Transaction
         const createInstalmentFeeTxnDto = {
             loan_id: processRepaymentDto.loan_id,
-            scheudle_instalment_id: scheudle_instalment.id,
+            repayment_schedule_id: scheudle_instalment.id,
             amount: scheudle_instalment.ins_membership_fee,
             image: processRepaymentDto.image,
             type: this.globalService.INSTALMENT_TRANSACTION_TYPE.FEE_PAYMENT,
@@ -129,7 +130,7 @@ export class HandleEqualRepaymentUsecase extends HandleRepaymentUsecase {
         if (scheudle_instalment.ins_additional_fee && scheudle_instalment.ins_additional_fee > 0) {
             const createAdditionalFeeTxnDto = {
                 loan_id: processRepaymentDto.loan_id,
-                scheudle_instalment_id: scheudle_instalment.id,
+                repayment_schedule_id: scheudle_instalment.id,
                 amount: scheudle_instalment.ins_additional_fee,
                 image: processRepaymentDto.image,
                 type: this.globalService.INSTALMENT_TRANSACTION_TYPE.ADDITIONAL_FEE,

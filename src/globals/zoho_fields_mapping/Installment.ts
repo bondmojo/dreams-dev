@@ -6,6 +6,6 @@ export const ZohoInstallmentFields = {
     overdue_amount: 'Overdue_Amount',
     repayment_status: 'Repayment_Status',
     total_paid_amount: 'Total_Paid_Amount',
-    due_principal_amount: 'Due_Principal_Amount',
+    principal_amount: 'Principal_Amount',
     installment_status: 'Installment_Status',
 }

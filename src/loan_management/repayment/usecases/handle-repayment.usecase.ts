@@ -8,7 +8,6 @@ import { GlobalService } from "../../../globals/usecases/global.service";
 import { ZohoRepaymentHelperService } from "../services/zoho-repayment-helper.service";
 import { TransactionService } from "../../transaction/usecases/transaction.service";
 import { RepaymentScheduleService } from "src/loan_management/repayment_schedule/usecases/repayment_schedule.service";
-
 @Injectable()
 export abstract class HandleRepaymentUsecase {
     constructor(
@@ -45,6 +44,10 @@ export abstract class HandleRepaymentUsecase {
     }
 
     async getLoanTotalPaidAmount(loan_id: string): Promise<number> {
-        return await this.transactionService.getTotalPaidAmount(loan_id)
+        return await this.transactionService.getLoanTotalPaidAmount(loan_id)
+    }
+
+    async getInstallmentTotalPaidAmount(repayment_schedule_id: string): Promise<number> {
+        return await this.transactionService.getInstalmentTotalPaidAmount(repayment_schedule_id)
     }
 }
