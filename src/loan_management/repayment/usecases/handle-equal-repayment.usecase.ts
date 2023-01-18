@@ -2,7 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { ProcessRepaymentDto } from "../dto";
 import { CustomLogger } from "../../../custom_logger";
 import { Loan } from '../../loan/entities/loan.entity';
-import { compareAsc, startOfDay, addDays } from "date-fns"
+import { differenceInCalendarDays, compareAsc, startOfDay, addDays } from "date-fns"
 import { HandleRepaymentUsecase } from './handle-repayment.usecase';
 import { Choice } from "@zohocrm/typescript-sdk-2.0/utils/util/choice";
 import { UpdateRepaymentScheduleDto } from '../../repayment_schedule/dto';
@@ -23,6 +23,7 @@ export class HandleEqualRepaymentUsecase extends HandleRepaymentUsecase {
     async updateLoan(processRepaymentDto: ProcessRepaymentDto, loan: Loan) {
         const outstanding_amount = loan.outstanding_amount - processRepaymentDto.amount;
         const updateLoanDto = new UpdateLoanDto();
+
         if (!outstanding_amount) {
             updateLoanDto.payment_status = await this.getLoanStatus(loan);
         }
@@ -35,6 +36,11 @@ export class HandleEqualRepaymentUsecase extends HandleRepaymentUsecase {
             Payment_Status: new Choice(updateLoanDto.payment_status),
             Outstanding_Balance: outstanding_amount,
         };
+
+        if (!outstanding_amount) {
+            // if outstanding balance is zero then consider as today is fully paid date
+            zohoKeyValuePairs.Days_Fully_Paid = differenceInCalendarDays(new Date(), new Date(loan.disbursed_date))
+        }
         zohoKeyValuePairs.Paid_Amount = await this.getLoanTotalPaidAmount(loan.id);
 
         this.logger.log(`Updating Loan On Zoho ${loan.zoho_loan_id} ${JSON.stringify(zohoKeyValuePairs)} `);

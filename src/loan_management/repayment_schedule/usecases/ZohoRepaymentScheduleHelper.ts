@@ -34,7 +34,7 @@ export class ZohoRepaymentScheduleHelper {
         zohoRepaymentSchedulePair[ZohoInstallmentFields.principal_amount] = Number(repaymentScheduleModel.ins_principal_amount);
         zohoRepaymentSchedulePair[ZohoInstallmentFields.repayment_date] = repaymentScheduleModel.due_date;
         zohoRepaymentSchedulePair[ZohoInstallmentFields.installment_status] = new Choice(this.globalService.INSTALMENT_SCHEDULING_STATUS_STR[repaymentScheduleModel.scheduling_status]);
-        zohoRepaymentSchedulePair[ZohoInstallmentFields.installment_fees] = repaymentScheduleModel.ins_membership_fee;
+        zohoRepaymentSchedulePair[ZohoInstallmentFields.installment_fees] = Number(repaymentScheduleModel.ins_membership_fee);
         zohoRepaymentSchedulePair[ZohoInstallmentFields.last_paid_date] = repaymentScheduleModel.previous_repayment_dates;
 
         //todo add other fields

@@ -51,7 +51,7 @@ export class LoanService {
             createLoanDto.wing_wei_luy_transfer_fee = 0;
             createLoanDto.outstanding_amount = +createLoanDto.amount + +createLoanDto.loan_fee;
             const today = new Date(); // current time
-            createLoanDto.repayment_date = add(today, { months: 1 }); // today + tenure_in_months
+            createLoanDto.repayment_date = add(today, { months: createLoanDto.tenure_in_months }); // today + tenure_in_months
             // if wire_transfer_type is mobile then calc wing_wei_luy_transfer_fee and add it into outstanding_amount
             if (createLoanDto?.wire_transfer_type == this.globalService.WIRE_TRANSFER_TYPES.MOBILE) {
                 const disbursed_amount = +createLoanDto.amount - +createLoanDto.dream_point;
@@ -120,7 +120,7 @@ export class LoanService {
             zohoLoanDto.wing_wei_luy_transfer_fee = createLoanDto.wing_wei_luy_transfer_fee;
             zohoLoanDto.loan_fee = createLoanDto.loan_fee;
             zohoLoanDto.outstanding_amount = createLoanDto.outstanding_amount;
-            zohoLoanDto.sendpulse_url = this.globalService.BASE_SENDPULSE_URL + createLoanDto?.sendpulse_id;;
+            zohoLoanDto.sendpulse_url = this.globalService.BASE_SENDPULSE_URL + createLoanDto?.sendpulse_id;
             zohoLoanDto.retool_url = this.globalService.BASE_RETOOL_URL + "#customer_id=" + createLoanDto?.client_id;;
             return await this.dreamerCreateLoanService.create(zohoLoanDto);
         } catch (error) {
