@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ZohoService } from './zoho.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { CustomLogger } from '../../custom_logger';
+import { CustomLogger } from '../../../custom_logger';
 import { UserSignature } from "@zohocrm/typescript-sdk-2.0/routes/user_signature"
 import { Levels, Logger } from "@zohocrm/typescript-sdk-2.0/routes/logger/logger"
 import { INDataCenter } from "@zohocrm/typescript-sdk-2.0/routes/dc/in_data_center"

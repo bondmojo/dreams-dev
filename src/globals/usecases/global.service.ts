@@ -20,6 +20,7 @@ export class GlobalService {
         NOT_QUALIFIED: 'Not Qualified',
         DISBURSED: 'Disbursed',
         FULLY_PAID: 'Fully Paid',
+        CONTRACT_SIGNED: 'Contract Signed'
     }
 
     public readonly ZOHO_LOAN_STATUS: any = {

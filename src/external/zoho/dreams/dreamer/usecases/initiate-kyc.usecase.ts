@@ -1,7 +1,7 @@
 import {Injectable} from "@nestjs/common";
 import {DreamerRepository} from "../repository/dreamer.repository";
-import {InitiateKycResponseDto} from "./dto/initiate-kyc-response.dto";
-import {ShuftiService} from "../../external/shufti/shufti.service";
+import {InitiateKycResponseDto} from "../dto/initiate-kyc-response.dto";
+import {ShuftiService} from "../../../../shufti/shufti.service";
 
 @Injectable()
 export class InitiateKycUsecase {

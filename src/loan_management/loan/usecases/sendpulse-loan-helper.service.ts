@@ -4,9 +4,9 @@ import { GlobalService } from "../../../globals/usecases/global.service"
 import { Loan } from '../entities/loan.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DreamerModel } from "src/dreamer/usecases/model/dreamer.model";
+import { DreamerModel } from "src/external/zoho/dreams/dreamer/usecases/model/dreamer.model";
 import { SendpluseService } from "src/external/sendpulse/sendpluse.service";
-
+import { MethodParamsRespLogger } from "src/decorator";
 @Injectable()
 export class SendpulseLoanHelperService {
     private readonly log = new CustomLogger(SendpulseLoanHelperService.name);
@@ -17,6 +17,7 @@ export class SendpulseLoanHelperService {
         private readonly sendpluseService: SendpluseService,
     ) { }
 
+    @MethodParamsRespLogger(new CustomLogger(SendpulseLoanHelperService.name))
     async triggerVideoVerificationFlowIfClientHasSuccessfullyPaidLoan(createLoanDto: any): Promise<any> {
         const loan = await this.loanRepository.findOne({
             where: {
@@ -30,7 +31,6 @@ export class SendpulseLoanHelperService {
             const flow_id = this.globalService.SENDPULSE_FLOW['FLOW_4.6'];
             const model = new DreamerModel();
             model.externalId = loan.client.sendpulse_id;
-            this.log.log("Running Video Verification Sendpulse Flow " + " flow_id =" + flow_id);
             return await this.sendpluseService.runFlow(model, flow_id);
         }
 
@@ -40,7 +40,6 @@ export class SendpulseLoanHelperService {
     async triggerFlow(sendpulse_id: string, flow_id: string): Promise<any> {
         const model = new DreamerModel();
         model.externalId = sendpulse_id;
-        this.log.log("Running Sendpulse Flow " + " flow_id =" + flow_id);
         return await this.sendpluseService.runFlow(model, flow_id);
     }
 

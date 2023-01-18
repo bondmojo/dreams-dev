@@ -3,7 +3,7 @@ import { forwardRef, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ClientModule } from '../client/client.module';
 
-import { DreamerModule } from 'src/dreamer/dreamer.module';
+import { DreamerModule } from 'src/external/zoho/dreams/dreamer.module';
 import { SendpulseModule } from 'src/external/sendpulse/sendpulse.module';
 import { GlobalModule } from "../../globals/global.module";
 import { TransactionModule } from "../transaction/transaction.module";

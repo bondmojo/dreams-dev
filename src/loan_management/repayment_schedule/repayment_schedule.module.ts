@@ -7,7 +7,7 @@ import { RepaymentSchedule } from './entities/repayment_schedule.entity';
 import { RepaymentScheduleService } from './usecases/repayment_schedule.service';
 import { CreateRepaymentScheduleUsecase } from './usecases/create_repayment_schedule.service';
 import { GlobalModule } from "../../globals/global.module";
-import { DreamerModule } from 'src/dreamer/dreamer.module';
+import { DreamerModule } from 'src/external/zoho/dreams/dreamer.module';
 import { ZohoRepaymentScheduleHelper } from './usecases/ZohoRepaymentScheduleHelper';
 import { GetRepaymentScheduleUsecase } from './usecases/get-repayment-schedule.service';
 @Module({
