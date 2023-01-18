@@ -107,25 +107,27 @@ export class LoanHelperService {
         let zohoKeyValuePairs: any = {};
 
         if (!loan || !createRepaymentTransactionDto.amount || loan.status != this.globalService.LOAN_STATUS.DISBURSED) {
-            throw new BadRequestException('Forbidden', 'Loan status is not disbursed');
+            throw new BadRequestException('Loan status is not disbursed');
         }
-        if (createRepaymentTransactionDto.amount > loan.outstanding_amount) {
-            // Case: ammount is greater then due ammount
-            throw new BadRequestException('Forbidden', 'Amount is greater then outstanding balance');
-        }
+        // if (createRepaymentTransactionDto.amount > loan.outstanding_amount) {
+        //     // Case: ammount is greater then due ammount
+        //     throw new BadRequestException('Forbidden', 'Amount is greater then outstanding balance');
+        // }
 
-        if (createRepaymentTransactionDto.amount == loan.outstanding_amount) {
+        if (createRepaymentTransactionDto.amount >= loan.outstanding_amount) {
             // Case: of fully repaid
+            // calculate extra amount if request amount is greater then outstanding amount.
+            const extra_amount = +createRepaymentTransactionDto.amount - +loan.outstanding_amount;
             await this.createPartialTransactionOnFullyPaid(loan, createRepaymentTransactionDto);
             await this.createCreditRepaymentTransaction(loan, createRepaymentTransactionDto);
             await this.createFeePaymentTransaction(loan, createRepaymentTransactionDto);
             await this.checkAndCreateCreditWingTransferFeeTransaction(loan, createRepaymentTransactionDto);
             await this.checkAndCreateLateFeeTransaction(loan, createRepaymentTransactionDto);
-            await this.createDreamPointEarnedTransaction(loan, createRepaymentTransactionDto);
+            await this.createDreamPointEarnedTransaction(loan, createRepaymentTransactionDto, extra_amount);
             await this.updateLoanAfterFullyPaid(loan, createRepaymentTransactionDto);
             const new_client_tier = +loan?.client?.tier + 1
             await this.updateSendpulseFieldsAsPerClientTier(loan, new_client_tier);
-            await this.updateClientAfterFullyPaid(loan, createRepaymentTransactionDto);
+            await this.updateClientAfterFullyPaid(loan, createRepaymentTransactionDto, extra_amount);
             // Mark Loan Fully Paid on Zoho Loan Module
             zohoKeyValuePairs = {
                 Loan_Status: new Choice(this.globalService.ZOHO_LOAN_STATUS.FULLY_PAID),
@@ -204,10 +206,11 @@ export class LoanHelperService {
         }
     }
 
-    async createDreamPointEarnedTransaction(loan: Loan, createRepaymentTransactionDto: CreateRepaymentTransactionDto): Promise<any> {
+    async createDreamPointEarnedTransaction(loan: Loan, createRepaymentTransactionDto: CreateRepaymentTransactionDto, extra_amount: number): Promise<any> {
+        const dream_point = +loan.dream_point + extra_amount;
         const transactionDto = {
             loan_id: loan.id,
-            amount: loan.dream_point,
+            amount: dream_point,
             image: createRepaymentTransactionDto.image,
             type: this.globalService.TRANSACTION_TYPE.DREAM_POINT_EARNED,
             note: createRepaymentTransactionDto.note,
@@ -230,10 +233,10 @@ export class LoanHelperService {
         return;
     }
 
-    async updateClientAfterFullyPaid(loan: Loan, createRepaymentTransactionDto: CreateRepaymentTransactionDto): Promise<any> {
+    async updateClientAfterFullyPaid(loan: Loan, createRepaymentTransactionDto: CreateRepaymentTransactionDto, extra_amount: number): Promise<any> {
 
         const client_new_tier = +loan?.client?.tier + 1;
-        const dream_point_earned = loan?.client?.dream_points_earned + loan?.dream_point;
+        const dream_point_earned = (loan?.client?.dream_points_earned + loan?.dream_point) + extra_amount;
         const dream_point_committed = loan?.client?.dream_points_committed - loan?.dream_point;
 
         if (dream_point_committed >= 0) {
