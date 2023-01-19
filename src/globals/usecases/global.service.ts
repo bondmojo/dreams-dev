@@ -204,6 +204,7 @@ export class GlobalService {
         ADDITIONAL_FEE: 'additional_fee',
         PARTIAL_PAYMENT: 'partial_payment',
         DREAM_POINT_REFUND: 'dream_point_refund',
+        OVER_PAYMENT: 'over_payment',
     };
 
 
