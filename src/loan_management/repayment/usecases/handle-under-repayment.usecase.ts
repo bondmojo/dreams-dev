@@ -29,6 +29,8 @@ export class HandleUnderRepaymentUsecase extends HandleRepaymentUsecase {
 
         zohoKeyValuePairs = {
             Outstanding_Balance: outstanding_amount,
+            Loan_Status: new Choice(this.globalService.ZOHO_LOAN_STATUS.PARTIAL_PAID),
+            Last_Repaid_Date: new Date(),
         };
         zohoKeyValuePairs.Paid_Amount = await this.getLoanTotalPaidAmount(loan.id);
 

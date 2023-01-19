@@ -8,6 +8,7 @@ export class UpdateClientDto {
   full_en: string;
   nickname: string;
   dob: Date;
+  tier:string;
   acc_provider_type: string;
   acc_number: string;
   acc_note: string;
