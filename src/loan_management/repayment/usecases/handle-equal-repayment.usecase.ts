@@ -7,6 +7,7 @@ import { HandleRepaymentUsecase } from './handle-repayment.usecase';
 import { Choice } from "@zohocrm/typescript-sdk-2.0/utils/util/choice";
 import { UpdateRepaymentScheduleDto } from '../../repayment_schedule/dto';
 import { UpdateLoanDto } from "src/loan_management/loan/dto/update-loan.dto";
+import { UpdateClientDto } from "src/loan_management/client/dto";
 @Injectable()
 export class HandleEqualRepaymentUsecase extends HandleRepaymentUsecase {
     private readonly logger = new CustomLogger(HandleEqualRepaymentUsecase.name);
@@ -16,36 +17,61 @@ export class HandleEqualRepaymentUsecase extends HandleRepaymentUsecase {
         const scheudle_instalment = await this.repaymentScheduleService.findOne({ loan_id: loan.id, scheduling_status: this.globalService.INSTALMENT_SCHEDULING_STATUS.SCHEDULED });
         await this.createTransactions(processRepaymentDto, scheudle_instalment);
         await this.updateRepaymentSchedule(scheudle_instalment);
-        await this.updateLoan(processRepaymentDto, loan);
         await this.scheduleNextInstalment(scheudle_instalment, loan.id);
+        await this.updateLoan(processRepaymentDto, loan);
     }
 
     async updateLoan(processRepaymentDto: ProcessRepaymentDto, loan: Loan) {
+        // Updating data in DB
         const outstanding_amount = loan.outstanding_amount - processRepaymentDto.amount;
         const updateLoanDto = new UpdateLoanDto();
-
-        if (!outstanding_amount) {
-            updateLoanDto.payment_status = await this.getLoanStatus(loan);
+        // if outstanding balance is zero then consider as today is fully paid date
+        if (outstanding_amount == 0) {
+            updateLoanDto.payment_status = await this.getLoanPaymentStatus(loan);
+            updateLoanDto.paid_date = new Date();
+            updateLoanDto.status = this.globalService.LOAN_STATUS.FULLY_PAID;
+            await this.updateClientAfterFullyPaid(processRepaymentDto, loan);
+            await this.createDreamPointEarnedTransaction(processRepaymentDto, loan);
         }
         updateLoanDto.id = loan.id;
         updateLoanDto.outstanding_amount = outstanding_amount;
         await this.loanService.update(updateLoanDto);
-        let zohoKeyValuePairs: any = {};
 
+        // Updating data in Zoho
+
+        let zohoKeyValuePairs: any = {};
         zohoKeyValuePairs = {
             Payment_Status: new Choice(updateLoanDto.payment_status),
             Outstanding_Balance: outstanding_amount,
+            Loan_Status: new Choice(this.globalService.ZOHO_LOAN_STATUS.PARTIAL_PAID),
         };
-
-        if (!outstanding_amount) {
+        if (outstanding_amount == 0) {
             // if outstanding balance is zero then consider as today is fully paid date
             zohoKeyValuePairs.Days_Fully_Paid = differenceInCalendarDays(new Date(), new Date(loan.disbursed_date))
+            zohoKeyValuePairs.Loan_Status = new Choice(this.globalService.ZOHO_LOAN_STATUS.FULLY_PAID)
         }
         zohoKeyValuePairs.Paid_Amount = await this.getLoanTotalPaidAmount(loan.id);
 
         this.logger.log(`Updating Loan On Zoho ${loan.zoho_loan_id} ${JSON.stringify(zohoKeyValuePairs)} `);
         await this.zohoRepaymentHelperService.updateZohoFields(loan.zoho_loan_id, zohoKeyValuePairs, this.globalService.ZOHO_MODULES.LOAN);
 
+    }
+
+    async updateClientAfterFullyPaid(processRepaymentDto: ProcessRepaymentDto, loan: Loan) {
+        const client_new_tier = +loan?.client?.tier + 1;
+        const dream_point_earned = loan?.client?.dream_points_earned + loan?.dream_point;
+        const dream_point_committed = loan?.client?.dream_points_committed - loan?.dream_point;
+
+        if (dream_point_committed >= 0) {
+            const updateClientDto = new UpdateClientDto()
+            updateClientDto.id = loan?.client?.id;
+            updateClientDto.tier = '' + client_new_tier;
+            updateClientDto.dream_points_earned = dream_point_earned;
+            updateClientDto.dream_points_committed = dream_point_committed
+
+            await this.clientService.update(updateClientDto);
+        }
+        return;
     }
 
     async scheduleNextInstalment(scheudle_instalment: any, loan_id: string) {
@@ -143,5 +169,17 @@ export class HandleEqualRepaymentUsecase extends HandleRepaymentUsecase {
             };
             await this.transactionService.create(createAdditionalFeeTxnDto);
         }
+    }
+
+    async createDreamPointEarnedTransaction(processRepaymentDto: any, loan: Loan) {
+        // Additional Fee Payment Transaction
+        const createAdditionalFeeTxnDto = {
+            loan_id: loan.id,
+            amount: loan.dream_point,
+            image: processRepaymentDto.image,
+            type: this.globalService.INSTALMENT_TRANSACTION_TYPE.DREAM_POINT_EARNED,
+            note: processRepaymentDto.note,
+        };
+        await this.transactionService.create(createAdditionalFeeTxnDto);
     }
 }

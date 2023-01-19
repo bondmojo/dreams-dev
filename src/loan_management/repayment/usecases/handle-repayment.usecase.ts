@@ -5,13 +5,15 @@ import { Loan } from "../../loan/entities/loan.entity";
 import { compareAsc, startOfDay, addDays } from "date-fns"
 import { LoanService } from "../../loan/usecases/loan.service";
 import { GlobalService } from "../../../globals/usecases/global.service";
-import { ZohoRepaymentHelperService } from "../services/zoho-repayment-helper.service";
+import { ClientService } from 'src/loan_management/client/usecases/client.service';
 import { TransactionService } from "../../transaction/usecases/transaction.service";
+import { ZohoRepaymentHelperService } from "../services/zoho-repayment-helper.service";
 import { RepaymentScheduleService } from "src/loan_management/repayment_schedule/usecases/repayment_schedule.service";
 @Injectable()
 export abstract class HandleRepaymentUsecase {
     constructor(
         public readonly loanService: LoanService,
+        public readonly clientService: ClientService,
         public readonly globalService: GlobalService,
         public readonly transactionService: TransactionService,
         public readonly repaymentScheduleService: RepaymentScheduleService,
@@ -28,7 +30,7 @@ export abstract class HandleRepaymentUsecase {
         return true;
     }
 
-    async getLoanStatus(loan: Loan): Promise<string> {
+    async getLoanPaymentStatus(loan: Loan): Promise<string> {
         const last_instalment = await this.repaymentScheduleService.findOne({ loan_id: loan.id, ins_number: loan.tenure_in_months, scheduling_status: this.globalService.INSTALMENT_SCHEDULING_STATUS.COMPLETED });
         if (!last_instalment) {
             return this.globalService.LOAN_PAYMENT_STATUS.PENDING;

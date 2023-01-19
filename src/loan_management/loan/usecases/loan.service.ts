@@ -131,6 +131,7 @@ export class LoanService {
     async findOneForInternalUse(fields: object): Promise<any> {
         const loan = await this.loanRepository.findOne({
             where: fields,
+            relations: ['client'],
             order: { ['created_at']: 'DESC' }
         });
         return loan;
