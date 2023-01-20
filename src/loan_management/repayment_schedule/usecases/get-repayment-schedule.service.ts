@@ -13,7 +13,7 @@ export class GetRepaymentScheduleUsecase {
 
     async get(getRepaymentScheduleDto: GetRepaymentScheduleDto): Promise<string> {
         try {
-            let tenure = Number(getRepaymentScheduleDto.loan_tenure_in_months);
+            let tenure = Number(getRepaymentScheduleDto.loan_tenure);
             const wing_wei_luy_transfer_fee = getRepaymentScheduleDto.wing_wei_luy_transfer_fee ?? 0;
             const loan_amount = getRepaymentScheduleDto.loan_amount + wing_wei_luy_transfer_fee;
             if (tenure == null || tenure == 0) {

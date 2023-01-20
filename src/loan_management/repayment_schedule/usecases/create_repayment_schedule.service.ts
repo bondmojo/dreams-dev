@@ -22,7 +22,7 @@ export class CreateRepaymentScheduleUsecase {
     async create(createRepaymentScheduleDto: CreateRepaymentScheduleDto): Promise<string> {
         try {
             // Generating client id
-            let tenure = Number(createRepaymentScheduleDto.loan_tenure_in_months);
+            let tenure = Number(createRepaymentScheduleDto.loan_tenure);
             if (tenure == null || tenure == 0) {
                 tenure = 1;
             }
