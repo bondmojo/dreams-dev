@@ -41,17 +41,21 @@ export class LoanService {
 
     async create(createLoanDto: any): Promise<Loan> {
         try {
-            if (!createLoanDto.tenure_in_months) {
-                createLoanDto.tenure_in_months = 1;
+            if (!createLoanDto.tenure) {
+                createLoanDto.tenure = 1;
+            }
+            if (!createLoanDto.tenure_type) {
+                createLoanDto.tenure_type = this.globalService.LOAN_TENURE_TYPE.MONTHLY;
             }
             createLoanDto.id = 'LN' + Math.floor(Math.random() * 100000000);
-            createLoanDto.loan_fee = createLoanDto.tenure_in_months * this.globalService.LOAN_FEES;
+            createLoanDto.loan_fee = createLoanDto.tenure * this.globalService.LOAN_FEES;
 
             // calculate outstanding balance & wing_wei_luy_transfer_fee
             createLoanDto.wing_wei_luy_transfer_fee = 0;
             createLoanDto.outstanding_amount = +createLoanDto.amount + +createLoanDto.loan_fee;
             const today = new Date(); // current time
-            createLoanDto.repayment_date = add(today, { months: createLoanDto.tenure_in_months }); // today + tenure_in_months
+            // FIXME: this tenure should support in weekly and other payments also
+            createLoanDto.repayment_date = add(today, { months: createLoanDto.tenure }); // today + tenure_in_months
             // if wire_transfer_type is mobile then calc wing_wei_luy_transfer_fee and add it into outstanding_amount
             if (createLoanDto?.wire_transfer_type == this.globalService.WIRE_TRANSFER_TYPES.MOBILE) {
                 const disbursed_amount = +createLoanDto.amount - +createLoanDto.dream_point;
@@ -223,7 +227,7 @@ export class LoanService {
             // loan amount is equal to loan_amount + extra fees
             crpSch.loan_amount = loan.amount + loan.wing_wei_luy_transfer_fee;
             crpSch.loan_id = loan.id;
-            crpSch.loan_tenure_in_months = loan.tenure_in_months;
+            crpSch.loan_tenure = loan.tenure;
             crpSch.zoho_loan_id = loan.zoho_loan_id;
 
             this.log.debug("creating repayment schedule for loan" + JSON.stringify(crpSch));
