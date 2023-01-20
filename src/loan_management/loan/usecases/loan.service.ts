@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from "@nestjs/common";
+import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from '@nestjs/typeorm';
 import { DisbursedLoanDto, CreateRepaymentTransactionDto, GetLoanDto, VideoReceivedCallbackDto } from "../dto";
 import { CustomLogger } from "../../../custom_logger";
@@ -205,7 +205,7 @@ export class LoanService {
             });
 
             if (!loan || loan.status != this.globalService.LOAN_STATUS.APPROVED) {
-                throw new BadRequestException('No Approved loan found for loan id');
+                throw new NotFoundException('No Approved loan found for loan id');
             }
             await this.loanHelperService.createCreditDisbursementTransaction(loan, disbursedLoanDto);
             await this.loanHelperService.checkAndCreateWingTransferFeeTransaction(loan, disbursedLoanDto);
@@ -233,6 +233,7 @@ export class LoanService {
         }
         catch (error) {
             this.log.error(`LOAN SERVICE: ERROR OCCURED WHILE RUNNING disbursed:  ${error}`);
+            throw error;
         }
     }
 
