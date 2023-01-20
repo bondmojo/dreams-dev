@@ -78,6 +78,10 @@ export class GlobalService {
         DREAM_POINT_REFUND: 'dream_point_refund'
     }
 
+    public readonly LOAN_TENURE_TYPE: any = {
+        MONTHLY: 'monthly',
+    }
+
     public readonly TIER_AMOUNT: any = {
         1: 50,
         2: 75,
