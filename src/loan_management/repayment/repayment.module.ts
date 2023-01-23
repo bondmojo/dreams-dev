@@ -13,9 +13,9 @@ import { HandleOverRepaymentUsecase } from './usecases/handle-over-repayment.use
 import { ZohoRepaymentHelperService } from './services/zoho-repayment-helper.service';
 import { DreamerModule } from 'src/external/zoho/dreams/dreamer.module';
 import { GetHandleRepaymentFactory } from './factory/get-handle-repayment.factory';
-
+import { ClientModule } from '../client/client.module';
 @Module({
-  imports: [LoanModule, RepaymentScheduleModule, TransactionModule, forwardRef(() => DreamerModule)],
+  imports: [LoanModule, RepaymentScheduleModule, TransactionModule, forwardRef(() => DreamerModule), ClientModule],
   controllers: [RepaymentController],
   providers: [
     RepaymentService, GetHandleRepaymentFactory,

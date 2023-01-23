@@ -37,7 +37,8 @@ export class CreateClientAndLoanDto {
   created_date: Date;
   disbursed_date: Date;
   paid_date: Date;
-  tenure_in_months: number;
+  tenure: number;
+  tenure_type: string;
   wire_transfer_type: string;
 
   //other Fields

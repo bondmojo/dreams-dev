@@ -29,7 +29,11 @@ export class HandleUnderRepaymentUsecase extends HandleRepaymentUsecase {
 
         zohoKeyValuePairs = {
             Outstanding_Balance: outstanding_amount,
+            Loan_Status: new Choice(this.globalService.ZOHO_LOAN_STATUS.PARTIAL_PAID),
+            Last_Repaid_Date: new Date(),
         };
+        zohoKeyValuePairs.Paid_Amount = await this.getLoanTotalPaidAmount(loan.id);
+
         this.logger.log(`Updating Loan On Zoho ${loan.zoho_loan_id} ${JSON.stringify(zohoKeyValuePairs)} `);
         await this.zohoRepaymentHelperService.updateZohoFields(loan.zoho_loan_id, zohoKeyValuePairs, this.globalService.ZOHO_MODULES.LOAN);
 
@@ -48,6 +52,7 @@ export class HandleUnderRepaymentUsecase extends HandleRepaymentUsecase {
             Overdue_Amount: updateRepaymentScheduleDto.ins_overdue_amount,
             Last_Paid_Date: new Date(),
         };
+        zohoKeyValuePairs.Paid_Amount = await this.getInstallmentTotalPaidAmount(scheudle_instalment.id);
         this.logger.log(`Updating Repayment Schedule On Zoho ${updateRepaymentScheduleDto.id} ${JSON.stringify(zohoKeyValuePairs)} ${this.globalService.ZOHO_MODULES.REPAYMENT_SCHEDULES}`);
         await this.zohoRepaymentHelperService.updateZohoFields(scheudle_instalment.zoho_repayment_schedule_id, zohoKeyValuePairs, this.globalService.ZOHO_MODULES.REPAYMENT_SCHEDULES);
 
@@ -57,7 +62,7 @@ export class HandleUnderRepaymentUsecase extends HandleRepaymentUsecase {
         // Partial Paid Transaction
         const createPartialPaidTxnDto = {
             loan_id: processRepaymentDto.loan_id,
-            scheudle_instalment_id: scheudle_instalment.id,
+            repayment_schedule_id: scheudle_instalment.id,
             amount: processRepaymentDto.amount,
             image: processRepaymentDto.image,
             type: this.globalService.INSTALMENT_TRANSACTION_TYPE.PARTIAL_PAYMENT,

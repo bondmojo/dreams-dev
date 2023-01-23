@@ -79,6 +79,10 @@ export class GlobalService {
         DREAM_POINT_REFUND: 'dream_point_refund'
     }
 
+    public readonly LOAN_TENURE_TYPE: any = {
+        MONTHLY: 'monthly',
+    }
+
     public readonly TIER_AMOUNT: any = {
         1: 50,
         2: 75,
@@ -168,18 +172,18 @@ export class GlobalService {
         PARTIAL_PAID: 200,
         IN_GRACE_PERIOD: 300,
         PAYMENT_DUE: 400,
-        PAID_ON_TIME: 500,
-        PAID_LATE: 600,
-        WAIVED_OFF: 700,
+        WAIVED_OFF: 500,
+        PAID_ON_TIME: 600,
+        PAID_LATE: 700,
     }
     public readonly INSTALMENT_PAYMENT_STATUS_STR: any = {
         100: 'Not Paid',
         200: 'Partial Paid',
         300: 'In Grace Period',
         400: 'Payment Due',
-        500: 'Paid On Time',
-        600: 'Paid Late',
-        700: 'Waived Off',
+        500: 'Waived Off',
+        600: 'Paid On Time',
+        700: 'Paid Late',
     }
 
     public readonly INSTALMENT_SCHEDULING_STATUS: any = {
@@ -205,6 +209,7 @@ export class GlobalService {
         ADDITIONAL_FEE: 'additional_fee',
         PARTIAL_PAYMENT: 'partial_payment',
         DREAM_POINT_REFUND: 'dream_point_refund',
+        OVER_PAYMENT: 'over_payment',
     };
 
 

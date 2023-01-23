@@ -13,7 +13,7 @@ export class GetRepaymentScheduleUsecase {
 
     async get(getRepaymentScheduleDto: GetRepaymentScheduleDto): Promise<string> {
         try {
-            let tenure = Number(getRepaymentScheduleDto.loan_tenure_in_months);
+            let tenure = Number(getRepaymentScheduleDto.loan_tenure);
             const wing_wei_luy_transfer_fee = getRepaymentScheduleDto.wing_wei_luy_transfer_fee ?? 0;
             const loan_amount = getRepaymentScheduleDto.loan_amount + wing_wei_luy_transfer_fee;
             if (tenure == null || tenure == 0) {
@@ -23,7 +23,7 @@ export class GetRepaymentScheduleUsecase {
             const repaymentScheduleArray: any = [];
             for (let i = 0; i < tenure; i++) {
                 const repaymentScheduleDto: any = {};
-                repaymentScheduleDto.instalment_number = i + 1;
+                repaymentScheduleDto.ins_number = i + 1;
                 let principal_amount = Math.floor(loan_amount / tenure);
                 //add remainder amount in last instalment.
                 if (i == tenure - 1) {
@@ -31,7 +31,7 @@ export class GetRepaymentScheduleUsecase {
                 }
                 repaymentScheduleDto.ins_overdue_amount = Number((principal_amount + this.globalService.INSTALMENT_MEMBERSHIP_FEE).toFixed(2));
                 const now = new Date();
-                repaymentScheduleDto.due_date = addMonths(now, repaymentScheduleDto.instalment_number);
+                repaymentScheduleDto.due_date = addMonths(now, repaymentScheduleDto.ins_number);
 
                 repaymentScheduleArray.push(repaymentScheduleDto);
             }

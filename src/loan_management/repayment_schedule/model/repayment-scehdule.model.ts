@@ -1,6 +1,6 @@
 export class RepaymentScheduleModel {
     id: string;
-    instalment_number: number;
+    ins_number: number;
     loan_id: string;
     client_id: string;
     ins_overdue_amount: number;

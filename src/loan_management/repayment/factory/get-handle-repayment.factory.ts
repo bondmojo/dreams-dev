@@ -29,10 +29,6 @@ export class GetHandleRepaymentFactory {
             throw new BadRequestException('No Schedule Instalment Found!');
         }
 
-        if (processRepaymentDto.amount > loan.outstanding_amount) {
-            this.logger.log(`Request Amount is greater than loan overdue amount ${JSON.stringify(processRepaymentDto)}`);
-            throw new BadRequestException('Amount is greater loan overdue amount!');
-        }
 
         if (processRepaymentDto.amount == scheudle_instalment.ins_overdue_amount) {
             return this.handleEqualRepaymentUsecase;
