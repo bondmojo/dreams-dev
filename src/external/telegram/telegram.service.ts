@@ -61,17 +61,7 @@ export class CustomTelegramService {
             customKeyboardButtonArray.push(r);
         }
 
-        /*  creditAmountArray.forEach(amount => {
-             const key: TelegramKeyboardButton = { text: `$${amount}` };
-             customKeyboardButtonArray.push([key]);
-         }) */
-
-        setTimeout(async () => {
-            const observable = await this.sendKeyboardMessage(customKeyboardButtonArray, telegram_chat_id, creditAmountDetails.message);
-            observable.subscribe((res: any) => {
-                this.log.log("sendCreditAmountKeyboard observable res =" + JSON.stringify(res));
-            });
-        }, 2000);
+        return await this.sendKeyboardMessage(customKeyboardButtonArray, telegram_chat_id, creditAmountDetails.message, 2000);
 
     }
 
@@ -108,12 +98,7 @@ export class CustomTelegramService {
             customKeyboardButtonArray.push([key]);
         }) */
 
-        setTimeout(async () => {
-            const observable = await this.sendKeyboardMessage(customKeyboardButtonArray, telegram_chat_id, dreamPointsDetailsDto.message);
-            observable.subscribe((res: any) => {
-                this.log.log("sendDreampointsOptionKeyboard observable res =" + JSON.stringify(res));
-            });
-        }, 2000);
+        return await this.sendKeyboardMessage(customKeyboardButtonArray, telegram_chat_id, dreamPointsDetailsDto.message, 2000);
     }
 
     async sendSelectTenureKeyboard(tenureOptionsDto: TenureOptionsDto) {
@@ -145,29 +130,34 @@ export class CustomTelegramService {
                         r.push({ text: `${++monthCount} Months` });
                     }
                 }
-
                 customKeyboardButtonArray.push(r);
             }
         }
-        setTimeout(async () => {
-            const observable = await this.sendKeyboardMessage(customKeyboardButtonArray, telegram_chat_id, tenureOptionsDto.message);
-            observable.subscribe((res: any) => {
-                this.log.log("sendSelectTenureKeyboard observable res =" + JSON.stringify(res));
-            });
-        }, 2000);
-
+        return await this.sendKeyboardMessage(customKeyboardButtonArray, telegram_chat_id, tenureOptionsDto.message, 2000);
     }
 
-    private sendKeyboardMessage(keyboardButtonArray: TelegramKeyboardButton[][], telegram_chat_id: string, message: string): any {
+    private async sendKeyboardMessage(keyboardButtonArray: TelegramKeyboardButton[][], telegram_chat_id: string, message: string, waitInMilliSec?: number): Promise<any> {
         const customKeyboard: TelegramReplyKeyboardMarkup = { keyboard: keyboardButtonArray, one_time_keyboard: false,/*  is_persistent: true */ };
         const data: TelegramSendMessageParams = {
             chat_id: telegram_chat_id,
             text: message,
             reply_markup: customKeyboard
         };
-        this.log.log("Sending telegram Keyboard: " + JSON.stringify(data));
-        return this.telegramService.sendMessage(data);
-        //return { status: "success" }
+        this.log.log("telegram Keyboard message : " + JSON.stringify(data) + ` Delay time in millsec =${waitInMilliSec}`);
+        if (!waitInMilliSec || waitInMilliSec == 0) {
+            this.telegramService.sendMessage(data);
+        }
+        else {
+            setTimeout(async () => {
+                this.log.log("wokeup.. Sending Keyboard: " + JSON.stringify(data));
+                const observable = this.telegramService.sendMessage(data);
+                observable.subscribe((res: any) => {
+                    this.log.log("observable res =" + JSON.stringify(res));
+                });
+
+            }, waitInMilliSec);
+        }
+        return { status: "success" }
     }
 
     async removeKeyboard(removeTelegramKeyboardDto: RemoveTelegramKeyboardDto) {

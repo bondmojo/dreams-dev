@@ -141,6 +141,9 @@ export class GlobalService {
             //FIXME: UPDATE FLOW ID
             "OLDER_THAN_3DAYS": this.isDev ? "632c615064d2872411413292" : "63502f34e4c17d77bf04b239"
         },
+
+        //Credit_Request
+        "FLOW_2.1": this.isDev ? "63044e6240a807725428da47" : '63502c9224d69e33c16719e3',
         //Contract_Form_Signed
         "FLOW_4.8": this.isDev ? "634cf815b9e72911917483a3" : '63502db319b15a483a50d3aa',
         //Verification_call
