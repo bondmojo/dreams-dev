@@ -5,11 +5,12 @@ import { TelegramModule } from "nestjs-telegram";
 import { CustomTelegramService } from "./telegram.service";
 import { TelegramController } from "./telegram.controller";
 import { CustomLogger } from "src/custom_logger";
+import { ClientModule } from "src/loan_management/client/client.module";
 
 @Module({
     imports: [HttpModule, GlobalModule, TelegramModule.forRoot({
         botKey: process.env.TELEGRAM_BOT_ID
-    })],
+    }), ClientModule],
     controllers: [TelegramController],
     providers: [CustomTelegramService],
     exports: [CustomTelegramService]

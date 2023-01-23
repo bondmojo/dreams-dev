@@ -90,6 +90,8 @@ export class GlobalService {
         8: 500
     }
 
+    public readonly TENURE_TYPE = ["Weekly", "Monthly"];
+
     CALC_WING_WEI_LUY_TRANSFER_FEE(amount: number): number {
         if (amount >= 0 && amount <= 25) {
             return 0.38;
@@ -207,6 +209,31 @@ export class GlobalService {
         DREAM_POINT_REFUND: 'dream_point_refund',
     };
 
+    public CLACULATE_TENURE(amount: number): string {
+
+        let tenure: string = '1';
+
+        if (amount <= this.TIER_AMOUNT['2']) {
+            tenure = '1';
+        }
+        else if (amount > this.TIER_AMOUNT['2'] && amount <= this.TIER_AMOUNT['4']) {
+            tenure = '2';
+        }
+        else if (amount > this.TIER_AMOUNT['4'] && amount <= this.TIER_AMOUNT['5']) {
+            tenure = '3';
+        }
+        else if (amount > this.TIER_AMOUNT['5'] && amount <= this.TIER_AMOUNT['6']) {
+            tenure = '4';
+        }
+        else if (amount > this.TIER_AMOUNT['6'] && amount <= this.TIER_AMOUNT['7']) {
+            tenure = '5';
+        }
+        else if (amount > this.TIER_AMOUNT['7'] /* && amount <= this.TIER_AMOUNT['8']*/) {
+            tenure = '6';
+
+        }
+        return tenure;
+    }
 
     /* constructor(
     ) { }

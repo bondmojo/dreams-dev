@@ -5,12 +5,17 @@ import { CustomLogger } from "../../custom_logger";
 import { CalculateLoanDto } from "./dto/calculate-loan.dto";
 import { CalculateLoanResultDto } from "./dto/calculate-loan-result.dto";
 import { format, add } from 'date-fns'
+import { GlobalService } from "src/globals/usecases/global.service";
 
 @Injectable()
 export class SendpulseHelperService {
     private readonly FEES: number = 3;
     private readonly LOAN_CYCLE: number = 30;
     private readonly log = new CustomLogger(SendpulseHelperService.name);
+
+    constructor(private readonly globalService: GlobalService) {
+
+    }
 
     calculateLoan(calculateLoanDto: CalculateLoanDto): CalculateLoanResultDto {
         const result = new CalculateLoanResultDto();
@@ -23,7 +28,9 @@ export class SendpulseHelperService {
             result.is_success = "true";
             const date = new Date();
             const payday = add(date, { days: this.LOAN_CYCLE });
-            result.paymentDate = format(payday, 'dd-MM-yyyy')
+            result.paymentDate = format(payday, 'dd-MM-yyyy');
+            result.tenure = this.globalService.CLACULATE_TENURE(amount);
+            result.tenure_type = this.globalService.TENURE_TYPE[1];
             return result;
         } catch (ex) {
             result.is_success = "false";
