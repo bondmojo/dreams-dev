@@ -5,6 +5,6 @@ export class CalculateLoanResultDto extends CalculationResultDto {
     payableAmount: string
     receivableAmount: string
     fee: string
-    tenure: string;
-    tenure_type: string;
+    maxTenure: string;
+    tenureType: string;
 }
