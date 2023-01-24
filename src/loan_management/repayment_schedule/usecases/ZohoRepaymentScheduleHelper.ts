@@ -6,7 +6,7 @@ import { Record } from "@zohocrm/typescript-sdk-2.0/core/com/zoho/crm/api/record
 import { Choice } from "@zohocrm/typescript-sdk-2.0/utils/util/choice";
 import { RepaymentScheduleModel } from '../model/repayment-scehdule.model';
 import { GlobalService } from "src/globals/usecases/global.service";
-
+import { ZohoInstallmentFields } from "src/globals/zoho_fields_mapping/Installment"
 
 
 @Injectable()
@@ -25,17 +25,17 @@ export class ZohoRepaymentScheduleHelper {
         const zoholoanID = new Record();
         zoholoanID.setId(id);
 
-        zohoRepaymentSchedulePair["Name"] = repaymentScheduleModel.id;
-        zohoRepaymentSchedulePair["Loan_Id"] = zoholoanID;
-        zohoRepaymentSchedulePair["Total_Paid_Amount"] = Number(repaymentScheduleModel.total_paid_amount);
-        zohoRepaymentSchedulePair["Overdue_Amount"] = Number(repaymentScheduleModel.ins_overdue_amount);
-        zohoRepaymentSchedulePair["Repayment_Status"] = new Choice(this.globalService.INSTALMENT_PAYMENT_STATUS_STR[repaymentScheduleModel.repayment_status]);
+        zohoRepaymentSchedulePair[ZohoInstallmentFields.name] = repaymentScheduleModel.id;
+        zohoRepaymentSchedulePair[ZohoInstallmentFields.loan_id] = zoholoanID;
+        zohoRepaymentSchedulePair[ZohoInstallmentFields.total_paid_amount] = Number(repaymentScheduleModel.total_paid_amount);
+        zohoRepaymentSchedulePair[ZohoInstallmentFields.overdue_amount] = Number(repaymentScheduleModel.ins_overdue_amount);
+        zohoRepaymentSchedulePair[ZohoInstallmentFields.repayment_status] = new Choice(this.globalService.INSTALMENT_PAYMENT_STATUS_STR[repaymentScheduleModel.repayment_status]);
 
-        zohoRepaymentSchedulePair["Due_Principal_Amount"] = Number(repaymentScheduleModel.ins_principal_amount);
-        zohoRepaymentSchedulePair["Repayment_Date"] = repaymentScheduleModel.due_date;
-        zohoRepaymentSchedulePair["Scheduling_Status"] = new Choice(this.globalService.INSTALMENT_SCHEDULING_STATUS_STR[repaymentScheduleModel.scheduling_status]);
-
-        zohoRepaymentSchedulePair["Last_Paid_Date"] = repaymentScheduleModel.previous_repayment_dates;
+        zohoRepaymentSchedulePair[ZohoInstallmentFields.principal_amount] = Number(repaymentScheduleModel.ins_principal_amount);
+        zohoRepaymentSchedulePair[ZohoInstallmentFields.repayment_date] = repaymentScheduleModel.due_date;
+        zohoRepaymentSchedulePair[ZohoInstallmentFields.installment_status] = new Choice(this.globalService.INSTALMENT_SCHEDULING_STATUS_STR[repaymentScheduleModel.scheduling_status]);
+        zohoRepaymentSchedulePair[ZohoInstallmentFields.installment_fees] = Number(repaymentScheduleModel.ins_membership_fee);
+        zohoRepaymentSchedulePair[ZohoInstallmentFields.last_paid_date] = repaymentScheduleModel.previous_repayment_dates;
 
         //todo add other fields
         return zohoRepaymentSchedulePair;

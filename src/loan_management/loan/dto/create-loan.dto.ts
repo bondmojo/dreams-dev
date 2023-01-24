@@ -9,7 +9,8 @@ export class CreateLoanDto {
   created_date: Date;
   disbursed_date: Date;
   paid_date: Date;
-  tenure_in_months: number;
+  tenure: number;
+  tenure_type: string;
   repayment_date: Date;
   wire_transfer_type: string;
   do_create_zoho_loan: boolean;

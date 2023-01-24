@@ -116,7 +116,7 @@ export class CustomTelegramService {
         let monthCount = 0;
         let customKeyboardButtonArray: TelegramKeyboardButton[][] = [];
 
-        if (tenure_type === this.globalService.TENURE_TYPE[1]) {
+        if (tenure_type === this.globalService.LOAN_TENURE_TYPE.MONTHLY) {
             for (let row = 0; row < rowCount; row++) {
                 let r: TelegramKeyboardButton[] = [];
 

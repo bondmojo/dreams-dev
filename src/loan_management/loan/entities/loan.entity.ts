@@ -57,8 +57,11 @@ export class Loan {
   @Column({ type: 'timestamp', nullable: true })
   disbursed_date: Date;
 
-  @Column({ nullable: true })
-  tenure_in_months: number;
+  @Column({ default: 1 })
+  tenure: number;
+
+  @Column({ default: 'monthly' })
+  tenure_type: string;
 
   @Column({ type: 'date', nullable: true })
   repayment_date: Date;

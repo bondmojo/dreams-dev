@@ -29,6 +29,7 @@ export class CreateClientAndLoanDto {
   utm_campaign: string;
   utm_medium: string;
   telegram_id: string;
+
   // Loan Fields
   client_id: string;
   amount: number;
@@ -37,8 +38,9 @@ export class CreateClientAndLoanDto {
   created_date: Date;
   disbursed_date: Date;
   paid_date: Date;
-  tenure_in_months: number;
   wire_transfer_type: string;
+  tenure: number;
+  tenure_type: string;
 
   //other Fields
   do_create_zoho_loan: boolean;

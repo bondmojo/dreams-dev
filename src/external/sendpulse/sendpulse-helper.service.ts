@@ -30,7 +30,7 @@ export class SendpulseHelperService {
             const payday = add(date, { days: this.LOAN_CYCLE });
             result.paymentDate = format(payday, 'dd-MM-yyyy');
             result.maxTenure = this.globalService.CLACULATE_TENURE(amount);
-            result.tenureType = this.globalService.TENURE_TYPE[1];
+            result.tenureType = this.globalService.LOAN_TENURE_TYPE.MONTHLY;
             return result;
         } catch (ex) {
             result.is_success = "false";
