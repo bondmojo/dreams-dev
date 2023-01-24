@@ -16,5 +16,7 @@ export class CreateZohoLoanApplicationDto {
   wing_wei_luy_transfer_fee: number;
   //loanOwner: string;
   lmsLoanId: string;
+  tenure: string;
+  tenureType: string;
 
 }

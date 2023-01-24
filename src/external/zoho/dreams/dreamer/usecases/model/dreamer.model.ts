@@ -12,6 +12,8 @@ export class DreamerModel {
     utmMedium: string;
     utmCampaign: string;
     telegram_id: string;
+    tenure: string;
+    tenureType: string;
 }
 
 export class LoanRequest {

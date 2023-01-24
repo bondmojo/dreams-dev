@@ -74,6 +74,10 @@ export class DreamerRepository {
             record.addKeyValue('utm_Campaign', dreamer.utmCampaign);
             record.addKeyValue('Telegram_Id', "" + dreamer.telegram_id);
 
+            //Tenure details
+            record.addKeyValue('Tenure', dreamer.tenure);
+            record.addKeyValue('Tenure_Type', dreamer.tenureType);
+
             this.log.log(`Trying to save dreamer on zoho: ${JSON.stringify(Object.fromEntries(record.getKeyValues()))}`);
             const map: Map<string, any> = await this.zohoservice.saveRecord(record, 'Leads');
 

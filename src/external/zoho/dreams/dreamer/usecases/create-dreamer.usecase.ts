@@ -39,6 +39,8 @@ export class CreateDreamerUsecase {
             dreamer.utmSorce = createDreamerDto.utmSorce;
             dreamer.utmMedium = createDreamerDto.utmMedium;
             dreamer.utmCampaign = createDreamerDto.utmCampaign;
+            dreamer.tenure = createDreamerDto.tenure;
+            dreamer.tenureType = createDreamerDto.tenureType;
         } catch (error) {
             this.log.error(`DREAMER: ERROR OCCURED WHILE RUNNING populateRequestData:  ${error}`);
         }

@@ -52,6 +52,9 @@ export class ZohoLoanRepository {
         record.addKeyValue('Account_No', loanDto.paymentAccountNumber);
         record.addKeyValue('Payment_Via', loanDto.paymentVia);
 
+        record.addKeyValue('Tenure', loanDto.tenure);
+        record.addKeyValue('Tenure_Type', loanDto.tenureType);
+
         record.addKeyValue("Loan_Status", new Choice(loanDto.loanStatus));
         if (!loanDto.membershipTier) {
             this.log.log("no membership tier found. for =" + (await dreamerModel).name);

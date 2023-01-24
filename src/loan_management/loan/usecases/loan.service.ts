@@ -85,7 +85,6 @@ export class LoanService {
                 updateApplStatus.application_status = createLoanDto.status;
                 this.eventEmitter.emit('loan.status.changed', (updateApplStatus));
                 this.log.log("emit:loan.status.changed");
-
             }
 
             //Step 5: Create transactions in Dreams DB

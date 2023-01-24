@@ -8,4 +8,6 @@ export class CreateDreamerDto {
   utmSorce: string;
   utmMedium: string;
   utmCampaign: string;
+  tenure: string;
+  tenureType: string;
 }
