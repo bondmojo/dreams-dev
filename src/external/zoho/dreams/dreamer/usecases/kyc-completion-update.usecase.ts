@@ -13,7 +13,6 @@ export class KycCompletionUpdateUsecase {
                 private readonly globalService: GlobalService) { }
 
         @OnEvent('kyc.callback')
-        @MethodParamsRespLogger(new CustomLogger(KycCompletionUpdateUsecase.name))
         async updateKycDetails(event: KycEventDto) {
                 try {
                         const dreamer = await this.repository.getDreamer(event.dreamerId);

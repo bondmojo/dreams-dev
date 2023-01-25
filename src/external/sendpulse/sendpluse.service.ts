@@ -52,7 +52,6 @@ export class SendpluseService {
 
     }
 
-    @MethodParamsRespLogger(new CustomLogger(SendpluseService.name))
     async runFlowV2(model: RunFlowModel) {
         try {
             await this.checkAndGenerateToken();
@@ -69,7 +68,6 @@ export class SendpluseService {
         }
     }
 
-    @MethodParamsRespLogger(new CustomLogger(SendpluseService.name))
     async runFlow(model: DreamerModel, flow: string): Promise<any> {
         try {
             await this.checkAndGenerateToken();
@@ -91,7 +89,6 @@ export class SendpluseService {
         }
     }
 
-    @MethodParamsRespLogger(new CustomLogger(SendpluseService.name))
     async setVariable(variableDto: SetVariableRequestDto): Promise<string> {
 
         try {

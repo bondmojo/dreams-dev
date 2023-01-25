@@ -18,18 +18,17 @@ export class ShuftiService {
     private readonly shuftiAuth = Buffer.from(this.clientId + ':' + this.secret).toString('base64');
 
     //private readonly registrationUrl = 'https://gojo.retool.com/embedded/public/228e6187-4a66-4a81-b430-a63a646f82b8';
-    private readonly callbackUrl = this.globalService.isDev ? 'https://dev.api.gojo.co/dreams/v1' : 'https://nfjlmolsee.execute-api.ap-southeast-1.amazonaws.com/prod/v1';
-    //private readonly callbackUrl = "https://b895-103-133-123-146.in.ngrok.io";
+    //private readonly callbackUrl = this.globalService.isDev ? 'https://dev.api.gojo.co/dreams/v1' : 'https://nfjlmolsee.execute-api.ap-southeast-1.amazonaws.com/prod/v1';
+    private readonly callbackUrl = "https://f51a-103-157-221-183.in.ngrok.io";
     private readonly telegramBotUrl = this.globalService.isDev ? "https://t.me/gojo_dreams_uat_bot" : "https://t.me/dreams_cambodia_bot";
 
     constructor(private readonly httpService: HttpService,
         private eventEmitter: EventEmitter2, private readonly globalService: GlobalService) {
     }
 
-    @MethodParamsRespLogger(new CustomLogger(ShuftiService.name))
     async initiateKyc(dreamerId: string, kycId: string): Promise<string> {
         try {
-            const request = structuredClone(this.TEMPLATE);
+            const request = JSON.parse(JSON.stringify(this.TEMPLATE));
             request.reference = kycId;
             request.callback_url = this.callbackUrl + '/shufti/callback?dreamerId=' + dreamerId + "&kycId=" + kycId;
             request.redirect_url = this.telegramBotUrl;
@@ -58,7 +57,6 @@ export class ShuftiService {
         }
     }
 
-    @MethodParamsRespLogger(new CustomLogger(ShuftiService.name))
     async fetchKycData(kycId: string): Promise<ShuftiResponseDto> {
         try {
             const request = { reference: kycId };
@@ -83,10 +81,8 @@ export class ShuftiService {
 
     }
 
-    @MethodParamsRespLogger(new CustomLogger(ShuftiService.name))
     async kycCallback(dreamerId: string, kycId: string, response: ShuftiResponseDto) {
         try {
-            this.logger.log("KYC Callback called response =" + JSON.stringify(response));
             const event: KycEventDto = this.buildEvent(dreamerId, kycId, response);
             if (response.event === 'verification.accepted') {
                 const data: ShuftiResponseDto = await this.fetchKycData(kycId);
@@ -114,7 +110,6 @@ export class ShuftiService {
         }
     }
 
-    @MethodParamsRespLogger(new CustomLogger(ShuftiService.name))
     private buildEvent(dreamerId: string, kycId: string, response: ShuftiResponseDto): KycEventDto {
         try {
             const event: KycEventDto = new KycEventDto();
@@ -131,7 +126,6 @@ export class ShuftiService {
             this.logger.error(`SHUFTI SERVICE: ERROR OCCURED WHILE RUNNING BuildEvent  :  ${error}`);
         }
     }
-
 
     private retrieveGender(gender: string) {
         if (gender == null) {

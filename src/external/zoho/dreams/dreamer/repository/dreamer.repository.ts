@@ -26,7 +26,6 @@ export class DreamerRepository {
         private readonly globalService: GlobalService,
     ) { }
 
-    @MethodParamsRespLogger(new CustomLogger(DreamerRepository.name))
     async getDreamer(dreamer: string): Promise<DreamerModel> {
         try {
             const dreamerModel = new DreamerModel();
@@ -78,6 +77,7 @@ export class DreamerRepository {
             record.addKeyValue('Tenure', dreamer.tenure);
             record.addKeyValue('Tenure_Type', dreamer.tenureType);
 
+
             this.log.log(`Trying to save dreamer on zoho: ${JSON.stringify(Object.fromEntries(record.getKeyValues()))}`);
             const map: Map<string, any> = await this.zohoservice.saveRecord(record, 'Leads');
 
@@ -104,7 +104,6 @@ export class DreamerRepository {
         return (map.get('id') as bigint).toString();
     }
 
-    @MethodParamsRespLogger(new CustomLogger(DreamerRepository.name))
     async updateAdditionalDetails(dreamerId: string, additionalDetails: AdditionalDetailsRequestDto): Promise<string> {
         try {
             // FIXME :: replace with updateFieldsOnZoho
@@ -151,7 +150,6 @@ export class DreamerRepository {
         }
     }
 
-    @MethodParamsRespLogger(new CustomLogger(DreamerRepository.name))
     async updatekycDetails(event: KycEventDto): Promise<string> {
         try {
             const filesToDeletes: string[] = [];
@@ -223,5 +221,4 @@ export class DreamerRepository {
         }
 
     }
-
 }

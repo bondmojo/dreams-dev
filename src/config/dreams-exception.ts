@@ -17,7 +17,8 @@ export class DreamsCode {
     public static readonly DRM_ERROR = 0;
     public static readonly CLIENT_NOT_FOUND = 1;
     public static readonly LOAN_NOT_FOUND = 2;
-    public static readonly SENDPULSE_ID_NOT_FOUND = 2;
+    public static readonly SENDPULSE_ID_NOT_FOUND = 3;
+    public static readonly TELEGRAM_ID_NOT_FOUND = 4;
 
 
 

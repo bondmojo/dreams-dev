@@ -39,12 +39,18 @@ export class CustomTelegramService {
     }
 
     async sendCreditAmountKeyboard(creditAmountDetails: CreditAmountDetailsDto) {
-        const sendpulseUserId = creditAmountDetails.sendpulse_user_id;
+        /* const sendpulseUserId = creditAmountDetails.sendpulse_user_id;
 
         if (sendpulseUserId == null) {
             throw new dreamsException.DreamsException(dreamsException.DreamsCode.SENDPULSE_ID_NOT_FOUND, "Invalid Sendpulse id with value" + sendpulseUserId);
+        } 
+
+        const telegram_chat_id = await this.getTelegramChatId(sendpulseUserId);*/
+        const telegram_chat_id = creditAmountDetails.telegram_chat_id;
+        if (telegram_chat_id == null) {
+            throw new dreamsException.DreamsException(dreamsException.DreamsCode.TELEGRAM_ID_NOT_FOUND, "TELEGRAM id NOT FOUND");
         }
-        const telegram_chat_id = await this.getTelegramChatId(sendpulseUserId);
+
         const max_credit_amount = parseInt(creditAmountDetails.max_credit_amount);
         const creditAmountArray = [0.2 * max_credit_amount, 0.4 * max_credit_amount, 0.6 * max_credit_amount, 0.8 * max_credit_amount, max_credit_amount];
 
@@ -66,12 +72,17 @@ export class CustomTelegramService {
     }
 
     async sendDreampointsOptionKeyboard(dreamPointsDetailsDto: DreamPointsDetailsDto) {
-        const sendpulseUserId = dreamPointsDetailsDto.sendpulse_user_id;
+        /* const sendpulseUserId = dreamPointsDetailsDto.sendpulse_user_id;
 
         if (sendpulseUserId == null) {
             throw new dreamsException.DreamsException(dreamsException.DreamsCode.SENDPULSE_ID_NOT_FOUND, "Invalid Sendpulse id with value" + sendpulseUserId);
         }
-        const telegram_chat_id = await this.getTelegramChatId(sendpulseUserId);
+        const telegram_chat_id = await this.getTelegramChatId(sendpulseUserId); */
+        const telegram_chat_id = dreamPointsDetailsDto.telegram_chat_id;
+        if (telegram_chat_id == null) {
+            throw new dreamsException.DreamsException(dreamsException.DreamsCode.TELEGRAM_ID_NOT_FOUND, "TELEGRAM id NOT FOUND");
+        }
+
         const req_loan_amount = parseInt(dreamPointsDetailsDto.requested_loan_amount);
         const dreamPointRequestArray = [Math.round(0.2 * req_loan_amount),
         Math.round(0.4 * req_loan_amount),
@@ -102,13 +113,16 @@ export class CustomTelegramService {
     }
 
     async sendSelectTenureKeyboard(tenureOptionsDto: TenureOptionsDto) {
-
-        const sendpulseUserId = tenureOptionsDto.sendpulse_user_id;
+        /* const sendpulseUserId = tenureOptionsDto.sendpulse_user_id;
 
         if (sendpulseUserId == null) {
             throw new dreamsException.DreamsException(dreamsException.DreamsCode.SENDPULSE_ID_NOT_FOUND, "Invalid Sendpulse id with value" + sendpulseUserId);
         }
-        const telegram_chat_id = await this.getTelegramChatId(sendpulseUserId);
+        const telegram_chat_id = await this.getTelegramChatId(sendpulseUserId); */
+        const telegram_chat_id = tenureOptionsDto.telegram_chat_id;
+        if (telegram_chat_id == null) {
+            throw new dreamsException.DreamsException(dreamsException.DreamsCode.TELEGRAM_ID_NOT_FOUND, "TELEGRAM id NOT FOUND");
+        }
 
         const tenure = parseInt(tenureOptionsDto.max_tenure);
         const rowCount = Math.floor((tenure + 1) / 2)

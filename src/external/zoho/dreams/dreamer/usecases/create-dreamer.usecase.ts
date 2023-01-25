@@ -25,6 +25,7 @@ export class CreateDreamerUsecase {
             return dreamer;
         } catch (error) {
             this.log.error(`DREAMER: ERROR OCCURED WHILE RUNNING create:  ${error}`);
+            throw error;
         }
     }
 
