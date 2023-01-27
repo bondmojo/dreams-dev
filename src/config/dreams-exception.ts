@@ -21,5 +21,7 @@ export class DreamsCode {
     public static readonly TELEGRAM_ID_NOT_FOUND = 4;
 
 
+    public static readonly INVALID_LOAN_STATUS = 5;
+
 
 }

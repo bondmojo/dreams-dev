@@ -20,7 +20,6 @@ export class UpdateRepaymentDateUsecase {
     private readonly globalService: GlobalService
   ) { }
 
-  @MethodParamsRespLogger(new CustomLogger(UpdateRepaymentDateUsecase.name))
   async updateRepaymentDate(updateRepaymentDateDto: UpdateRepaymentDateDto) {
     try {
       const loan = await this.fetchtLoan(updateRepaymentDateDto.loan_id);

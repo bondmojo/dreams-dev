@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { te } from "date-fns/locale";
-import { TelegramKeyboardButton, TelegramMessage, TelegramReplyKeyboardMarkup, TelegramReplyKeyboardRemove, TelegramSendMessageParams, TelegramService } from "nestjs-telegram";
+import { TelegramKeyboardButton, TelegramMessage, TelegramReplyKeyboardMarkup, TelegramReplyKeyboardRemove, TelegramSendChatActionParams, TelegramSendMessageParams, TelegramService } from "nestjs-telegram";
 import { send } from "process";
 import { Observable } from "rxjs";
 import * as dreamsException from "src/config/dreams-exception";
@@ -162,6 +162,7 @@ export class CustomTelegramService {
             this.telegramService.sendMessage(data);
         }
         else {
+            this.sendTypingAction(telegram_chat_id);
             setTimeout(async () => {
                 this.log.log("wokeup.. Sending Keyboard: " + JSON.stringify(data));
                 const observable = this.telegramService.sendMessage(data);
@@ -184,6 +185,11 @@ export class CustomTelegramService {
         };
         this.log.log("Removing telegram Keyboard: " + JSON.stringify(data));
         this.telegramService.sendMessage(data);
+    }
+
+    private sendTypingAction(telegram_chat_id: string) {
+        const typingAction: TelegramSendChatActionParams = { chat_id: telegram_chat_id, action: "typing" }
+        this.telegramService.sendChatAction(typingAction);
     }
 
     async getTelegramChatId(sendpulseUserId: string): Promise<string> {

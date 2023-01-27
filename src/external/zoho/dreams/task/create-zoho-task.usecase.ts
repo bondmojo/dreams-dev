@@ -19,7 +19,6 @@ export class CreateZohoTaskUsecase {
         private readonly global: GlobalService,
         private readonly sendpluseService: SendpluseService
     ) { }
-    @MethodParamsRespLogger(new CustomLogger(CreateZohoTaskUsecase.name))
     async createTask(task: ZohoTaskRequest): Promise<string> {
         try {
             if (!task.dreamer_id && task.sendpulse_id) {
@@ -52,7 +51,6 @@ export class CreateZohoTaskUsecase {
     }
 
     //FIXME: Replace this with generic Task
-    @MethodParamsRespLogger(new CustomLogger(CreateZohoTaskUsecase.name))
     async createPaymentRecievedTask(zoho_id: string): Promise<string> {
         try {
             const client = await this.clientService.findbyZohoId(zoho_id);

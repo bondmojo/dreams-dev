@@ -50,7 +50,6 @@ export class HandleLatePaymentService {
     return 'Done'
   }
 
-  @MethodParamsRespLogger(new CustomLogger(HandleLatePaymentService.name))
   async fetchCustomersByDueDate(dueDate: Date): Promise<Loan[] | null> {
     const loansPromise = await this.loanRepository.find({
       where: [{

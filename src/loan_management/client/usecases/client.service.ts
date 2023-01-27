@@ -70,7 +70,6 @@ export class ClientService {
     }
 
     @OnEvent('client.update')
-    @MethodParamsRespLogger(new CustomLogger(ClientService.name))
     async update(updateClientDto: UpdateClientDto) {
         return await this.clientRepository.update(updateClientDto.id, updateClientDto);
     }

@@ -16,7 +16,6 @@ export class UpdateFieldsOnZohoUsecase {
     }
 
     // This function should be use for all future update implementations.
-    @MethodParamsRespLogger(new CustomLogger(UpdateFieldsOnZohoUsecase.name))
     private async updateFieldsOnZoho(id: string, zohoKeyValuePairs: any, moduleName: string): Promise<string> {
         // zohoDataKeyValuePair should be key value pair
         const record = new Record();

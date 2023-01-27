@@ -323,7 +323,6 @@ export class LoanHelperService {
         return response;
     }
 
-    @MethodParamsRespLogger(new CustomLogger(LoanHelperService.name))
     async getLoanLastPartialPaymentAmount(loan_id: string): Promise<any> {
         const transaction = await this.transactionService.findOne({
             loan_id: loan_id,

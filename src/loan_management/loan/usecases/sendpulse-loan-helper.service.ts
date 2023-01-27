@@ -17,7 +17,6 @@ export class SendpulseLoanHelperService {
         private readonly sendpluseService: SendpluseService,
     ) { }
 
-    @MethodParamsRespLogger(new CustomLogger(SendpulseLoanHelperService.name))
     async triggerVideoVerificationFlowIfClientHasSuccessfullyPaidLoan(createLoanDto: any): Promise<any> {
         const loan = await this.loanRepository.findOne({
             where: {

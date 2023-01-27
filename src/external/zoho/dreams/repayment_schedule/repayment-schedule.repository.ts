@@ -12,7 +12,6 @@ export class ZohoRepaymentScheduleRepository {
         private readonly globalService: GlobalService,
     ) { }
 
-    @MethodParamsRespLogger(new CustomLogger(ZohoRepaymentScheduleRepository.name))
     async createBulkRecordOnZoho(zohoRecordList: [], moduleName: string): Promise<string[]> {
         // zohoDataKeyValuePair should be key value pair
 

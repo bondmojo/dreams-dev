@@ -19,7 +19,6 @@ export class ZohoLoanRepository {
         private readonly dreamerRepository: DreamerRepository
     ) { }
 
-    @MethodParamsRespLogger(new CustomLogger(ZohoLoanRepository.name))
     async createLoanApplication(dreamerId: string, loanDto: CreateZohoLoanApplicationDto): Promise<CreateZohoLoanApplicationDto> {
 
         const dreamerModel = this.dreamerRepository.getDreamer(dreamerId);

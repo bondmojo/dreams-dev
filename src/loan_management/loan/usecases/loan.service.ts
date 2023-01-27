@@ -20,6 +20,7 @@ import { SendpulseLoanHelperService } from "./sendpulse-loan-helper.service";
 import { ZohoLoanHelperService } from "./zoho-loan-helper.service";
 
 import { MethodParamsRespLogger } from "src/decorator";
+import { DreamsCode, DreamsException } from "src/config/dreams-exception";
 @Injectable()
 export class LoanService {
     private readonly log = new CustomLogger(LoanService.name);
@@ -107,7 +108,6 @@ export class LoanService {
         await this.loanRepository.update(updateLoanDto.id, updateLoanDto);
     }
 
-    @MethodParamsRespLogger(new CustomLogger(LoanService.name))
     async createLoanInZoho(createLoanDto: any): Promise<any> {
         try {
             const zohoLoanDto = new CreateZohoLoanApplicationDto();
@@ -214,9 +214,10 @@ export class LoanService {
                 relations: ['client']
             });
 
-            if (!loan || loan.status != this.globalService.LOAN_STATUS.APPROVED) {
-                throw new NotFoundException('No Approved loan found for loan id');
+            if (!loan || loan.status != this.globalService.LOAN_STATUS.CONTRACT_SIGNED) {
+                throw new DreamsException(DreamsCode.INVALID_LOAN_STATUS, 'No Contract Signed loan found for loan id');
             }
+
             await this.loanHelperService.createCreditDisbursementTransaction(loan, disbursedLoanDto);
             await this.loanHelperService.checkAndCreateWingTransferFeeTransaction(loan, disbursedLoanDto);
             await this.loanHelperService.updateLoanDataAfterDisbursement(loan, disbursedLoanDto);
