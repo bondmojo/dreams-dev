@@ -1,4 +1,4 @@
-import { CreateClientAndLoanDto } from './dto/create-client-and-loan.dto';
+import { CreateClientAndLoanDto, RefundDreamPointDto } from './dto';
 import { Body, Controller, Param, Post, Get } from '@nestjs/common';
 import { ClientService } from "./usecases/client.service";
 import { CustomLogger } from "../../custom_logger";
@@ -26,6 +26,12 @@ export class ClientController {
   @MethodParamsRespLogger(new CustomLogger(ClientController.name))
   async contracturl(@Param('id') id: string) {
     return await this.clientService.getContracturl(id);
+  }
+
+  @Post('/refundDreamPoint')
+  @MethodParamsRespLogger(new CustomLogger(ClientController.name))
+  async refundDreamPoint(@Body() refundDreamPointDto: RefundDreamPointDto) {
+    return await this.clientService.refundDreamPoint(refundDreamPointDto);
   }
 
 }

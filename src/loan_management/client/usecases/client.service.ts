@@ -1,6 +1,6 @@
 import { ConsoleLogger, Injectable } from "@nestjs/common";
 import { InjectRepository } from '@nestjs/typeorm';
-import { CreateClientAndLoanDto, CreateClientDto, GetClientDto, UpdateClientDto } from "../dto";
+import { CreateClientAndLoanDto, CreateClientDto, GetClientDto, UpdateClientDto, RefundDreamPointDto } from "../dto";
 import { CustomLogger } from "../../../custom_logger";
 import { Client } from '../entities/client.entity';
 import { Repository } from 'typeorm';
@@ -9,7 +9,7 @@ import { OnEvent } from "@nestjs/event-emitter";
 import { GlobalService } from "../../../globals/usecases/global.service"
 import { SendpluseService } from "src/external/sendpulse/sendpluse.service";
 import { format } from 'date-fns';
-import { MethodParamsRespLogger } from "src/decorator";
+import { DreamPointService } from "./dream-point.service";
 @Injectable()
 export class ClientService {
     private readonly log = new CustomLogger(ClientService.name);
@@ -18,7 +18,8 @@ export class ClientService {
         private readonly clientRepository: Repository<Client>,
         private readonly loanService: LoanService,
         private readonly globalService: GlobalService,
-        private readonly sendpulseService: SendpluseService
+        private readonly sendpulseService: SendpluseService,
+        private readonly dreamPointService: DreamPointService,
     ) { }
 
     async create(createClientAndLoanDto: CreateClientAndLoanDto): Promise<Client> {
@@ -123,6 +124,14 @@ export class ClientService {
             return { contract_form_url: encodeURI(JOTFORM_CONTRACT_URL) };
         } catch (error) {
             this.log.error(`CLIENT SERVICE: ERROR OCCURED WHILE RUNNING getContracturl:  ${error}`);
+        }
+    }
+
+    async refundDreamPoint(refundDreamPointDto: RefundDreamPointDto): Promise<any> {
+        try {
+            return await this.dreamPointService.refund(refundDreamPointDto);
+        } catch (error) {
+            this.log.error(`CLIENT SERVICE: ERROR OCCURED WHILE RUNNING refundDreamPoint:  ${error}`);
         }
     }
 }
