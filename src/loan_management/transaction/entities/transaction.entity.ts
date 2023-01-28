@@ -8,18 +8,26 @@ import {
 } from 'typeorm';
 
 import { Loan } from "../../loan/entities/loan.entity";
+import { Client } from 'src/loan_management/client/entities/client.entity';
 import { RepaymentSchedule } from "../../repayment_schedule/entities/repayment_schedule.entity";
 @Entity({ name: "transactions" })
 export class Transaction {
   @PrimaryColumn()
   id: string;
 
-  @Column()
+  @Column({ nullable: true })
   loan_id: string;
 
   @ManyToOne(() => Loan, loan => loan.transaction)
   @JoinColumn({ name: 'loan_id', referencedColumnName: 'id' })
   loan: Loan[];
+
+  @Column({ nullable: true })
+  client_id: string;
+
+  @ManyToOne(() => Client, client => client.transaction)
+  @JoinColumn({ name: 'client_id', referencedColumnName: 'id' })
+  client: Client[];
 
   @Column({ nullable: true })
   repayment_schedule_id: string;
