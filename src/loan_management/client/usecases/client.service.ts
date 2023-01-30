@@ -127,7 +127,7 @@ export class ClientService {
         }
     }
 
-    async refundDreamPoint(refundDreamPointDto: RefundDreamPointDto): Promise<any> {
+    async dreamPointRefund(refundDreamPointDto: RefundDreamPointDto): Promise<any> {
         try {
             return await this.dreamPointService.refund(refundDreamPointDto);
         } catch (error) {

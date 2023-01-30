@@ -24,7 +24,7 @@ export class DreamPointService {
     async refund(refundDreamPointDto: RefundDreamPointDto): Promise<any> {
         try {
             if (!refundDreamPointDto.amount) {
-                throw new BadRequestException('Amount is missing.');
+                throw new BadRequestException('Please Enter correct amount.');
             }
             const client = await this.clientRepository.findOneByOrFail(
                 { id: Equal(refundDreamPointDto.client_id) }
