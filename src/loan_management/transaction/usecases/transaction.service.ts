@@ -38,6 +38,7 @@ export class TransactionService {
         return transactions;
     }
 
+    //FIXME:  Remove this function when repayment process removed from loan service
     async getTotalPaidAmount(loan_id: string): Promise<number> {
         const total_paid_amount = (await this.transactionRepository.find({
             where: { loan_id: loan_id, type: this.globalService.TRANSACTION_TYPE.PARTIAL_PAYMENT },
@@ -46,17 +47,22 @@ export class TransactionService {
     }
 
     public async getLoanTotalPaidAmount(loan_id: string): Promise<number> {
-        const total_paid_amount = (await this.transactionRepository.find({
-            where: { loan_id: loan_id, type: this.globalService.TRANSACTION_TYPE.PARTIAL_PAYMENT },
-        })).reduce((acc, item) => acc = acc + item.amount, 0);
-        return total_paid_amount;
+        const paid_amount =
+            await this.transactionRepository.createQueryBuilder("transactions")
+                .select("SUM(transactions.amount)", "total")
+                .where("transactions.loan_id = :loan_id", { loan_id: loan_id })
+                .andWhere("transactions.type = :type", { type: this.globalService.TRANSACTION_TYPE.PARTIAL_PAYMENT })
+                .getRawOne();
+        return paid_amount.total;
     }
 
     public async getInstalmentTotalPaidAmount(repayment_schedule_id: string): Promise<number> {
-        const total_paid_amount = (await this.transactionRepository.find({
-            where: { repayment_schedule_id: repayment_schedule_id, type: this.globalService.TRANSACTION_TYPE.PARTIAL_PAYMENT },
-        })).reduce((acc, item) => acc = acc + item.amount, 0);
-        return total_paid_amount;
+        const paid_amount = await this.transactionRepository.createQueryBuilder("transactions")
+            .select("SUM(transactions.amount)", "total")
+            .where("transactions.repayment_schedule_id = :repayment_schedule_id", { repayment_schedule_id: repayment_schedule_id })
+            .andWhere("transactions.type = :type", { type: this.globalService.TRANSACTION_TYPE.PARTIAL_PAYMENT })
+            .getRawOne();
+        return paid_amount.total;
     }
 
 }
