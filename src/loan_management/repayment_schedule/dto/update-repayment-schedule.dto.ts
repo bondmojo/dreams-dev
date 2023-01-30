@@ -7,4 +7,5 @@ export class UpdateRepaymentScheduleDto {
   ins_overdue_amount: number;
   zoho_repayment_schedule_id: string;
   paid_date: Date;
+  total_paid_amount: number;
 }

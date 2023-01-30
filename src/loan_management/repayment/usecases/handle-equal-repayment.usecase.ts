@@ -16,7 +16,7 @@ export class HandleEqualRepaymentUsecase extends HandleRepaymentUsecase {
         const loan = await this.loanService.findOneForInternalUse({ id: processRepaymentDto.loan_id });
         const scheudle_instalment = await this.repaymentScheduleService.findOne({ loan_id: loan.id, scheduling_status: this.globalService.INSTALMENT_SCHEDULING_STATUS.SCHEDULED });
         await this.createTransactions(processRepaymentDto, scheudle_instalment);
-        await this.updateRepaymentSchedule(scheudle_instalment);
+        await this.updateRepaymentSchedule(scheudle_instalment, processRepaymentDto);
         await this.scheduleNextInstalment(scheudle_instalment, loan.id);
         await this.updateLoan(processRepaymentDto, loan);
     }
@@ -93,7 +93,7 @@ export class HandleEqualRepaymentUsecase extends HandleRepaymentUsecase {
 
     }
 
-    async updateRepaymentSchedule(scheudle_instalment: any) {
+    async updateRepaymentSchedule(scheudle_instalment: any, processRepaymentDto: ProcessRepaymentDto) {
         const repayment_status = this.calcInsPaymentStatus(scheudle_instalment);
         const updateRepaymentScheduleDto = new UpdateRepaymentScheduleDto();
         updateRepaymentScheduleDto.id = scheudle_instalment.id;
@@ -101,7 +101,7 @@ export class HandleEqualRepaymentUsecase extends HandleRepaymentUsecase {
         updateRepaymentScheduleDto.scheduling_status = this.globalService.INSTALMENT_SCHEDULING_STATUS.COMPLETED;
         updateRepaymentScheduleDto.ins_overdue_amount = 0;
         updateRepaymentScheduleDto.paid_date = new Date();
-
+        updateRepaymentScheduleDto.total_paid_amount = (Number(scheudle_instalment.total_paid_amount) + processRepaymentDto.amount);
         await this.repaymentScheduleService.update(updateRepaymentScheduleDto);
 
         let zohoKeyValuePairs: any = {};
@@ -111,7 +111,7 @@ export class HandleEqualRepaymentUsecase extends HandleRepaymentUsecase {
             Overdue_Amount: updateRepaymentScheduleDto.ins_overdue_amount,
             Last_Paid_Date: new Date(),
         };
-        zohoKeyValuePairs.Paid_Amount = await this.getInstallmentTotalPaidAmount(scheudle_instalment.id);
+        zohoKeyValuePairs.Paid_Amount = updateRepaymentScheduleDto.total_paid_amount;
         this.logger.log(`Updating Repayment Schedule On Zoho ${updateRepaymentScheduleDto.id} ${JSON.stringify(zohoKeyValuePairs)} ${this.globalService.ZOHO_MODULES.REPAYMENT_SCHEDULES}`);
         await this.zohoRepaymentHelperService.updateZohoFields(scheudle_instalment.zoho_repayment_schedule_id, zohoKeyValuePairs, this.globalService.ZOHO_MODULES.REPAYMENT_SCHEDULES);
     }
