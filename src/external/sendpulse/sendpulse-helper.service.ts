@@ -6,6 +6,7 @@ import { CalculateLoanDto } from "./dto/calculate-loan.dto";
 import { CalculateLoanResultDto } from "./dto/calculate-loan-result.dto";
 import { format, add } from 'date-fns'
 import { GlobalService } from "src/globals/usecases/global.service";
+import { DreamsCode, DreamsException } from "src/config/dreams-exception";
 
 @Injectable()
 export class SendpulseHelperService {
@@ -22,7 +23,14 @@ export class SendpulseHelperService {
         try {
             const amount = parseInt(calculateLoanDto.amount);
             const dreamsPoint = parseInt(calculateLoanDto.dreamPoints);
-            result.payableAmount = (amount + this.FEES).toString();
+            const tenure = parseInt(calculateLoanDto.tenure);
+            const tenure_type = calculateLoanDto.tenure_type;
+
+            if (tenure_type != this.globalService.LOAN_TENURE_TYPE['MONTHLY']) {
+                throw new DreamsException(DreamsCode.INVALID_DATA, "Tenure Type implementation required");
+            }
+
+            result.payableAmount = (amount + (this.FEES * tenure)).toString();
             result.receivableAmount = (amount - dreamsPoint).toString();
             result.fee = this.FEES.toString();
             result.is_success = "true";
