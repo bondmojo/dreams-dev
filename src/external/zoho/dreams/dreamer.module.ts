@@ -21,9 +21,10 @@ import { UpdateLoanPaymentDetailsUsecase } from "./zoho-loans/usecases/update-lo
 import { CreateZohoRepaymentScheduleUsecase } from "./repayment_schedule/create-repayment-schedule.usecase";
 import { ZohoRepaymentScheduleRepository } from "./repayment_schedule/repayment-schedule.repository";
 import { ZohoHelperService } from "./utility/zoho-helper.service";
+import { ZohoTaskController } from "./zoho-task.controller";
 @Module({
     imports: [SendpulseModule, ZohoModule, ShuftiModule, GlobalModule, ClientModule],
-    controllers: [DreamerController, DreamerLoanApplController],
+    controllers: [DreamerController, DreamerLoanApplController, ZohoTaskController],
     providers: [
         CreateDreamerUsecase,
         UpdatePaymentDetailsUsecase,
