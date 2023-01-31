@@ -3,7 +3,7 @@ import { ZohoTaskRequest } from 'src/external/zoho/dreams/task/zoho-task-request
 import { CustomLogger } from "../../../custom_logger";
 import { CreateZohoTaskUsecase } from './task/create-zoho-task.usecase';
 import { MethodParamsRespLogger } from 'src/decorator';
-@Controller('task')
+@Controller('/zoho/tasks')
 export class ZohoTaskController {
   private readonly logger = new CustomLogger(ZohoTaskController.name);
   constructor(
