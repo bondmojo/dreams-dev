@@ -37,8 +37,9 @@ export class CreateZohoTaskUsecase {
             if (!task.assign_to)
                 task.assign_to = this.global.DEFAULT_TASK_ASSIGNEE;
             task.status = "Not Started";
-            const id = await this.repository.createTask(task.dreamer_id, task);
             task.subject = task.subject + " | " + client?.full_en;
+
+            const id = await this.repository.createTask(task.dreamer_id, task);
 
             // Do other actions on behalf of type
             if (task?.type) {
