@@ -12,14 +12,14 @@ export class ZohoTaskController {
   ) { }
 
   //FIXME: Replace this with generic Task
-  @Post(':id/create_payment_recieved_task')
+  @Post(':dreamer_id/create_payment_recieved_task')
   @MethodParamsRespLogger(new CustomLogger(ZohoTaskController.name))
   async createPaymentTask(
-    @Param('id') id: string) {
+    @Param('dreamer_id') id: string) {
     return await this.createTaskUsecase.createPaymentRecievedTask(id);
   }
 
-  @Post(':id/create_ticket')
+  @Post(':dreamer_id/create_ticket')
   @MethodParamsRespLogger(new CustomLogger(ZohoTaskController.name))
   async createTask(
     @Body() zohoTask: ZohoTaskRequest) {
