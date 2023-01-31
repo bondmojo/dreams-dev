@@ -3,16 +3,15 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Cron } from '@nestjs/schedule';
 import { CustomLogger } from 'src/custom_logger';
 import { Loan } from '../entities/loan.entity';
-import { Repository, Not, LessThan } from 'typeorm';
-import { addDays, differenceInDays } from "date-fns";
-import { ClientReminderModel } from './reminder.model';
+import { Repository, Not, LessThan, Equal } from 'typeorm';
+import { addDays, } from "date-fns";
 import { ClientService } from '../../client/usecases/client.service';
 import { Client } from 'src/loan_management/client/entities/client.entity';
 import { SendpluseService } from 'src/external/sendpulse/sendpluse.service';
 import { RunFlowModel } from 'src/external/sendpulse/model/run-flow-model';
-import { GetClientDto } from 'src/loan_management/client/dto';
 import { GlobalService } from "../../../globals/usecases/global.service";
-
+import { RepaymentScheduleService } from 'src/loan_management/repayment_schedule/usecases/repayment_schedule.service';
+import { RepaymentSchedule } from 'src/loan_management/repayment_schedule/entities/repayment_schedule.entity';
 
 
 @Injectable()
@@ -24,7 +23,8 @@ export class PaymentReminderService {
     private readonly loanRepository: Repository<Loan>,
     private readonly clientService: ClientService,
     private readonly sendpulseService: SendpluseService,
-    private readonly globalService: GlobalService
+    private readonly globalService: GlobalService,
+    private readonly repaymentScheduleService: RepaymentScheduleService,
   ) { }
 
   async runCronApis(id: number) {
@@ -85,27 +85,27 @@ export class PaymentReminderService {
     else
       this.log.log("Running DAY Schedule for remaining Days =" + remainingDays);
 
-    let loansPromise;
+    let clients;
 
     if (remainingDays >= -3) {
       const remaining_days = addDays(today, remainingDays);
-      loansPromise = await this.fetchCustomersByDueDate(remaining_days);
+      clients = await this.getCustomersByInstalmentDueDate(remaining_days);
     }
     else {
       const remaining_days = addDays(today, remainingDays + 1);
-      loansPromise = await this.fetchOlderCustomers(remaining_days);
+      clients = await this.getCustomersWithDueDate4DayBefore(remaining_days);
     }
 
-    if (!loansPromise || loansPromise.length == 0) {
+    if (!clients || clients.length == 0) {
       this.log.log("NO Customer Reminder to be sent");
       return;
     }
 
-    loansPromise.forEach(loan => {
+    clients.forEach(async (client) => {
 
-      const sendpulseId = loan.client.sendpulse_id;
+      const sendpulseId = client.sendpulse_id;
       if (sendpulseId) {
-        let flow = new RunFlowModel();
+        const flow = new RunFlowModel();
         this.log.log("sendNotification ->sendpulse ID =" + sendpulseId);
         flow.contact_id = sendpulseId;
         flow.external_data = {};
@@ -155,28 +155,37 @@ export class PaymentReminderService {
               flow.flow_id = this.globalService.SENDPULSE_FLOW.REMINDER_FLOW_ID.OLDER_THAN_3DAYS;
             break;
         }
-        this.sendpulseService.runFlowV2(flow);
+
+        await this.sendpulseService.runFlowV2(flow);
       }
     });
   }
 
-  async fetchCustomersByDueDate(dueDate: Date): Promise<Loan[] | null> {
-    this.log.log("FETCHing Clients with Due date =" + dueDate);
-    let loanPromise = await this.loanRepository.find({
-      where: { repayment_date: dueDate, status: this.globalService.LOAN_STATUS.DISBURSED },
-      relations: ['client']
-    });
-    this.log.log("repayment_date loans=" + JSON.stringify(loanPromise));
-    return loanPromise;
+  async getCustomersByInstalmentDueDate(dueDate: Date): Promise<Client[] | null> {
+    this.log.log(`Fetching clients with Due date = ${dueDate}`);
+    const repayment_schedules = await this.repaymentScheduleService.find({
+      due_date: Equal(dueDate),
+      scheduling_status: this.globalService.INSTALMENT_SCHEDULING_STATUS.SCHEDULED,
+    }, ['client']
+    );
+
+    const clients = repayment_schedules.map((rs: Partial<RepaymentSchedule>) => rs.client);
+
+    this.log.log("Clients By Instalment Due Date =" + JSON.stringify(clients));
+    return clients;
   }
 
-  async fetchOlderCustomers(dueDate: Date): Promise<Loan[] | null> {
-    this.log.log("FETCHing Older Customers with Due date less than =" + dueDate);
-    let loanPromise = await this.loanRepository.find({
-      where: { repayment_date: LessThan(dueDate), status: this.globalService.LOAN_STATUS.DISBURSED },
-      relations: ['client']
-    });
-    this.log.log("OLDER CUSTOMER loans=" + JSON.stringify(loanPromise));
-    return loanPromise;
+
+  async getCustomersWithDueDate4DayBefore(dueDate: Date): Promise<Client[] | null> {
+    this.log.log(`Fetching Older Customers with Due date less than =  ${dueDate}`);
+    const repayment_schedules = await this.repaymentScheduleService.find({
+      due_date: LessThan(dueDate),
+      scheduling_status: this.globalService.INSTALMENT_SCHEDULING_STATUS.SCHEDULED,
+    }, ['client']
+    );
+
+    const clients = repayment_schedules.map((rs: RepaymentSchedule) => rs.client);
+    this.log.log("Older Customers with Due date less than " + JSON.stringify(repayment_schedules));
+    return clients;
   }
 }

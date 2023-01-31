@@ -2,7 +2,7 @@ import { ConsoleLogger, Injectable } from "@nestjs/common";
 import { InjectRepository } from '@nestjs/typeorm';
 import { CustomLogger } from "../../../custom_logger";
 import { RepaymentSchedule } from '../entities/repayment_schedule.entity';
-import { Repository } from 'typeorm';
+import { Repository, FindOptionsWhere } from 'typeorm';
 import { UpdateRepaymentScheduleDto } from '../dto';
 @Injectable()
 export class RepaymentScheduleService {
@@ -23,6 +23,14 @@ export class RepaymentScheduleService {
     async update(updateRepaymentScheduleDto: UpdateRepaymentScheduleDto) {
         this.log.log(`Updating Repayment Schedule with data ${JSON.stringify(updateRepaymentScheduleDto)}`);
         await this.repaymentScheduleRepository.update(updateRepaymentScheduleDto.id, updateRepaymentScheduleDto);
+    }
+
+    async find(fields: FindOptionsWhere<RepaymentSchedule>, relations: Array<string>): Promise<any> {
+        const installments = await this.repaymentScheduleRepository.find({
+            where: fields,
+            relations: relations,
+        });
+        return installments;
     }
 
 }
