@@ -9,6 +9,7 @@ import { DreamerModel } from '../dreamer/usecases/model/dreamer.model';
 import { SendpluseService } from '../../../sendpulse/sendpluse.service';
 import { ZohoTaskRepository } from "./zoho-task.repository";
 import { MethodParamsRespLogger } from "src/decorator";
+import { DreamsCode, DreamsException } from "src/config/dreams-exception";
 @Injectable()
 export class CreateZohoTaskUsecase {
     private readonly log = new CustomLogger(CreateZohoTaskUsecase.name);
@@ -47,6 +48,7 @@ export class CreateZohoTaskUsecase {
             return id;
         } catch (error) {
             this.log.error(`DREAMER: ERROR OCCURED WHILE RUNNING createTask:  ${error}`);
+            throw new DreamsException(DreamsCode.UNKNOWN_ERROR, error.message);
         }
     }
 
@@ -67,6 +69,7 @@ export class CreateZohoTaskUsecase {
             return id;
         } catch (error) {
             this.log.error(`DREAMER: ERROR OCCURED WHILE RUNNING createPaymentRecievedTask:  ${error}`);
+            throw new DreamsException(DreamsCode.UNKNOWN_ERROR, error.message);
         }
     }
 
