@@ -114,7 +114,7 @@ export class SendpluseService {
         return await this.setVariable(setVariableRequestDto);
     }
 
-    async createClientId(client: Client): Promise<string> {
+    async createClientId(client: Partial<Client>): Promise<string> {
         try {
             const variableDto = new SetVariableRequestDto();
             //Client ID Variable
