@@ -1,4 +1,4 @@
-import { ConsoleLogger, Injectable } from "@nestjs/common";
+import { ConsoleLogger, Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateClientAndLoanDto, CreateClientDto, GetClientDto, UpdateClientDto, RefundDreamPointDto } from "../dto";
 import { CustomLogger } from "../../../custom_logger";
@@ -9,7 +9,6 @@ import { OnEvent } from "@nestjs/event-emitter";
 import { GlobalService } from "../../../globals/usecases/global.service"
 import { SendpluseService } from "src/external/sendpulse/sendpluse.service";
 import { format } from 'date-fns';
-import { DreamPointService } from "./dream-point.service";
 @Injectable()
 export class ClientService {
     private readonly log = new CustomLogger(ClientService.name);
@@ -19,7 +18,6 @@ export class ClientService {
         private readonly loanService: LoanService,
         private readonly globalService: GlobalService,
         private readonly sendpulseService: SendpluseService,
-        private readonly dreamPointService: DreamPointService,
     ) { }
 
     async create(createClientAndLoanDto: CreateClientAndLoanDto): Promise<Client> {
@@ -71,8 +69,14 @@ export class ClientService {
     }
 
     @OnEvent('client.update')
-    async update(updateClientDto: UpdateClientDto) {
-        return await this.clientRepository.update(updateClientDto.id, updateClientDto);
+    async update(updateClientDto: Partial<Client>) {
+        const client = await this.findbyId(updateClientDto.id);
+        if (!client) {
+            throw new NotFoundException("Client Not Found");
+        }
+        Object.assign(client, updateClientDto);
+        const result = await this.clientRepository.save(client);
+        return result;
     }
 
     async getContracturl(clientId: string): Promise<Client[] | any> {
@@ -127,11 +131,4 @@ export class ClientService {
         }
     }
 
-    async dreamPointRefund(refundDreamPointDto: RefundDreamPointDto): Promise<any> {
-        try {
-            return await this.dreamPointService.refund(refundDreamPointDto);
-        } catch (error) {
-            this.log.error(`CLIENT SERVICE: ERROR OCCURED WHILE RUNNING refundDreamPoint:  ${error}`);
-        }
-    }
 }
