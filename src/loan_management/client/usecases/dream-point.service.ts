@@ -4,21 +4,19 @@ import { RefundDreamPointDto } from "../dto";
 import { CustomLogger } from "../../../custom_logger";
 import { Client } from '../entities/client.entity';
 import { Repository } from 'typeorm';
-import { LoanService } from "../../loan/usecases/loan.service";
 import { GlobalService } from "../../../globals/usecases/global.service"
 import { SendpluseService } from "src/external/sendpulse/sendpluse.service";
 import { Equal } from "typeorm"
 import { TransactionService } from "src/loan_management/transaction/usecases/transaction.service";
+import { ClientService } from "./client.service";
 @Injectable()
 export class DreamPointService {
     private readonly log = new CustomLogger(DreamPointService.name);
     constructor(
-        @InjectRepository(Client)
-        private readonly clientRepository: Repository<Client>,
-        private readonly loanService: LoanService,
         private readonly globalService: GlobalService,
         private readonly sendpulseService: SendpluseService,
-        private readonly transactionService: TransactionService
+        private readonly clientService: ClientService,
+        private readonly transactionService: TransactionService,
     ) { }
 
     async refund(refundDreamPointDto: RefundDreamPointDto): Promise<any> {
@@ -26,8 +24,8 @@ export class DreamPointService {
             if (!refundDreamPointDto.amount) {
                 throw new BadRequestException('Please Enter correct amount.');
             }
-            const client = await this.clientRepository.findOneByOrFail(
-                { id: Equal(refundDreamPointDto.client_id) }
+            const client = await this.clientService.findbyId(
+                refundDreamPointDto.client_id
             );
 
             const dream_points_earned = client.dream_points_earned;
@@ -54,9 +52,9 @@ export class DreamPointService {
                 // tier: 1,
                 dream_points_earned: dream_points_earned - refundDreamPointDto.amount,
             };
-            return await this.clientRepository.update(client.id, updateClientDto);
+            return await this.clientService.update(updateClientDto);
         } catch (error) {
-            this.log.error(`CLIENT SERVICE: ERROR OCCURED WHILE RUNNING refundDreamPoint:  ${error}`);
+            this.log.error(`DREAM POINT SERVICE: ERROR OCCURED WHILE RUNNING refundDreamPoint:  ${error}`);
         }
 
 
