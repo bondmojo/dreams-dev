@@ -34,9 +34,8 @@ export class HandleOverRepaymentUsecase extends HandleRepaymentUsecase {
         while (processRepaymentDto.amount > 0) {
             const scheudle_instalment = await this.repaymentScheduleService.findOne({ loan_id: loan.id, scheduling_status: this.globalService.INSTALMENT_SCHEDULING_STATUS.SCHEDULED });
             if (!scheudle_instalment && processRepaymentDto.amount > 0) {
-                // if NO schedule installment found & amount is extra    then store it in dream points. 
-                await this.createOverPaymentTransaction(processRepaymentDto.amount, processRepaymentDto, loan);
-                await this.addOverPayAmountInDreamPoints(processRepaymentDto.amount, processRepaymentDto, loan);
+                // if NO schedule installment found & amount is extra  then store it in dream points. 
+                await this.handleExtraPayment(processRepaymentDto.amount, processRepaymentDto, loan);
                 processRepaymentDto.amount = 0;
             }
             else if (processRepaymentDto.amount >= scheudle_instalment.ins_overdue_amount) {
@@ -60,10 +59,15 @@ export class HandleOverRepaymentUsecase extends HandleRepaymentUsecase {
         }
     }
 
-    async createOverPaymentTransaction(over_pay_amount: number, processRepaymentDto: any, loan: Loan) {
+    async handleExtraPayment(extra_amount: number, processRepaymentDto: any, loan: Loan) {
+        await this.createExtraPaymentTransactions(extra_amount, processRepaymentDto, loan);
+        await this.addExtraAmountInDreamPoints(extra_amount, processRepaymentDto, loan);
+    }
+
+    async createExtraPaymentTransactions(extra_amount: number, processRepaymentDto: any, loan: Loan) {
         const createAdditionalFeeTxnDto = {
             loan_id: loan.id,
-            amount: over_pay_amount,
+            amount: extra_amount,
             image: processRepaymentDto.image,
             type: this.globalService.INSTALMENT_TRANSACTION_TYPE.OVER_PAYMENT,
             note: processRepaymentDto.note,
@@ -71,9 +75,20 @@ export class HandleOverRepaymentUsecase extends HandleRepaymentUsecase {
         await this.transactionService.create(createAdditionalFeeTxnDto);
     }
 
-    async addOverPayAmountInDreamPoints(over_pay_amount: number, processRepaymentDto: ProcessRepaymentDto, loan: Loan) {
+    async addExtraAmountInDreamPoints(extra_amount: number, processRepaymentDto: ProcessRepaymentDto, loan: Loan) {
+        // Create Dream Point Earned Transaction
+        const createAdditionalFeeTxnDto = {
+            loan_id: loan.id,
+            amount: extra_amount,
+            image: processRepaymentDto.image,
+            type: this.globalService.INSTALMENT_TRANSACTION_TYPE.DREAM_POINT_EARNED,
+            note: processRepaymentDto.note,
+        };
+        await this.transactionService.create(createAdditionalFeeTxnDto);
+
+        // Added Extra Amount in Client Dream Points
         const client = await this.clientService.findbyId(loan.client.id);
-        const dream_point_earned = client.dream_points_earned + over_pay_amount;
+        const dream_point_earned = client.dream_points_earned + extra_amount;
         const updateClientDto = new UpdateClientDto()
         updateClientDto.id = client.id;
         updateClientDto.dream_points_earned = dream_point_earned;
