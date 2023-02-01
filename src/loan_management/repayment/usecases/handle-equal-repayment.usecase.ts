@@ -60,17 +60,18 @@ export class HandleEqualRepaymentUsecase extends HandleRepaymentUsecase {
     async updateClientAfterFullyPaid(processRepaymentDto: ProcessRepaymentDto, loan: Loan) {
         const client_new_tier = +loan?.client?.tier + 1;
         const dream_point_earned = loan?.client?.dream_points_earned + loan?.dream_point;
-        const dream_point_committed = loan?.client?.dream_points_committed - loan?.dream_point;
+        let dream_point_committed = loan?.client?.dream_points_committed - loan?.dream_point;
 
-        if (dream_point_committed >= 0) {
-            const updateClientDto = new UpdateClientDto()
-            updateClientDto.id = loan?.client?.id;
-            updateClientDto.tier = '' + client_new_tier;
-            updateClientDto.dream_points_earned = dream_point_earned;
-            updateClientDto.dream_points_committed = dream_point_committed
+        // Make dream point commited to zero if its values is negative
+        dream_point_committed = dream_point_committed < 0 ? 0 : dream_point_committed;
+        const updateClientDto = new UpdateClientDto()
+        updateClientDto.id = loan?.client?.id;
+        updateClientDto.tier = '' + client_new_tier;
+        updateClientDto.dream_points_earned = dream_point_earned;
+        updateClientDto.dream_points_committed = dream_point_committed
 
-            await this.clientService.update(updateClientDto);
-        }
+        await this.clientService.update(updateClientDto);
+
         return;
     }
 
@@ -101,7 +102,7 @@ export class HandleEqualRepaymentUsecase extends HandleRepaymentUsecase {
         updateRepaymentScheduleDto.scheduling_status = this.globalService.INSTALMENT_SCHEDULING_STATUS.COMPLETED;
         updateRepaymentScheduleDto.ins_overdue_amount = 0;
         updateRepaymentScheduleDto.paid_date = new Date();
-        updateRepaymentScheduleDto.total_paid_amount = (Number(scheudle_instalment.total_paid_amount) + processRepaymentDto.amount);
+        updateRepaymentScheduleDto.total_paid_amount = (Number(scheudle_instalment.total_paid_amount) + Number(processRepaymentDto.amount));
         await this.repaymentScheduleService.update(updateRepaymentScheduleDto);
 
         let zohoKeyValuePairs: any = {};
@@ -111,7 +112,7 @@ export class HandleEqualRepaymentUsecase extends HandleRepaymentUsecase {
             Overdue_Amount: updateRepaymentScheduleDto.ins_overdue_amount,
             Last_Paid_Date: new Date(),
         };
-        zohoKeyValuePairs.Paid_Amount = updateRepaymentScheduleDto.total_paid_amount;
+        zohoKeyValuePairs.Paid_Amount = Number(updateRepaymentScheduleDto.total_paid_amount);
         this.logger.log(`Updating Repayment Schedule On Zoho ${updateRepaymentScheduleDto.id} ${JSON.stringify(zohoKeyValuePairs)} ${this.globalService.ZOHO_MODULES.REPAYMENT_SCHEDULES}`);
         await this.zohoRepaymentHelperService.updateZohoFields(scheudle_instalment.zoho_repayment_schedule_id, zohoKeyValuePairs, this.globalService.ZOHO_MODULES.REPAYMENT_SCHEDULES);
     }

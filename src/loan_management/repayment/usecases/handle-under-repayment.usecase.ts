@@ -44,7 +44,7 @@ export class HandleUnderRepaymentUsecase extends HandleRepaymentUsecase {
         updateRepaymentScheduleDto.id = scheudle_instalment.id;
         updateRepaymentScheduleDto.repayment_status = this.globalService.INSTALMENT_PAYMENT_STATUS.PARTIAL_PAID;
         updateRepaymentScheduleDto.ins_overdue_amount = scheudle_instalment.ins_overdue_amount - processRepaymentDto.amount;
-        updateRepaymentScheduleDto.total_paid_amount = (Number(scheudle_instalment.total_paid_amount) + processRepaymentDto.amount);
+        updateRepaymentScheduleDto.total_paid_amount = (Number(scheudle_instalment.total_paid_amount) + Number(processRepaymentDto.amount));
         await this.repaymentScheduleService.update(updateRepaymentScheduleDto);
 
         let zohoKeyValuePairs: any = {};
@@ -53,7 +53,7 @@ export class HandleUnderRepaymentUsecase extends HandleRepaymentUsecase {
             Overdue_Amount: updateRepaymentScheduleDto.ins_overdue_amount,
             Last_Paid_Date: new Date(),
         };
-        zohoKeyValuePairs.Paid_Amount = updateRepaymentScheduleDto.total_paid_amount;
+        zohoKeyValuePairs.Paid_Amount = Number(updateRepaymentScheduleDto.total_paid_amount);
         this.logger.log(`Updating Repayment Schedule On Zoho ${updateRepaymentScheduleDto.id} ${JSON.stringify(zohoKeyValuePairs)} ${this.globalService.ZOHO_MODULES.REPAYMENT_SCHEDULES}`);
         await this.zohoRepaymentHelperService.updateZohoFields(scheudle_instalment.zoho_repayment_schedule_id, zohoKeyValuePairs, this.globalService.ZOHO_MODULES.REPAYMENT_SCHEDULES);
 
