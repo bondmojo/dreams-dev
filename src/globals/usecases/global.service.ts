@@ -113,7 +113,8 @@ export class GlobalService {
         return 2.00;
     }
 
-    public readonly BASE_RETOOL_URL = this.isDev ? "https://gojo.retool.com/apps/ed171e5c-250d-11ed-b962-9fea298077ce/CBS?_environment=staging&_releaseVersion=latest" : "https://gojo.retool.com/apps/ed171e5c-250d-11ed-b962-9fea298077ce/CBS?_environment=production&_releaseVersion=latest";
+    private readonly BASE_DREAMS_RETOOL_URL = "https://gojo.retool.com/apps/abfc2eda-80ed-11ed-b001-179efcd7af36/Dreams_App/Dreams-Devhttps://gojo.retool.com/apps/abfc2eda-80ed-11ed-b001-179efcd7af36/Dreams";
+    public readonly DREAMS_RETOOL_URL = this.isDev ? this.BASE_DREAMS_RETOOL_URL + "/App-Dev/CBS?_environment=staging&_releaseVersion=latest" : this.BASE_DREAMS_RETOOL_URL + "/App-Production/CBS?_environment=production&_releaseVersion=latest";
     public readonly BASE_SENDPULSE_URL = this.isDev ? "https://login.sendpulse.com/messengers/chats/62bad9dd3ceed143a323bc5f/contacts/all/" : "https://login.sendpulse.com/messengers/chats/63087d88e330bc7fb767d166/contacts/all/";
 
     public readonly DEFAULT_TASK_ASSIGNEE = this.isDev ? "mohit.joshi@gojo.co" : "kalyana.phal@gojo.co";

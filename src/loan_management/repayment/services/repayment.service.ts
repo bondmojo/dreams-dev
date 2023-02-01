@@ -2,6 +2,7 @@ import { ProcessRepaymentDto } from "../dto";
 import { Injectable } from "@nestjs/common";
 import { CustomLogger } from "../../../custom_logger";
 import { GetHandleRepaymentFactory } from "../factory/get-handle-repayment.factory";
+import { HandleRepaymentUsecase } from "../usecases/handle-repayment.usecase";
 @Injectable()
 export class RepaymentService {
     private readonly logger = new CustomLogger(RepaymentService.name);
@@ -13,7 +14,7 @@ export class RepaymentService {
     async process(processRepaymentDto: ProcessRepaymentDto): Promise<any> {
         try {
 
-            const handle_repayment_obj = await this.getHandleRepaymentFactory.create(processRepaymentDto);
+            const handle_repayment_obj: HandleRepaymentUsecase = await this.getHandleRepaymentFactory.create(processRepaymentDto);
             handle_repayment_obj.process(processRepaymentDto);
 
         } catch (error) {

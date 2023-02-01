@@ -126,7 +126,7 @@ export class LoanService {
             zohoLoanDto.loan_fee = createLoanDto.loan_fee;
             zohoLoanDto.outstanding_amount = createLoanDto.outstanding_amount;
             zohoLoanDto.sendpulse_url = this.globalService.BASE_SENDPULSE_URL + createLoanDto?.sendpulse_id;
-            zohoLoanDto.retool_url = this.globalService.BASE_RETOOL_URL + "#customer_id=" + createLoanDto?.client_id;;
+            zohoLoanDto.retool_url = this.globalService.DREAMS_RETOOL_URL + "#customer_id=" + createLoanDto?.client_id;;
             return await this.dreamerCreateLoanService.create(zohoLoanDto);
         } catch (error) {
             this.log.error(`LOAN SERVICE: ERROR OCCURED WHILE RUNNING createLoanInZoho:  ${error}`);
