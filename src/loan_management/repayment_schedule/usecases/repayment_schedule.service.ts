@@ -30,7 +30,6 @@ export class RepaymentScheduleService {
     }
 
     async find(fields: FindOptionsWhere<RepaymentSchedule>, relations: Array<string> = []): Promise<any> {
-        console
         const installments = await this.repaymentScheduleRepository.find({
             where: fields,
             relations: relations,
