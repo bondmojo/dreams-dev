@@ -36,7 +36,7 @@ export class ZohoTaskRepository {
         taskRecord.addFieldValue(Field.Tasks.OWNER, user);
 
         if (taskDetails?.dreamservice_customer_id) {
-            const retoolUrl = this.globalService.BASE_RETOOL_URL + "#customer_id=" + taskDetails?.dreamservice_customer_id;
+            const retoolUrl = this.globalService.DREAMS_RETOOL_URL + "#customer_id=" + taskDetails?.dreamservice_customer_id;
             taskRecord.addFieldValue(Field.Tasks.DESCRIPTION, retoolUrl);
             this.log.log(`createTask. Retool URL = ${retoolUrl}`);
         }

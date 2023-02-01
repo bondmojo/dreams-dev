@@ -7,6 +7,7 @@ import { HandleOverRepaymentUsecase } from "../usecases/handle-over-repayment.us
 import { HandleEqualRepaymentUsecase } from "../usecases/handle-equal-repayment.usecase";
 import { HandleUnderRepaymentUsecase } from "../usecases/handle-under-repayment.usecase";
 import { RepaymentScheduleService } from "src/loan_management/repayment_schedule/usecases/repayment_schedule.service";
+import { HandleRepaymentUsecase } from "../usecases/handle-repayment.usecase";
 @Injectable()
 export class GetHandleRepaymentFactory {
     private readonly logger = new CustomLogger(GetHandleRepaymentFactory.name);
@@ -20,7 +21,7 @@ export class GetHandleRepaymentFactory {
         private readonly handleOverRepaymentUsecase: HandleOverRepaymentUsecase,
     ) { }
 
-    async create(processRepaymentDto: ProcessRepaymentDto): Promise<any> {
+    async create(processRepaymentDto: ProcessRepaymentDto): Promise<HandleRepaymentUsecase> {
         const loan = await this.loanService.findOneForInternalUse({ id: processRepaymentDto.loan_id });
         const scheudle_instalment = await this.repaymentScheduleService.findOne({ loan_id: loan.id, scheduling_status: this.globalService.INSTALMENT_SCHEDULING_STATUS.SCHEDULED });
 
