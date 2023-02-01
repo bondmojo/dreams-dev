@@ -22,6 +22,9 @@ export class DreamsCode {
 
 
     public static readonly INVALID_LOAN_STATUS = 5;
+    public static readonly INVALID_DATA = 100;
+    public static readonly UNKNOWN_ERROR = 1000;
+
 
 
 }
