@@ -10,8 +10,9 @@ import { GlobalService } from "../../../globals/usecases/global.service"
 import { SendpluseService } from "src/external/sendpulse/sendpluse.service";
 import { ZohoLoanHelperService } from "./zoho-loan-helper.service";
 import { Choice } from "@zohocrm/typescript-sdk-2.0/utils/util/choice";
-import { differenceInCalendarDays, compareAsc, startOfDay, addDays } from "date-fns"
+import { differenceInCalendarDays, compareAsc, startOfDay, addDays, add } from "date-fns"
 import { MethodParamsRespLogger } from "src/decorator";
+
 @Injectable()
 export class LoanHelperService {
     private readonly log = new CustomLogger(LoanHelperService.name);
@@ -76,14 +77,37 @@ export class LoanHelperService {
     async updateLoanDataAfterDisbursement(loan: Loan, disbursedLoanDto: DisbursedLoanDto) {
         const today = new Date(); // current time
 
+        /**
+         * FIXME: this tenure should support in weekly and other payments also
+         * Update repayment date here becuase the previous repayment date is old as its assign when loan was created
+         * and there is high chances that loan disburment date is different then loan creation date
+         *  */
+
+        const repayment_date = add(today, { months: loan.tenure }); // today + tenure_in_months
+
         const fields_to_be_update: object = {
             wing_code: disbursedLoanDto.wing_code,
+            repayment_date: repayment_date,
             disbursed_date: today,
             status: this.globalService.LOAN_STATUS.DISBURSED,
         }
 
         this.log.log(`Updating loan with data ${JSON.stringify(fields_to_be_update)}`);
         return await this.loanRepository.update(loan.id, fields_to_be_update);
+    }
+
+    async updateZohoDataAfterDisbursement(loan: Loan, disbursedLoanDto: DisbursedLoanDto) {
+        const updated_loan = await this.loanRepository.findOne({
+            where: { id: loan.id }
+        });
+        const zohoKeyValuePairs = {
+            Loan_Status: new Choice(this.globalService.ZOHO_LOAN_STATUS.DISBURSED),
+            Disbursal_Date: new Date(),
+            Repayment_Date: new Date(updated_loan.repayment_date),
+            Payment_Status: new Choice(this.globalService.LOAN_PAYMENT_STATUS.PENDING),
+        };
+        await this.zohoLoanHelperService.updateZohoFields(loan.zoho_loan_id, zohoKeyValuePairs, this.globalService.ZOHO_MODULES.LOAN);
+
     }
 
     //The Zoho loan ID is updated, once loan is created in zoho 

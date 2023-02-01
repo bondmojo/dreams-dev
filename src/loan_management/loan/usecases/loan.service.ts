@@ -221,13 +221,7 @@ export class LoanService {
             await this.loanHelperService.createCreditDisbursementTransaction(loan, disbursedLoanDto);
             await this.loanHelperService.checkAndCreateWingTransferFeeTransaction(loan, disbursedLoanDto);
             await this.loanHelperService.updateLoanDataAfterDisbursement(loan, disbursedLoanDto);
-            const zohoKeyValuePairs = {
-                Loan_Status: new Choice(this.globalService.ZOHO_LOAN_STATUS.DISBURSED),
-                Disbursal_Date: new Date(),
-                Repayment_Date: new Date(loan.repayment_date),
-                Payment_Status: new Choice(this.globalService.LOAN_PAYMENT_STATUS.PENDING),
-            };
-            await this.zohoLoanHelperService.updateZohoFields(loan.zoho_loan_id, zohoKeyValuePairs, this.globalService.ZOHO_MODULES.LOAN);
+            await this.loanHelperService.updateZohoDataAfterDisbursement(loan, disbursedLoanDto);
 
             const crpSch = new CreateRepaymentScheduleDto();
             crpSch.client_id = loan.client_id;
