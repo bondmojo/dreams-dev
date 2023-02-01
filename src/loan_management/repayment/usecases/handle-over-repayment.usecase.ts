@@ -31,8 +31,13 @@ export class HandleOverRepaymentUsecase extends HandleRepaymentUsecase {
 
     async process(processRepaymentDto: ProcessRepaymentDto): Promise<any> {
         const loan = await this.loanService.findOneForInternalUse({ id: processRepaymentDto.loan_id });
+        this.createTransactions(processRepaymentDto);
+
         while (processRepaymentDto.amount > 0) {
             const scheudle_instalment = await this.repaymentScheduleService.findOne({ loan_id: loan.id, scheduling_status: this.globalService.INSTALMENT_SCHEDULING_STATUS.SCHEDULED });
+            // Do not create partial payment transaction in equal & under payment process as we are already creating it in overpayment usecase.
+            const doCreatePartialPaymentTransaction = false;
+
             if (!scheudle_instalment && processRepaymentDto.amount > 0) {
                 // if NO schedule installment found & amount is extra  then store it in dream points. 
                 await this.handleExtraPayment(processRepaymentDto.amount, processRepaymentDto, loan);
@@ -44,7 +49,7 @@ export class HandleOverRepaymentUsecase extends HandleRepaymentUsecase {
                 equalPaymentProcessDto.amount = scheudle_instalment.ins_overdue_amount;
                 equalPaymentProcessDto.image = processRepaymentDto.image;
                 equalPaymentProcessDto.note = processRepaymentDto.note;
-                await this.handleEqualPaymentUsecase.process(equalPaymentProcessDto);
+                await this.handleEqualPaymentUsecase.process(equalPaymentProcessDto, doCreatePartialPaymentTransaction);
                 processRepaymentDto.amount = processRepaymentDto.amount - scheudle_instalment.ins_overdue_amount;
 
             } else if (processRepaymentDto.amount < scheudle_instalment.ins_overdue_amount) {
@@ -53,7 +58,7 @@ export class HandleOverRepaymentUsecase extends HandleRepaymentUsecase {
                 underPaymentProcessDto.amount = processRepaymentDto.amount;
                 underPaymentProcessDto.image = processRepaymentDto.image;
                 underPaymentProcessDto.note = processRepaymentDto.note;
-                await this.handleUnderRepaymentUsecase.process(underPaymentProcessDto);
+                await this.handleUnderRepaymentUsecase.process(underPaymentProcessDto, doCreatePartialPaymentTransaction);
                 processRepaymentDto.amount = 0;
             }
         }
@@ -94,5 +99,17 @@ export class HandleOverRepaymentUsecase extends HandleRepaymentUsecase {
         updateClientDto.dream_points_earned = dream_point_earned;
         await this.clientService.update(updateClientDto);
         return;
+    }
+
+    async createTransactions(processRepaymentDto: any) {
+        // Partial Paid Transaction
+        // It doesn't have instalment_id as it's not a part of any instalment
+        const createPartialPaidTxnDto = {
+            loan_id: processRepaymentDto.loan_id,
+            amount: processRepaymentDto.amount,
+            image: processRepaymentDto.image,
+            type: this.globalService.INSTALMENT_TRANSACTION_TYPE.PARTIAL_PAYMENT,
+        };
+        await this.transactionService.create(createPartialPaidTxnDto);
     }
 }

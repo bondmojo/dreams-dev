@@ -10,10 +10,10 @@ import { UpdateLoanDto } from "src/loan_management/loan/dto/update-loan.dto";
 export class HandleUnderRepaymentUsecase extends HandleRepaymentUsecase {
     private readonly logger = new CustomLogger(HandleUnderRepaymentUsecase.name);
 
-    async process(processRepaymentDto: ProcessRepaymentDto): Promise<any> {
+    async process(processRepaymentDto: ProcessRepaymentDto, doCreatePartialPaymentTransaction = true): Promise<any> {
         const loan = await this.loanService.findOneForInternalUse({ id: processRepaymentDto.loan_id });
         const scheudle_instalment = await this.repaymentScheduleService.findOne({ loan_id: loan.id, scheduling_status: this.globalService.INSTALMENT_SCHEDULING_STATUS.SCHEDULED });
-        await this.createTransactions(processRepaymentDto, scheudle_instalment);
+        await this.createTransactions(processRepaymentDto, scheudle_instalment, doCreatePartialPaymentTransaction);
         await this.updateRepaymentSchedule(scheudle_instalment, processRepaymentDto);
         await this.updateLoan(processRepaymentDto, loan);
     }
@@ -59,15 +59,17 @@ export class HandleUnderRepaymentUsecase extends HandleRepaymentUsecase {
 
     }
 
-    async createTransactions(processRepaymentDto: any, scheudle_instalment: any) {
+    async createTransactions(processRepaymentDto: any, scheudle_instalment: any, doCreatePartialPaymentTransaction: boolean) {
         // Partial Paid Transaction
-        const createPartialPaidTxnDto = {
-            loan_id: processRepaymentDto.loan_id,
-            repayment_schedule_id: scheudle_instalment.id,
-            amount: processRepaymentDto.amount,
-            image: processRepaymentDto.image,
-            type: this.globalService.INSTALMENT_TRANSACTION_TYPE.PARTIAL_PAYMENT,
-        };
-        await this.transactionService.create(createPartialPaidTxnDto);
+        if (doCreatePartialPaymentTransaction) {
+            const createPartialPaidTxnDto = {
+                loan_id: processRepaymentDto.loan_id,
+                repayment_schedule_id: scheudle_instalment.id,
+                amount: processRepaymentDto.amount,
+                image: processRepaymentDto.image,
+                type: this.globalService.INSTALMENT_TRANSACTION_TYPE.PARTIAL_PAYMENT,
+            };
+            await this.transactionService.create(createPartialPaidTxnDto);
+        }
     }
 }
