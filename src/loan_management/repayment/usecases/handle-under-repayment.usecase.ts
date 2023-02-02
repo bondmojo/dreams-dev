@@ -13,7 +13,7 @@ export class HandleUnderRepaymentUsecase extends HandleRepaymentUsecase {
     async process(processRepaymentDto: ProcessRepaymentDto, doCreatePartialPaymentTransaction = true): Promise<any> {
         const loan = await this.loanService.findOneForInternalUse({ id: processRepaymentDto.loan_id });
         const scheudle_instalment = await this.repaymentScheduleService.findOne({ loan_id: loan.id, scheduling_status: this.globalService.INSTALMENT_SCHEDULING_STATUS.SCHEDULED });
-        await this.createTransactions(processRepaymentDto, scheudle_instalment, doCreatePartialPaymentTransaction);
+        await this.createTransactions(processRepaymentDto, scheudle_instalment, loan, doCreatePartialPaymentTransaction);
         await this.updateRepaymentSchedule(scheudle_instalment, processRepaymentDto);
         await this.updateLoan(processRepaymentDto, loan);
     }
@@ -59,12 +59,13 @@ export class HandleUnderRepaymentUsecase extends HandleRepaymentUsecase {
 
     }
 
-    async createTransactions(processRepaymentDto: any, scheudle_instalment: any, doCreatePartialPaymentTransaction: boolean) {
+    async createTransactions(processRepaymentDto: any, scheudle_instalment: any, loan: Loan, doCreatePartialPaymentTransaction: boolean) {
         // Partial Paid Transaction
         if (doCreatePartialPaymentTransaction) {
             const createPartialPaidTxnDto = {
                 loan_id: processRepaymentDto.loan_id,
                 repayment_schedule_id: scheudle_instalment.id,
+                client_id: loan.client_id,
                 amount: processRepaymentDto.amount,
                 image: processRepaymentDto.image,
                 type: this.globalService.INSTALMENT_TRANSACTION_TYPE.PARTIAL_PAYMENT,

@@ -15,7 +15,7 @@ export class HandleEqualRepaymentUsecase extends HandleRepaymentUsecase {
     async process(processRepaymentDto: ProcessRepaymentDto, doCreatePartialPaymentTransaction = true): Promise<any> {
         const loan = await this.loanService.findOneForInternalUse({ id: processRepaymentDto.loan_id });
         const scheudle_instalment = await this.repaymentScheduleService.findOne({ loan_id: loan.id, scheduling_status: this.globalService.INSTALMENT_SCHEDULING_STATUS.SCHEDULED });
-        await this.createTransactions(processRepaymentDto, scheudle_instalment, doCreatePartialPaymentTransaction);
+        await this.createTransactions(processRepaymentDto, scheudle_instalment, loan, doCreatePartialPaymentTransaction);
         await this.updateRepaymentSchedule(scheudle_instalment, processRepaymentDto);
         await this.scheduleNextInstalment(scheudle_instalment, loan.id);
         await this.updateLoan(processRepaymentDto, loan);
@@ -128,12 +128,13 @@ export class HandleEqualRepaymentUsecase extends HandleRepaymentUsecase {
         return this.globalService.INSTALMENT_PAYMENT_STATUS.PAID_ON_TIME;
     }
 
-    async createTransactions(processRepaymentDto: any, scheudle_instalment: any, doCreatePartialPaymentTransaction: boolean) {
+    async createTransactions(processRepaymentDto: any, scheudle_instalment: any, loan: Loan, doCreatePartialPaymentTransaction: boolean) {
         // Partial Paid Transaction
         if (doCreatePartialPaymentTransaction) {
             const createPartialPaidTxnDto = {
                 loan_id: processRepaymentDto.loan_id,
                 repayment_schedule_id: scheudle_instalment.id,
+                client_id: loan.client_id,
                 amount: processRepaymentDto.amount,
                 image: processRepaymentDto.image,
                 type: this.globalService.INSTALMENT_TRANSACTION_TYPE.PARTIAL_PAYMENT,
@@ -145,6 +146,7 @@ export class HandleEqualRepaymentUsecase extends HandleRepaymentUsecase {
         const createCreditRepaymentTxnDto = {
             loan_id: processRepaymentDto.loan_id,
             repayment_schedule_id: scheudle_instalment.id,
+            client_id: loan.client_id,
             amount: scheudle_instalment.ins_principal_amount,
             image: processRepaymentDto.image,
             type: this.globalService.INSTALMENT_TRANSACTION_TYPE.CREDIT_REPAYMENT,
@@ -155,6 +157,7 @@ export class HandleEqualRepaymentUsecase extends HandleRepaymentUsecase {
         const createInstalmentFeeTxnDto = {
             loan_id: processRepaymentDto.loan_id,
             repayment_schedule_id: scheudle_instalment.id,
+            client_id: loan.client_id,
             amount: scheudle_instalment.ins_membership_fee,
             image: processRepaymentDto.image,
             type: this.globalService.INSTALMENT_TRANSACTION_TYPE.FEE_PAYMENT,
@@ -166,6 +169,7 @@ export class HandleEqualRepaymentUsecase extends HandleRepaymentUsecase {
             const createAdditionalFeeTxnDto = {
                 loan_id: processRepaymentDto.loan_id,
                 repayment_schedule_id: scheudle_instalment.id,
+                client_id: loan.client_id,
                 amount: scheudle_instalment.ins_additional_fee,
                 image: processRepaymentDto.image,
                 type: this.globalService.INSTALMENT_TRANSACTION_TYPE.ADDITIONAL_FEE,
@@ -179,6 +183,7 @@ export class HandleEqualRepaymentUsecase extends HandleRepaymentUsecase {
         const createAdditionalFeeTxnDto = {
             loan_id: loan.id,
             amount: loan.dream_point,
+            client_id: loan.client_id,
             image: processRepaymentDto.image,
             type: this.globalService.INSTALMENT_TRANSACTION_TYPE.DREAM_POINT_EARNED,
             note: processRepaymentDto.note,

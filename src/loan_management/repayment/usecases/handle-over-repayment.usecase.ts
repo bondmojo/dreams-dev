@@ -31,7 +31,7 @@ export class HandleOverRepaymentUsecase extends HandleRepaymentUsecase {
 
     async process(processRepaymentDto: ProcessRepaymentDto): Promise<any> {
         const loan = await this.loanService.findOneForInternalUse({ id: processRepaymentDto.loan_id });
-        this.createTransactions(processRepaymentDto);
+        this.createTransactions(processRepaymentDto, loan);
 
         while (processRepaymentDto.amount > 0) {
             const scheudle_instalment = await this.repaymentScheduleService.findOne({ loan_id: loan.id, scheduling_status: this.globalService.INSTALMENT_SCHEDULING_STATUS.SCHEDULED });
@@ -73,6 +73,7 @@ export class HandleOverRepaymentUsecase extends HandleRepaymentUsecase {
         const createAdditionalFeeTxnDto = {
             loan_id: loan.id,
             amount: extra_amount,
+            client_id: loan.client_id,
             image: processRepaymentDto.image,
             type: this.globalService.INSTALMENT_TRANSACTION_TYPE.OVER_PAYMENT,
             note: processRepaymentDto.note,
@@ -85,6 +86,7 @@ export class HandleOverRepaymentUsecase extends HandleRepaymentUsecase {
         const createAdditionalFeeTxnDto = {
             loan_id: loan.id,
             amount: extra_amount,
+            client_id: loan.client_id,
             image: processRepaymentDto.image,
             type: this.globalService.INSTALMENT_TRANSACTION_TYPE.DREAM_POINT_EARNED,
             note: processRepaymentDto.note,
@@ -101,11 +103,12 @@ export class HandleOverRepaymentUsecase extends HandleRepaymentUsecase {
         return;
     }
 
-    async createTransactions(processRepaymentDto: any) {
+    async createTransactions(processRepaymentDto: any, loan: Loan) {
         // Partial Paid Transaction
         // It doesn't have instalment_id as it's not a part of any instalment
         const createPartialPaidTxnDto = {
             loan_id: processRepaymentDto.loan_id,
+            client_id: loan.client_id,
             amount: processRepaymentDto.amount,
             image: processRepaymentDto.image,
             type: this.globalService.INSTALMENT_TRANSACTION_TYPE.PARTIAL_PAYMENT,

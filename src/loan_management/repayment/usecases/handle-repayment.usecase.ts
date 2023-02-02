@@ -38,7 +38,7 @@ export abstract class HandleRepaymentUsecase {
         const first_repayment_date = (last_instalment.previous_repayment_dates && last_instalment.previous_repayment_dates.length) ? last_instalment.previous_repayment_dates[0] : last_instalment.due_date;
         const grace_repayment_date = addDays(new Date(first_repayment_date), this.globalService.INSTALMENT_GRACE_PERIOD_DAYS);
         const paid_date = new Date(last_instalment.paid_date);
-        // payment status is late if paid_date is greater then grace repayment date
+        // payment status is late if instalment paid_date is greater then grace repayment date
         if (compareAsc(startOfDay(paid_date), grace_repayment_date) == 1) {
             return this.globalService.LOAN_PAYMENT_STATUS.PAID_LATE;
         }
