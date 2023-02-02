@@ -30,6 +30,7 @@ export class LoanHelperService {
         const createTransactionDto = {
             loan_id: createLoanDto.id,
             amount: createLoanDto.dream_point,
+            client_id: createLoanDto.client_id,
             type: this.globalService.TRANSACTION_TYPE.DREAM_POINT_COMMITMENT,
         };
         const transaction = await this.transactionService.create(createTransactionDto);
