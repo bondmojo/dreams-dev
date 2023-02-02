@@ -124,6 +124,8 @@ export class LoanService {
             zohoLoanDto.disbursed_amount = createLoanDto.amount - createLoanDto.dream_point;
             zohoLoanDto.wing_wei_luy_transfer_fee = createLoanDto.wing_wei_luy_transfer_fee;
             zohoLoanDto.loan_fee = createLoanDto.loan_fee;
+            zohoLoanDto.tenure = createLoanDto.tenure;
+            zohoLoanDto.tenureType = createLoanDto.tenure_type;
             zohoLoanDto.outstanding_amount = createLoanDto.outstanding_amount;
             zohoLoanDto.sendpulse_url = this.globalService.BASE_SENDPULSE_URL + createLoanDto?.sendpulse_id;
             zohoLoanDto.retool_url = this.globalService.DREAMS_RETOOL_URL + "#customer_id=" + createLoanDto?.client_id;;
