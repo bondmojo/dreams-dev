@@ -56,13 +56,4 @@ export class TransactionService {
         return paid_amount.total;
     }
 
-    public async getInstalmentTotalPaidAmount(repayment_schedule_id: string): Promise<number> {
-        const paid_amount = await this.transactionRepository.createQueryBuilder("transactions")
-            .select("SUM(transactions.amount)", "total")
-            .where("transactions.repayment_schedule_id = :repayment_schedule_id", { repayment_schedule_id: repayment_schedule_id })
-            .andWhere("transactions.type = :type", { type: this.globalService.TRANSACTION_TYPE.PARTIAL_PAYMENT })
-            .getRawOne();
-        return paid_amount.total;
-    }
-
 }
