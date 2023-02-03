@@ -41,9 +41,11 @@ export class SendpulseHelperService {
             result.tenureType = this.globalService.LOAN_TENURE_TYPE.MONTHLY;
             return result;
         } catch (ex) {
-            result.is_success = "false";
-            result.message = ex;
-            return result;
+            /*             result.is_success = "false";
+                        result.message = ex;
+                        return result;
+             */
+            throw ex;
         }
     }
 
@@ -56,11 +58,7 @@ export class SendpulseHelperService {
             case "strlen":
                 return this.strlenOperation(calculateDto);
             default:
-                return {
-                    is_success: "false",
-                    message: calculateDto.message
-                }
-
+                throw new DreamsException(DreamsCode.PAUSE_SENDPULSE_FLOW_ERROR, "CALCULATION FAILED");
         }
     }
 
