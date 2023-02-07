@@ -32,6 +32,7 @@ export class HandleEqualRepaymentUsecase extends HandleRepaymentUsecase {
             updateLoanDto.status = this.globalService.LOAN_STATUS.FULLY_PAID;
             await this.updateClientAfterFullyPaid(processRepaymentDto, loan);
             await this.createDreamPointEarnedTransaction(processRepaymentDto, loan);
+            await this.updateSendpulseFieldsAfterFullyPaid(loan);
         }
         updateLoanDto.id = loan.id;
         updateLoanDto.outstanding_amount = outstanding_amount;
@@ -76,6 +77,7 @@ export class HandleEqualRepaymentUsecase extends HandleRepaymentUsecase {
     }
 
     async scheduleNextInstalment(scheudle_instalment: any, loan_id: string) {
+
         const next_ins_number = scheudle_instalment.ins_number + 1;
         const next_scheudle_instalment = await this.repaymentScheduleService.findOne({ loan_id: loan_id, ins_number: next_ins_number, scheduling_status: this.globalService.INSTALMENT_SCHEDULING_STATUS.NOT_SCHEDULED });
         if (!next_scheudle_instalment) {
@@ -190,4 +192,33 @@ export class HandleEqualRepaymentUsecase extends HandleRepaymentUsecase {
         };
         await this.transactionService.create(createAdditionalFeeTxnDto);
     }
+
+    async updateSendpulseFieldsAfterFullyPaid(loan: Loan): Promise<any> {
+        const client = await this.clientService.findbyId(loan.client_id)
+
+        const client_tier = Number(client.tier);
+        const new_max_credit_amount = this.globalService.TIER_AMOUNT[client_tier];
+        const new_next_loan_amount = this.globalService.TIER_AMOUNT[client_tier + 1];
+
+        await this.sendpulseService.updateSendpulseVariable({
+            variable_name: 'Tier',
+            variable_id: this.globalService.SENDPULSE_VARIABLE_ID.TIER,
+            variable_value: '' + client_tier,
+            contact_id: loan.client.sendpulse_id,
+        });
+        await this.sendpulseService.updateSendpulseVariable({
+            variable_name: 'maxCreditAmount',
+            variable_id: this.globalService.SENDPULSE_VARIABLE_ID.MAX_CREDIT_AMOUNT,
+            variable_value: '' + new_max_credit_amount,
+            contact_id: loan.client.sendpulse_id,
+        });
+        await this.sendpulseService.updateSendpulseVariable({
+            variable_name: 'nextLoanAmount',
+            variable_id: this.globalService.SENDPULSE_VARIABLE_ID.NEXT_LOAN_AMOUNT,
+            variable_value: '' + new_next_loan_amount,
+            contact_id: loan.client.sendpulse_id,
+        });
+        return;
+    }
+
 }

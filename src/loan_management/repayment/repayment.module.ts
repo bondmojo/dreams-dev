@@ -14,13 +14,14 @@ import { ZohoRepaymentHelperService } from './services/zoho-repayment-helper.ser
 import { DreamerModule } from 'src/external/zoho/dreams/dreamer.module';
 import { GetHandleRepaymentFactory } from './factory/get-handle-repayment.factory';
 import { ClientModule } from '../client/client.module';
+import { SendpulseModule } from 'src/external/sendpulse/sendpulse.module';
 @Module({
-  imports: [LoanModule, RepaymentScheduleModule, TransactionModule, forwardRef(() => DreamerModule), ClientModule],
+  imports: [LoanModule, RepaymentScheduleModule, TransactionModule, forwardRef(() => DreamerModule), ClientModule, SendpulseModule],
   controllers: [RepaymentController],
   providers: [
     RepaymentService, GetHandleRepaymentFactory,
     HandleEqualRepaymentUsecase, HandleUnderRepaymentUsecase,
-    HandleOverRepaymentUsecase, ZohoRepaymentHelperService
+    HandleOverRepaymentUsecase, ZohoRepaymentHelperService,
   ],
   exports: [RepaymentService]
 })

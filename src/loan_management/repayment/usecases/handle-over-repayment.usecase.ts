@@ -12,6 +12,7 @@ import { ZohoRepaymentHelperService } from "../services/zoho-repayment-helper.se
 import { ClientService } from "src/loan_management/client/usecases/client.service";
 import { UpdateClientDto } from "src/loan_management/client/dto";
 import { RepaymentScheduleService } from "src/loan_management/repayment_schedule/usecases/repayment_schedule.service";
+import { SendpluseService } from "src/external/sendpulse/sendpluse.service";
 @Injectable()
 export class HandleOverRepaymentUsecase extends HandleRepaymentUsecase {
     private readonly logger = new CustomLogger(HandleOverRepaymentUsecase.name);
@@ -25,8 +26,9 @@ export class HandleOverRepaymentUsecase extends HandleRepaymentUsecase {
         public readonly zohoRepaymentHelperService: ZohoRepaymentHelperService,
         private readonly handleEqualPaymentUsecase: HandleEqualRepaymentUsecase,
         private readonly handleUnderRepaymentUsecase: HandleUnderRepaymentUsecase,
+        public readonly sendpulseService: SendpluseService,
     ) {
-        super(loanService, clientService, globalService, transactionService, repaymentScheduleService, zohoRepaymentHelperService);
+        super(loanService, clientService, globalService, transactionService, repaymentScheduleService, zohoRepaymentHelperService, sendpulseService);
     }
 
     async process(processRepaymentDto: ProcessRepaymentDto): Promise<any> {

@@ -9,6 +9,8 @@ import { ClientService } from 'src/loan_management/client/usecases/client.servic
 import { TransactionService } from "../../transaction/usecases/transaction.service";
 import { ZohoRepaymentHelperService } from "../services/zoho-repayment-helper.service";
 import { RepaymentScheduleService } from "src/loan_management/repayment_schedule/usecases/repayment_schedule.service";
+import { SendpluseService } from "src/external/sendpulse/sendpluse.service";
+
 @Injectable()
 export abstract class HandleRepaymentUsecase {
     constructor(
@@ -18,6 +20,7 @@ export abstract class HandleRepaymentUsecase {
         public readonly transactionService: TransactionService,
         public readonly repaymentScheduleService: RepaymentScheduleService,
         public readonly zohoRepaymentHelperService: ZohoRepaymentHelperService,
+        public readonly sendpulseService: SendpluseService,
     ) {
     }
     abstract process(processRepaymentDto: ProcessRepaymentDto): Promise<any>;
