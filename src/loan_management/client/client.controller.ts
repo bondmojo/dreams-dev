@@ -30,7 +30,7 @@ export class ClientController {
     return await this.clientService.getContracturl(id);
   }
 
-  @Post('/dream_point/refund')
+  @Post('/dreamPoint/refund')
   @MethodParamsRespLogger(new CustomLogger(ClientController.name))
   async dreamPointRefund(@Body() refundDreamPointDto: RefundDreamPointDto) {
     return await this.dreamPointService.refund(refundDreamPointDto);

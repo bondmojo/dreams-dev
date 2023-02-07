@@ -7,7 +7,7 @@ import { MethodParamsRespLogger } from 'src/decorator';
 import { GlobalService } from 'src/globals/usecases/global.service';
 import { GetInstalmentDto } from './dto';
 
-@Controller('repayment_schedule')
+@Controller('repaymentSchedule')
 export class RepaymentScheduleController {
   private readonly logger = new CustomLogger(RepaymentScheduleController.name);
   constructor(
