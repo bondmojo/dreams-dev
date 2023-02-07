@@ -4,9 +4,12 @@ import { CalculationResultDto } from "./dto/calculation-result.dto";
 import { CustomLogger } from "../../custom_logger";
 import { CalculateLoanDto } from "./dto/calculate-loan.dto";
 import { CalculateLoanResultDto } from "./dto/calculate-loan-result.dto";
-import { format, add } from 'date-fns'
+import { format, add, addMonths } from 'date-fns'
 import { GlobalService } from "src/globals/usecases/global.service";
 import { DreamsCode, DreamsException } from "src/config/dreams-exception";
+import CalculateRepaymentScheduleDto from "./dto/calculate-repayment-schedule.dto";
+import { gl } from "date-fns/locale";
+import RepaymentScheduleDto from "./dto/repayment-schedule.dto";
 
 @Injectable()
 export class SendpulseHelperService {
@@ -15,7 +18,7 @@ export class SendpulseHelperService {
     private readonly log = new CustomLogger(SendpulseHelperService.name);
 
     constructor(private readonly globalService: GlobalService) {
-
+        this.log.log("repayment schedule str=" + globalService.en.getString('repayment_schedule'));
     }
 
     calculateLoan(calculateLoanDto: CalculateLoanDto): CalculateLoanResultDto {
@@ -30,14 +33,14 @@ export class SendpulseHelperService {
                 throw new DreamsException(DreamsCode.INVALID_DATA, "Tenure Type implementation required");
             }
 
-            result.payableAmount = (amount + (this.FEES * tenure)).toString();
+            result.payableAmount = (amount + (this.globalService.INSTALMENT_MEMBERSHIP_FEE * tenure)).toString();
             result.receivableAmount = (amount - dreamsPoint).toString();
             result.fee = this.FEES.toString();
             result.is_success = "true";
             const date = new Date();
             const payday = add(date, { days: this.LOAN_CYCLE });
             result.paymentDate = format(payday, 'dd-MM-yyyy');
-            result.maxTenure = this.globalService.CLACULATE_TENURE(amount);
+            result.maxTenure = this.globalService.CLACULATE_MAX_TENURE({ amount });
             result.tenureType = this.globalService.LOAN_TENURE_TYPE.MONTHLY;
             return result;
         } catch (ex) {
@@ -48,6 +51,41 @@ export class SendpulseHelperService {
             throw ex;
         }
     }
+
+    caclulateRepaymentSchedule(calculateRepaymentScheduleDto: CalculateRepaymentScheduleDto): RepaymentScheduleDto[] {
+        try {
+            let tenure = Number(calculateRepaymentScheduleDto.loan_tenure);
+            const wing_wei_luy_transfer_fee = Number(calculateRepaymentScheduleDto.wing_wei_luy_transfer_fee) ?? 0;
+            const loan_amount = Number(calculateRepaymentScheduleDto.loan_amount) + wing_wei_luy_transfer_fee;
+            if (tenure == null || tenure == 0) {
+                tenure = 1;
+            }
+
+            const repaymentScheduleArray: RepaymentScheduleDto[] = [];
+            for (let i = 0; i < tenure; i++) {
+                const repaymentScheduleDto = new RepaymentScheduleDto();
+                repaymentScheduleDto.ins_number = i + 1;
+                let principal_amount = Math.floor(loan_amount / tenure);
+                //add remainder amount in last instalment.
+                if (i == tenure - 1) {
+                    principal_amount += loan_amount % tenure;
+                }
+                repaymentScheduleDto.ins_overdue_amount = Number((principal_amount + this.globalService.INSTALMENT_MEMBERSHIP_FEE).toFixed(2));
+                const now = new Date();
+                repaymentScheduleDto.due_date = format(addMonths(now, repaymentScheduleDto.ins_number), 'dd-MMM-yyyy');
+                repaymentScheduleDto.currency = calculateRepaymentScheduleDto.currency;
+                repaymentScheduleArray.push(repaymentScheduleDto);
+            }
+
+            this.log.debug("Repayment Schedule Plan =" + JSON.stringify(repaymentScheduleArray));
+            return repaymentScheduleArray;
+        }
+        catch (error) {
+            this.log.error(`Error in Repayment Schedule Creation ${error}`);
+            throw new DreamsException(DreamsCode.UNKNOWN_ERROR, `Error in Repayment Schedule Creation ${error}`);
+        }
+    }
+
 
     calculate(calculateDto: CalculationDto): CalculationResultDto {
         switch (calculateDto.operation_type) {
@@ -130,5 +168,30 @@ export class SendpulseHelperService {
         // Remove other characters from string
         number = number.replace(/[^០១២៣៤៥៦៧៨៩]/g, '');
         return number;
+    }
+
+    getRepaymentScheduleMessage(ln: string, repaymentScheduleDto: RepaymentScheduleDto[]) {
+        let repaymentMsgTemplate: string;
+        let repaymentMsgString: string = "";
+
+        if (ln == 'kh') {
+            repaymentMsgTemplate = this.globalService.kh.getString('repayment_schedule');
+        }
+        else {
+            repaymentMsgTemplate = this.globalService.en.getString('repayment_schedule');
+        }
+
+        if (repaymentScheduleDto != null && repaymentScheduleDto.length > 0) {
+
+            repaymentScheduleDto.forEach((schedule) => {
+                const currency = schedule.currency;
+                const ins_amount = schedule.ins_overdue_amount;
+                const ins_date = schedule.due_date;
+
+                repaymentMsgString += eval(`\`${repaymentMsgTemplate}\``);
+                this.log.log("evaluated string = " + repaymentMsgString);
+            });
+        }
+        return { message: repaymentMsgString };
     }
 }

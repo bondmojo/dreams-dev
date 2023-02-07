@@ -3,7 +3,10 @@ import { GlobalService } from "./usecases/global.service";
 import { GlobalController } from './global.controller';
 @Global()
 @Module({
-    providers: [GlobalService],
+    providers: [{
+        provide: GlobalService,
+        useValue: new GlobalService()
+    }],
     exports: [GlobalService],
     controllers: [GlobalController]
 })
