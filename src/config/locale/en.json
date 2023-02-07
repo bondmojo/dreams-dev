@@ -1,0 +1,3 @@
+{
+    "repayment_schedule": "You will repay ${currency}${ins_amount} on ${ins_date}. \n"
+}
