@@ -20,6 +20,7 @@ export class GlobalService {
         NOT_QUALIFIED: 'Not Qualified',
         DISBURSED: 'Disbursed',
         FULLY_PAID: 'Fully Paid',
+        CANCELED: "Canceled",
         CONTRACT_SIGNED: 'Contract Signed'
     }
 
@@ -168,6 +169,8 @@ export class GlobalService {
         "TIER": this.isDev ? "6333ce7e4abfcd3b000c14d7" : "635033fabb24cc18be46315d",
         "MAX_CREDIT_AMOUNT": this.isDev ? "630f3559fc45bf34001312c7" : "6350317bcef5586a617e2b77",
         "NEXT_LOAN_AMOUNT": this.isDev ? "6347ece53cfb19125f6d0b58" : "6350344b00bc7d0dfa140eeb",
+        'TENURE': this.isDev ? "63ca6a20d0b92b54d2260bfa" : "",
+        "TENURE_TYPE": this.isDev ? "63ca776429235600120500b7" : "",
     }
 
     // Repayment Schuedle Global Configurations
@@ -178,18 +181,20 @@ export class GlobalService {
         PARTIAL_PAID: 200,
         IN_GRACE_PERIOD: 300,
         PAYMENT_DUE: 400,
-        WAIVED_OFF: 500,
-        PAID_ON_TIME: 600,
-        PAID_LATE: 700,
+        PAYMENT_RESCHEDULED: 500,
+        WAIVED_OFF: 600,
+        PAID_ON_TIME: 700,
+        PAID_LATE: 800,
     }
     public readonly INSTALMENT_PAYMENT_STATUS_STR: any = {
         100: 'Not Paid',
         200: 'Partial Paid',
         300: 'In Grace Period',
         400: 'Payment Due',
-        500: 'Waived Off',
-        600: 'Paid On Time',
-        700: 'Paid Late',
+        500: "Payment Rescheduled",
+        600: 'Waived Off',
+        700: 'Paid On Time',
+        800: 'Paid Late',
     }
 
     public readonly INSTALMENT_SCHEDULING_STATUS: any = {
@@ -220,7 +225,7 @@ export class GlobalService {
 
     public CLACULATE_TENURE(amount: number): string {
 
-        let tenure: string = '1';
+        let tenure = '1';
 
         if (amount <= this.TIER_AMOUNT['2']) {
             tenure = '1';
