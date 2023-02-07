@@ -3,4 +3,5 @@ export class CalculateLoanDto {
     dreamPoints: string;
     tenure: string;
     tenure_type: string;
+    wing_transfer_fee: string;
 }
