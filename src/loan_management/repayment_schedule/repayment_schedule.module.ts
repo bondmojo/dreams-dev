@@ -9,11 +9,11 @@ import { CreateRepaymentScheduleUsecase } from './usecases/create_repayment_sche
 import { GlobalModule } from "../../globals/global.module";
 import { DreamerModule } from 'src/external/zoho/dreams/dreamer.module';
 import { ZohoRepaymentScheduleHelper } from './usecases/ZohoRepaymentScheduleHelper';
-import { GetRepaymentScheduleUsecase } from './usecases/get-repayment-schedule.service';
+
 @Module({
   imports: [SendpulseModule, TypeOrmModule.forFeature([RepaymentSchedule]), GlobalModule, forwardRef(() => DreamerModule)],
   controllers: [RepaymentScheduleController],
-  providers: [RepaymentScheduleService, CreateRepaymentScheduleUsecase, ZohoRepaymentScheduleHelper, GetRepaymentScheduleUsecase],
-  exports: [RepaymentScheduleService, CreateRepaymentScheduleUsecase]
+  providers: [RepaymentScheduleService, CreateRepaymentScheduleUsecase, ZohoRepaymentScheduleHelper],
+  exports: [RepaymentScheduleService, CreateRepaymentScheduleUsecase, ZohoRepaymentScheduleHelper]
 })
 export class RepaymentScheduleModule { }

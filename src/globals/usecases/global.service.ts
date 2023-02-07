@@ -1,6 +1,8 @@
-import { Injectable } from "@nestjs/common";
 import { CustomLogger } from "../../custom_logger";
-
+import { Injectable, Scope } from "@nestjs/common";
+import * as cjson from 'cjson';
+import { timeStamp } from "console";
+import { TelegramKickChatMemberParams } from "nestjs-telegram";
 
 
 @Injectable()
@@ -13,6 +15,8 @@ export class GlobalService {
     public readonly LOAN_FEES: number = 3;
     public readonly LOAN_LATE_FEE_EACH_MONTH: number = 3;
     public readonly LOAN_GRACE_PERIOD_DAYS: number = 3;
+    public en: English;
+    public kh: Khmer;
 
     public readonly LOAN_STATUS: any = {
         APPROVED: 'Approved',
@@ -223,35 +227,39 @@ export class GlobalService {
         OVER_PAYMENT: 'over_payment',
     };
 
-    public CLACULATE_TENURE(amount: number): string {
+    public CLACULATE_MAX_TENURE({ amount }: { amount: number; }): string {
 
-        let tenure = '1';
+        let max_tenure = '1';
 
         if (amount <= this.TIER_AMOUNT['2']) {
-            tenure = '1';
+            max_tenure = '1';
         }
         else if (amount > this.TIER_AMOUNT['2'] && amount <= this.TIER_AMOUNT['4']) {
-            tenure = '2';
+            max_tenure = '2';
         }
         else if (amount > this.TIER_AMOUNT['4'] && amount <= this.TIER_AMOUNT['5']) {
-            tenure = '3';
+            max_tenure = '3';
         }
         else if (amount > this.TIER_AMOUNT['5'] && amount <= this.TIER_AMOUNT['6']) {
-            tenure = '4';
+            max_tenure = '4';
         }
         else if (amount > this.TIER_AMOUNT['6'] && amount <= this.TIER_AMOUNT['7']) {
-            tenure = '5';
+            max_tenure = '5';
         }
         else if (amount > this.TIER_AMOUNT['7'] /* && amount <= this.TIER_AMOUNT['8']*/) {
-            tenure = '6';
+            max_tenure = '6';
 
         }
-        return tenure;
+        return max_tenure;
     }
 
-    /* constructor(
-    ) { }
+    constructor() {
+        this.log.log("INITIALIZING GLOBALS");
+        this.en = new English();
+        this.kh = new Khmer();
+    }
 
+    /*
     logenv() {
         this.log.log("env =" + process.env.NODE_ENV);
         this.log.log("GLOBAL Services Dev Environment =" + this.isDev);
@@ -260,4 +268,40 @@ export class GlobalService {
     } */
 
 
+}
+
+class English {
+
+    private _en: any;
+    private log = new CustomLogger(English.name);
+    constructor() {
+        this.loadLanguageJson();
+    }
+    private async loadLanguageJson() {
+        //@FIXME: Move JSON File to AWS S3 
+        this._en = await cjson.load('src/config/locale/en.json');
+        this.log.log("English Language Loaded");
+    }
+
+    public getString(key: string): string {
+        return this._en[key];
+    }
+}
+
+class Khmer {
+
+    private _kh: any;
+    private log = new CustomLogger(English.name);
+    constructor() {
+        this.loadLanguageJson();
+    }
+    private async loadLanguageJson() {
+        //@FIXME: Move JSON File to AWS S3 
+        this._kh = await cjson.load('src/config/locale/kh.json');
+        this.log.log("Khmer Language Loaded");
+    }
+
+    public getString(key: string): string {
+        return this._kh[key];
+    }
 }
