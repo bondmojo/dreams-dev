@@ -15,7 +15,7 @@ export class RepaymentService {
         try {
 
             const handle_repayment_obj: HandleRepaymentUsecase = await this.getHandleRepaymentFactory.create(processRepaymentDto);
-            handle_repayment_obj.process(processRepaymentDto);
+            await handle_repayment_obj.process(processRepaymentDto);
 
         } catch (error) {
             this.logger.error(`Error in Loan Instalment Processing for Loan ID = ${processRepaymentDto.loan_id} error:  ${error}`);

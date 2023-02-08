@@ -33,7 +33,7 @@ export class HandleOverRepaymentUsecase extends HandleRepaymentUsecase {
 
     async process(processRepaymentDto: ProcessRepaymentDto): Promise<any> {
         const loan = await this.loanService.findOneForInternalUse({ id: processRepaymentDto.loan_id });
-        this.createTransactions(processRepaymentDto, loan);
+        await this.createTransactions(processRepaymentDto, loan);
 
         while (processRepaymentDto.amount > 0) {
             const scheudle_instalment = await this.repaymentScheduleService.findOne({ loan_id: loan.id, scheduling_status: this.globalService.INSTALMENT_SCHEDULING_STATUS.SCHEDULED });
