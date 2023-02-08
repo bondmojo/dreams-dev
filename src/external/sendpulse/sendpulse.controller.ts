@@ -104,7 +104,45 @@ export class SendpulseController {
       ln = "en";
     }
     const repaymentScheduleDto: RepaymentScheduleDto[] = this.sendpulseHelperService.caclulateRepaymentSchedule(calculateRepaymentScheduleDto);
-    return this.sendpulseHelperService.getRepaymentScheduleMessage(ln, repaymentScheduleDto);
+    return { message: this.sendpulseHelperService.getRepaymentScheduleMessage(ln, repaymentScheduleDto) };
+
+  }
+
+  @Post('/calculator/getTenureOptionsMessage')
+  @MethodParamsRespLogger(new CustomLogger(SendpulseController.name))
+  async getTenureOptionsMessage(@Headers('language') ln: string, @Body() @Body() calculateRepaymentScheduleDto: CalculateRepaymentScheduleDto) {
+
+    if (ln != "en" && ln != "kh") {
+      ln = "en";
+    }
+
+
+    const tenure = Number(calculateRepaymentScheduleDto.loan_tenure);
+    let responseMsg = "";
+    let month;
+    let months;
+    if (ln == this.globalService.LANGUAGE.kh) {
+      month = this.globalService.kh.getString("Month");
+      months = this.globalService.kh.getString("Months");
+    }
+    else {
+      month = this.globalService.en.getString("Month");
+      months = this.globalService.en.getString("Months");
+    }
+
+    for (let i = 1; i <= tenure; i++) {
+      const schedule: CalculateRepaymentScheduleDto = JSON.parse(JSON.stringify(calculateRepaymentScheduleDto));
+      schedule.loan_tenure = String(i);
+      const repaymentScheduleDto: RepaymentScheduleDto[] = this.sendpulseHelperService.caclulateRepaymentSchedule(schedule);
+      this.log.debug(JSON.stringify(repaymentScheduleDto));
+
+      if (i === 1)
+        responseMsg += i + " " + month + " \n" + this.sendpulseHelperService.getRepaymentScheduleMessage(ln, repaymentScheduleDto) + "\n";
+      else
+        responseMsg += i + " " + months + " \n" + this.sendpulseHelperService.getRepaymentScheduleMessage(ln, repaymentScheduleDto) + "\n";
+
+    }
+    return { tenureOptions: responseMsg };
   }
 
 }

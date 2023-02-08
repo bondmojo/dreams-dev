@@ -253,6 +253,11 @@ export class GlobalService {
         return max_tenure;
     }
 
+    public readonly LANGUAGE = {
+        en: "en",
+        kh: "kh"
+    }
+
     constructor() {
         this.log.log("INITIALIZING GLOBALS");
         this.en = new English();

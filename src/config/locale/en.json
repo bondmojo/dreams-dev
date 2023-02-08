@@ -1,3 +1,5 @@
 {
-    "repayment_schedule": "You will repay ${currency}${ins_amount} on ${ins_date}. \n"
+    "repayment_schedule": "You will repay ${currency}${ins_amount} on ${ins_date}. \n",
+    "Month": "Month ",
+    "Months": "Months "
 }
