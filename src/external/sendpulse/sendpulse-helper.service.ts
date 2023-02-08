@@ -28,14 +28,14 @@ export class SendpulseHelperService {
             const dreamsPoint = parseInt(calculateLoanDto.dreamPoints);
             const tenure = parseInt(calculateLoanDto.tenure);
             const tenure_type = calculateLoanDto.tenure_type;
+            const wing_transfer_fee = calculateLoanDto.wing_transfer_fee;
 
             if (tenure_type != this.globalService.LOAN_TENURE_TYPE['MONTHLY']) {
                 throw new DreamsException(DreamsCode.INVALID_DATA, "Tenure Type implementation required");
             }
-
-            result.payableAmount = (amount + (this.globalService.INSTALMENT_MEMBERSHIP_FEE * tenure)).toString();
+            result.fee = ((this.globalService.INSTALMENT_MEMBERSHIP_FEE * tenure)).toString();
+            result.payableAmount = (amount + Number(result.fee) + Number(wing_transfer_fee)).toString();
             result.receivableAmount = (amount - dreamsPoint).toString();
-            result.fee = this.FEES.toString();
             result.is_success = "true";
             const date = new Date();
             const payday = add(date, { days: this.LOAN_CYCLE });
@@ -85,7 +85,6 @@ export class SendpulseHelperService {
             throw new DreamsException(DreamsCode.UNKNOWN_ERROR, `Error in Repayment Schedule Creation ${error}`);
         }
     }
-
 
     calculate(calculateDto: CalculationDto): CalculationResultDto {
         switch (calculateDto.operation_type) {
