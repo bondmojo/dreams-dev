@@ -191,6 +191,6 @@ export class SendpulseHelperService {
                 this.log.log("evaluated string = " + repaymentMsgString);
             });
         }
-        return { message: repaymentMsgString };
+        return repaymentMsgString;
     }
 }
