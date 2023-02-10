@@ -60,7 +60,7 @@ export class Loan {
   @Column({ default: 1 })
   tenure: number;
 
-  @Column({ default: 'monthly' })
+  @Column({ default: 'Monthly' })
   tenure_type: string;
 
   @Column({ type: 'date', nullable: true })
