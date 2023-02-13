@@ -1,5 +1,5 @@
 {
-    "repayment_schedule": "In khmer: You will repay ${currency}${ins_amount} on ${ins_date}. \n",
-    "Month": "KH: Month",
-    "Months": "KH: Months"
+    "repayment_schedule": "អ្នកនឹងសង ${currency}${ins_amount} នៅថ្ងៃទី ${ins_date}. \n",
+    "Month": "ខែ",
+    "Months": "ខែ"
 }
