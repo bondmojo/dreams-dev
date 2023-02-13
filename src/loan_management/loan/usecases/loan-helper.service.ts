@@ -49,6 +49,7 @@ export class LoanHelperService {
         const credit_disbursed_amount = loan.amount - loan.dream_point;
         const disbursementTransactionDto = {
             loan_id: loan.id,
+            client_id: loan.client_id,
             amount: credit_disbursed_amount,
             image: disbursedLoanDto.image,
             type: this.globalService.TRANSACTION_TYPE.CREDIT_DISBURSEMENT,
@@ -69,6 +70,7 @@ export class LoanHelperService {
                 image: disbursedLoanDto.image,
                 type: this.globalService.TRANSACTION_TYPE.DEBIT_WING_WEI_LUY_TRANSFER_FEE,
                 note: disbursedLoanDto.note,
+                client_id: loan.client_id,
             }
             await this.transactionService.create(transactionDto);
         }
@@ -235,6 +237,7 @@ export class LoanHelperService {
             image: createRepaymentTransactionDto.image,
             type: this.globalService.TRANSACTION_TYPE.DREAM_POINT_EARNED,
             note: createRepaymentTransactionDto.note,
+            client_id: loan.client_id
         }
         const transaction = await this.transactionService.create(transactionDto);
         return transaction;
@@ -332,6 +335,7 @@ export class LoanHelperService {
             image: createRepaymentTransactionDto.image,
             type: this.globalService.TRANSACTION_TYPE.DREAM_POINT_REFUND,
             note: createRepaymentTransactionDto.note,
+            client_id: loan.client_id
         }
         await this.transactionService.create(transactionDto);
 
