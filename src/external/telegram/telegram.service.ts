@@ -85,10 +85,10 @@ export class CustomTelegramService {
 
         const req_loan_amount = parseInt(dreamPointsDetailsDto.requested_loan_amount);
         const dreamPointRequestArray = [Math.round(-0.2 * req_loan_amount),
-        Math.round(-0.4 * req_loan_amount),
-        Math.round(-0.6 * req_loan_amount),
-        Math.round(-0.8 * req_loan_amount),
-        -1 * req_loan_amount];
+        Math.round(0.4 * req_loan_amount),
+        Math.round(0.6 * req_loan_amount),
+        Math.round(0.8 * req_loan_amount),
+            req_loan_amount];
 
         let customKeyboardButtonArray: TelegramKeyboardButton[][] = [];
 
@@ -98,7 +98,7 @@ export class CustomTelegramService {
             let r: TelegramKeyboardButton[] = [];
             for (let c = 0; c < 2; c++) {
                 if (i < 5)
-                    r.push({ text: `$${dreamPointRequestArray[i]}` });
+                    r.push({ text: `-$${dreamPointRequestArray[i]}` });
                 i++;
             }
             customKeyboardButtonArray.push(r);
