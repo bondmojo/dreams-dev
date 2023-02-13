@@ -118,7 +118,7 @@ export class GlobalService {
         return 2.00;
     }
 
-    private readonly BASE_DREAMS_RETOOL_URL = "https://gojo.retool.com/apps/abfc2eda-80ed-11ed-b001-179efcd7af36/Dreams/";
+    private readonly BASE_DREAMS_RETOOL_URL = "https://gojo.retool.com/apps/abfc2eda-80ed-11ed-b001-179efcd7af36/Dreams";
     public readonly DREAMS_RETOOL_URL = this.isDev ? this.BASE_DREAMS_RETOOL_URL + "/App-Dev/CBS?_environment=staging&_releaseVersion=latest" : this.BASE_DREAMS_RETOOL_URL + "/App-Production/CBS?_environment=production&_releaseVersion=latest";
     public readonly BASE_SENDPULSE_URL = this.isDev ? "https://login.sendpulse.com/messengers/chats/62bad9dd3ceed143a323bc5f/contacts/all/" : "https://login.sendpulse.com/messengers/chats/63087d88e330bc7fb767d166/contacts/all/";
 
