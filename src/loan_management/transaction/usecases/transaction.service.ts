@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { GetTransactionDto } from "../dto";
 import { CustomLogger } from "../../../custom_logger";
 import { Transaction } from '../entities/transaction.entity';
-import { Repository } from 'typeorm';
+import { Repository, In } from 'typeorm';
 import { GlobalService } from "../../../globals/usecases/global.service";
 
 @Injectable()
@@ -21,6 +21,14 @@ export class TransactionService {
         this.logger.log(`Creating transaction with data ${JSON.stringify(createTransactionDto)}`);
         const transactionFromDb = await this.transactionRepository.save(createTransactionDto);
         return transactionFromDb;
+    }
+
+    // TOBE DELETED: after migration complete
+    async bulkUpdate(ids: string[], arrts: Partial<Transaction>): Promise<any> {
+        const resp = await this.transactionRepository.createQueryBuilder().update(Transaction).set(arrts)
+            .where({ id: In(ids) })
+            .execute();
+        return resp;
     }
 
     async findOne(fields: GetTransactionDto): Promise<Transaction | null> {

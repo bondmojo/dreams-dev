@@ -29,6 +29,11 @@ export class RepaymentScheduleService {
         await this.repaymentScheduleRepository.update(updateRepaymentScheduleDto.id, updateRepaymentScheduleDto);
     }
 
+    // TO BE DELETE: once loan to instalment migration done
+    async save(repayment_schedule_model: any): Promise<any> {
+        return await this.repaymentScheduleRepository.save(repayment_schedule_model);
+    }
+
     async find(fields: FindOptionsWhere<RepaymentSchedule>, relations: Array<string> = []): Promise<any> {
         const installments = await this.repaymentScheduleRepository.find({
             where: fields,
