@@ -173,8 +173,9 @@ export class GlobalService {
         "TIER": this.isDev ? "6333ce7e4abfcd3b000c14d7" : "635033fabb24cc18be46315d",
         "MAX_CREDIT_AMOUNT": this.isDev ? "630f3559fc45bf34001312c7" : "6350317bcef5586a617e2b77",
         "NEXT_LOAN_AMOUNT": this.isDev ? "6347ece53cfb19125f6d0b58" : "6350344b00bc7d0dfa140eeb",
-        'TENURE': this.isDev ? "63ca6a20d0b92b54d2260bfa" : "",
-        "TENURE_TYPE": this.isDev ? "63ca776429235600120500b7" : "",
+        'TENURE': this.isDev ? "63ca6a20d0b92b54d2260bfa" : "63ca76b511a1b936fa29b631",
+        "TENURE_TYPE": this.isDev ? "63ca776429235600120500b7" : "63ca76d54f1b19669a2cfbe3",
+        "IS_INSTALMENT_FULLYPAID": this.isDev ? "63ee14e659e3477b9e1bfdc3" : "63ee14840cf2b903b034b9ea"
     }
 
     // Repayment Schuedle Global Configurations

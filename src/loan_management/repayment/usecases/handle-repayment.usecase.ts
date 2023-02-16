@@ -52,4 +52,13 @@ export abstract class HandleRepaymentUsecase {
         return await this.transactionService.getLoanTotalPaidAmount(loan_id)
     }
 
+    async updateIsInstalmentFullyPaidOnSendpulse(loan: Loan, isInstalmentFullyPaid: boolean) {
+        await this.sendpulseService.updateSendpulseVariable({
+            variable_name: 'isInstalmentFullyPaid',
+            variable_id: this.globalService.SENDPULSE_VARIABLE_ID.IS_INSTALMENT_FULLYPAID,
+            variable_value: isInstalmentFullyPaid ? 'true' : 'false',
+            contact_id: loan.client.sendpulse_id,
+        });
+    }
+
 }
