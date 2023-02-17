@@ -1,4 +1,5 @@
-import { Body, Controller, Get, Post } from "@nestjs/common";
+import { Body, Controller, Post } from "@nestjs/common";
+import { MethodParamsRespLogger } from "src/decorator";
 import { CustomLogger } from "../../custom_logger";
 import { CreditAmountDetailsDto } from "./dto/credit_amount_details.dto";
 import { DreamPointsDetailsDto } from "./dto/dream-points-details.dto";
@@ -12,12 +13,14 @@ export class TelegramController {
     private readonly logger = new CustomLogger(TelegramController.name);
     constructor(private readonly customTelegramService: CustomTelegramService) { }
 
-    @Get('/sendKeyboardMessage')
-    async sendKeyboardMessage(customTelegramKeyboardMessage: CustomTelegramKeyboardMessage) {
+    @Post('/sendKeyboardMessage')
+    @MethodParamsRespLogger(new CustomLogger(TelegramController.name))
+    async sendKeyboardMessage(@Body() customTelegramKeyboardMessage: CustomTelegramKeyboardMessage) {
         return this.customTelegramService.sendMessageWithCustomKeyboard(customTelegramKeyboardMessage);
     }
 
     @Post('/sendCreditAmountKeyboard')
+    @MethodParamsRespLogger(new CustomLogger(TelegramController.name))
     async sendCreditAmountKeyboard(@Body() creditAmountDetails: CreditAmountDetailsDto) {
         this.logger.log("sendCreditAmountKeyboard Request =" + JSON.stringify(creditAmountDetails));
         this.customTelegramService.sendCreditAmountKeyboard(creditAmountDetails);
@@ -25,6 +28,7 @@ export class TelegramController {
     }
 
     @Post('/removeTelegramKeyboard')
+    @MethodParamsRespLogger(new CustomLogger(TelegramController.name))
     async removeTelegramKeyboard(@Body() removeTelegramKeyboardDto: RemoveTelegramKeyboardDto) {
         this.logger.log(" removeTelegramKeyboard Request =" + JSON.stringify(removeTelegramKeyboardDto));
         this.customTelegramService.removeKeyboard(removeTelegramKeyboardDto);
@@ -32,6 +36,7 @@ export class TelegramController {
     }
 
     @Post('/sendDreampointsOptionKeyboard')
+    @MethodParamsRespLogger(new CustomLogger(TelegramController.name))
     async sendDreampointsOptionKeyboard(@Body() dreamPointsDetailsDto: DreamPointsDetailsDto) {
         this.logger.log("sendDreampointsOptionKeyboard Request =" + JSON.stringify(dreamPointsDetailsDto));
         this.customTelegramService.sendDreampointsOptionKeyboard(dreamPointsDetailsDto);
@@ -41,8 +46,7 @@ export class TelegramController {
     @Post('/sendSelectTenureKeyboard')
     async sendSelectTenureKeyboard(@Body() tenureOptionsDto: TenureOptionsDto) {
         this.logger.log("sendSelectTenureKeyboard Request =" + JSON.stringify(tenureOptionsDto));
-        this.customTelegramService.sendSelectTenureKeyboard(tenureOptionsDto);
-        return { success: true }
+        return this.customTelegramService.sendSelectTenureKeyboard(tenureOptionsDto);
     }
 
 }

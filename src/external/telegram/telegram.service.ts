@@ -26,16 +26,17 @@ export class CustomTelegramService {
     }
 
     async sendMessageWithCustomKeyboard(customTelegramKeyboardMessage: CustomTelegramKeyboardMessage): Promise<any> {
-        let buttonArray: TelegramKeyboardButton[][] = [];
-        let i = customTelegramKeyboardMessage.number_of_instalments;
-        for (let row = 0; row < 3; row++) {
+        const telegram_chat_id = customTelegramKeyboardMessage.telegram_chat_id;
+
+        let customKeyboardButtonArray: TelegramKeyboardButton[][] = [];
+        let len = customTelegramKeyboardMessage.keyboardOptions.length;
+        for (let row = 0; row < len; row++) {
             let r: TelegramKeyboardButton[] = [];
-            for (let c = 0; c < 3; c++) {
-                r.push({ text: "" + i });
-                i++;
-            }
-            buttonArray.push(r);
+            r.push({ text: customTelegramKeyboardMessage.keyboardOptions[row] });
+            customKeyboardButtonArray.push(r);
         }
+        return await this.sendKeyboardMessage(customKeyboardButtonArray, telegram_chat_id, customTelegramKeyboardMessage.message, 0);
+
     }
 
     async sendCreditAmountKeyboard(creditAmountDetails: CreditAmountDetailsDto) {
@@ -66,7 +67,7 @@ export class CustomTelegramService {
             }
             customKeyboardButtonArray.push(r);
         }
-
+        telegram_chat_id
         return await this.sendKeyboardMessage(customKeyboardButtonArray, telegram_chat_id, creditAmountDetails.message, 2000);
 
     }
@@ -159,7 +160,10 @@ export class CustomTelegramService {
         };
         this.log.log("telegram Keyboard message : " + JSON.stringify(data) + ` Delay time in millsec =${waitInMilliSec}`);
         if (!waitInMilliSec || waitInMilliSec == 0) {
-            this.telegramService.sendMessage(data);
+            const observable = this.telegramService.sendMessage(data);
+            observable.subscribe((res: any) => {
+                this.log.log("observable res =" + JSON.stringify(res));
+            });
         }
         else {
             this.sendTypingAction(telegram_chat_id);

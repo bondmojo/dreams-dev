@@ -1,5 +1,5 @@
-export class CustomTelegramKeyboardMessage{
-    chat_id:string;
-    text: string;
-    number_of_instalments: number;
+export class CustomTelegramKeyboardMessage {
+    telegram_chat_id: string;
+    message: string;
+    keyboardOptions: string[];
 }
