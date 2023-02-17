@@ -161,7 +161,7 @@ export class GlobalService {
         //Verification_call
         "FLOW_4.7": this.isDev ? "6343d395bc32a404aa0f256a" : '63502d953159eb63ba30bead',
         // Payment Confirmation FLow
-        "FLOW_7.4": this.isDev ? "63e4f3a2b96a18361e2a5a2d" : '63502fb40f6f1901106bde54',
+        "FLOW_7.4": this.isDev ? "637b3068f4f6fb4873206fcb" : '63502fb40f6f1901106bde54',
         // Video Received Confirmation Flow
         "FLOW_4.9": this.isDev ? '63722b1c383fae7ce1107fa4' : '637b687dbaff8b1f2208d173',
         // Send Video Message Flow
@@ -175,8 +175,9 @@ export class GlobalService {
         "TIER": this.isDev ? "6333ce7e4abfcd3b000c14d7" : "635033fabb24cc18be46315d",
         "MAX_CREDIT_AMOUNT": this.isDev ? "630f3559fc45bf34001312c7" : "6350317bcef5586a617e2b77",
         "NEXT_LOAN_AMOUNT": this.isDev ? "6347ece53cfb19125f6d0b58" : "6350344b00bc7d0dfa140eeb",
-        'TENURE': this.isDev ? "63ca6a20d0b92b54d2260bfa" : "",
-        "TENURE_TYPE": this.isDev ? "63ca776429235600120500b7" : "",
+        'TENURE': this.isDev ? "63ca6a20d0b92b54d2260bfa" : "63ca76b511a1b936fa29b631",
+        "TENURE_TYPE": this.isDev ? "63ca776429235600120500b7" : "63ca76d54f1b19669a2cfbe3",
+        "IS_INSTALMENT_FULLYPAID": this.isDev ? "63ee14e659e3477b9e1bfdc3" : "63ee14840cf2b903b034b9ea"
     }
 
     // Repayment Schuedle Global Configurations

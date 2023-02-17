@@ -1,5 +1,5 @@
 import { CreateRepaymentScheduleDto, GetRepaymentScheduleDto } from './dto';
-import { Body, Controller, Post, } from '@nestjs/common';
+import { Body, Controller, Post, Get, Param } from '@nestjs/common';
 import { CustomLogger } from "../../custom_logger";
 import { CreateRepaymentScheduleUsecase } from './usecases/create_repayment_schedule.service';
 import { RepaymentScheduleService } from './usecases/repayment_schedule.service';
@@ -20,6 +20,12 @@ export class RepaymentScheduleController {
   @MethodParamsRespLogger(new CustomLogger(RepaymentScheduleController.name))
   async create(@Body() createRepaymentScheduleDto: CreateRepaymentScheduleDto) {
     return await this.createRepaymentScheduleUsecase.create(createRepaymentScheduleDto);
+  }
+
+  @Get('/:loan_id/paymentPlanMsg')
+  @MethodParamsRespLogger(new CustomLogger(RepaymentScheduleController.name))
+  async getPaymentPlanMsg(@Param('loan_id') loan_id: string) {
+    return await this.repaymentScheduleService.getPaymentPlanMsg(loan_id);
   }
 
   @Post('get/instalment')

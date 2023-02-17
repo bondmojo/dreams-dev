@@ -34,11 +34,20 @@ export class HandleOverRepaymentUsecase extends HandleRepaymentUsecase {
     async process(processRepaymentDto: ProcessRepaymentDto): Promise<any> {
         const loan = await this.loanService.findOneForInternalUse({ id: processRepaymentDto.loan_id });
         await this.createTransactions(processRepaymentDto, loan);
-
         while (processRepaymentDto.amount > 0) {
             const scheudle_instalment = await this.repaymentScheduleService.findOne({ loan_id: loan.id, scheduling_status: this.globalService.INSTALMENT_SCHEDULING_STATUS.SCHEDULED });
+
             // Do not create partial payment transaction in equal & under payment process as we are already creating it in overpayment usecase.
             const doCreatePartialPaymentTransaction = false;
+
+            /**
+             * This variable is used to tell other usecase functions that they are called from over payment usecase.
+             * So they will not do the same tasks which we are doing in this(overpayment usecase).
+             * Ex. trigger payment confirmatin flow, update variable on sendpulse.
+             */
+            const isFunctionCalledFromOverPaymentUsecase = true;
+
+
 
             if (!scheudle_instalment && processRepaymentDto.amount > 0) {
                 // if NO schedule installment found & amount is extra  then store it in dream points. 
@@ -51,7 +60,7 @@ export class HandleOverRepaymentUsecase extends HandleRepaymentUsecase {
                 equalPaymentProcessDto.amount = scheudle_instalment.ins_overdue_amount;
                 equalPaymentProcessDto.image = processRepaymentDto.image;
                 equalPaymentProcessDto.note = processRepaymentDto.note;
-                await this.handleEqualPaymentUsecase.process(equalPaymentProcessDto, doCreatePartialPaymentTransaction);
+                await this.handleEqualPaymentUsecase.process(equalPaymentProcessDto, doCreatePartialPaymentTransaction, isFunctionCalledFromOverPaymentUsecase);
                 processRepaymentDto.amount = processRepaymentDto.amount - scheudle_instalment.ins_overdue_amount;
 
             } else if (processRepaymentDto.amount < scheudle_instalment.ins_overdue_amount) {
@@ -60,10 +69,14 @@ export class HandleOverRepaymentUsecase extends HandleRepaymentUsecase {
                 underPaymentProcessDto.amount = processRepaymentDto.amount;
                 underPaymentProcessDto.image = processRepaymentDto.image;
                 underPaymentProcessDto.note = processRepaymentDto.note;
-                await this.handleUnderRepaymentUsecase.process(underPaymentProcessDto, doCreatePartialPaymentTransaction);
+                await this.handleUnderRepaymentUsecase.process(underPaymentProcessDto, doCreatePartialPaymentTransaction, isFunctionCalledFromOverPaymentUsecase);
                 processRepaymentDto.amount = 0;
             }
         }
+
+        const isInstalmentFullyPaid = true;
+        await this.updateIsInstalmentFullyPaidOnSendpulse(loan, isInstalmentFullyPaid);
+        await this.triggerPaymentConfirmationFlow(loan);
     }
 
     async handleExtraPayment(extra_amount: number, processRepaymentDto: any, loan: Loan) {

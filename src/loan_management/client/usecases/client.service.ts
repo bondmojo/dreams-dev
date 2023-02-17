@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { CreateClientAndLoanDto, CreateClientDto, GetClientDto, UpdateClientDto, RefundDreamPointDto } from "../dto";
 import { CustomLogger } from "../../../custom_logger";
 import { Client } from '../entities/client.entity';
-import { Repository } from 'typeorm';
+import { FindOptionsWhere, Repository } from 'typeorm';
 import { LoanService } from "../../loan/usecases/loan.service";
 import { OnEvent } from "@nestjs/event-emitter";
 import { GlobalService } from "../../../globals/usecases/global.service"
@@ -131,4 +131,11 @@ export class ClientService {
         }
     }
 
+    async find(fields: FindOptionsWhere<Client>, relations: Array<string> = []): Promise<any> {
+        const clients = await this.clientRepository.find({
+            where: fields,
+            relations: relations,
+        });
+        return clients;
+    }
 }
