@@ -34,10 +34,11 @@ export class RepaymentScheduleService {
         return await this.repaymentScheduleRepository.save(repayment_schedule_model);
     }
 
-    async find(fields: FindOptionsWhere<RepaymentSchedule>, relations: Array<string> = []): Promise<any> {
+    async find(fields: FindOptionsWhere<RepaymentSchedule>, relations: Array<string> = [], order: object = { ['created_at']: 'DESC' }): Promise<any> {
         const installments = await this.repaymentScheduleRepository.find({
             where: fields,
             relations: relations,
+            order: order
         });
         return installments;
     }
@@ -68,5 +69,25 @@ export class RepaymentScheduleService {
                 error: `Error in get Instalment  ${error}`,
             }, HttpStatus.EXPECTATION_FAILED);
         }
+    }
+
+    async getPaymentPlanMsg(loan_id: string): Promise<object> {
+        const installments = await this.find({ loan_id }, [], { ['due_date']: 'ASC' });
+        let payment_plan_msg = "";
+        for (let i = 0; i < installments.length; i++) {
+            if (installments[i].ins_overdue_amount == 0) {
+                // strikethrough instalment if overdue is zero
+                payment_plan_msg = payment_plan_msg + `<del>$${installments[i].ins_overdue_amount} - ${installments[i].due_date}</del>`;
+            } else {
+                payment_plan_msg = payment_plan_msg + `$${installments[i].ins_overdue_amount} - ${installments[i].due_date} `;
+            }
+            if (i < installments.length) {
+                payment_plan_msg += '\n'
+            }
+        }
+
+        return {
+            payment_plan: payment_plan_msg
+        };
     }
 }
