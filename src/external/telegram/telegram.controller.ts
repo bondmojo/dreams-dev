@@ -13,7 +13,7 @@ export class TelegramController {
     private readonly logger = new CustomLogger(TelegramController.name);
     constructor(private readonly customTelegramService: CustomTelegramService) { }
 
-    @Post('/sendKeyboardMessage')
+    @Post('/sendCustomKeyboardMessage')
     @MethodParamsRespLogger(new CustomLogger(TelegramController.name))
     async sendKeyboardMessage(@Body() customTelegramKeyboardMessage: CustomTelegramKeyboardMessage) {
         return this.customTelegramService.sendMessageWithCustomKeyboard(customTelegramKeyboardMessage);
@@ -44,6 +44,7 @@ export class TelegramController {
     }
 
     @Post('/sendSelectTenureKeyboard')
+    @MethodParamsRespLogger(new CustomLogger(TelegramController.name))
     async sendSelectTenureKeyboard(@Body() tenureOptionsDto: TenureOptionsDto) {
         this.logger.log("sendSelectTenureKeyboard Request =" + JSON.stringify(tenureOptionsDto));
         return this.customTelegramService.sendSelectTenureKeyboard(tenureOptionsDto);
