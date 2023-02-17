@@ -33,10 +33,10 @@ export class LoanMigrationService {
 
     async migrateData(): Promise<any> {
         // Migrate client table data
-        await this.migrateClientData();
+        // await this.migrateClientData();
 
         // migration loan table data
-        // await this.migrateLoanData();
+        await this.migrateLoanData();
 
         return 'Done';
     }
@@ -80,7 +80,6 @@ export class LoanMigrationService {
         const model: any = {};
         const now = new Date();
 
-        model.id = 'INS' + Math.floor(Math.random() * 100000000);
         model.loan_id = loan.id;
         model.client_id = loan.client_id;
         model.ins_number = 1;
@@ -116,7 +115,7 @@ export class LoanMigrationService {
         for (let i = 0; i < loans.length; i++) {
             const loan = loans[i];
 
-            if (loan.id != "LN43919027") {
+            if (loan.id != "LN5525109") {
                 continue;
             }
             try {
@@ -131,15 +130,16 @@ export class LoanMigrationService {
                 /** 
                  * Updating Loan Tenure Info in db, zoho, sendpuse
                  * */
-                this.updateLoanTenure(loan);
+                await this.updateLoanTenure(loan);
 
                 /**
                  * Create Instalment for only disbursed & fully paid loan.
                  * For request & approved loan, the instalment will automatically create on oan disbursment.
                  */
                 if (["Disbursed", "Fully Paid"].includes(loan.status)) {
-                    const ins_zoho_id = await this.createInsOnZoho(loan);
-                    await this.createInsInDb(loan, ins_zoho_id);
+                    const instalement_id = 'INS' + Math.floor(Math.random() * 100000000);
+                    const ins_zoho_id = await this.createInsOnZoho(loan, instalement_id);
+                    await this.createInsInDb(loan, ins_zoho_id, instalement_id);
                 }
 
                 console.log("****End count ------------->", count);
@@ -205,15 +205,17 @@ export class LoanMigrationService {
         });
     }
 
-    async createInsOnZoho(loan: Loan): Promise<string> {
+    async createInsOnZoho(loan: Loan, instalement_id: string): Promise<string> {
         const ins_db_obj = this.getInsDBOjbect(loan);
+        ins_db_obj.id = instalement_id;
         const ins_zoho_record = await this.getInsZohoRecord(ins_db_obj);
         const [ins_zoho_id] = await this.zohoRepaymentScheduleHelper.createZohoRepaymentSchedule([ins_zoho_record]);
         return ins_zoho_id;
     }
 
-    async createInsInDb(loan: Loan, ins_zoho_id: string) {
+    async createInsInDb(loan: Loan, ins_zoho_id: string, instalement_id: string) {
         const ins_db_obj = this.getInsDBOjbect(loan);
+        ins_db_obj.id = instalement_id
         ins_db_obj.zoho_repayment_schedule_id = ins_zoho_id;
         return await this.repaymentScheduleService.save(ins_db_obj);
     }
