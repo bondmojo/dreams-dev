@@ -10,17 +10,21 @@ import { UpdateLoanDto } from "src/loan_management/loan/dto/update-loan.dto";
 export class HandleUnderRepaymentUsecase extends HandleRepaymentUsecase {
     private readonly logger = new CustomLogger(HandleUnderRepaymentUsecase.name);
 
-    async process(processRepaymentDto: ProcessRepaymentDto, doCreatePartialPaymentTransaction = true, doUpdateIsInstalmentFullyPaidOnSendpulse = true): Promise<any> {
+    async process(processRepaymentDto: ProcessRepaymentDto, doCreatePartialPaymentTransaction = true, isFunctionCalledFromOverPaymentUsecase = false): Promise<any> {
         const loan = await this.loanService.findOneForInternalUse({ id: processRepaymentDto.loan_id });
         const scheudle_instalment = await this.repaymentScheduleService.findOne({ loan_id: loan.id, scheduling_status: this.globalService.INSTALMENT_SCHEDULING_STATUS.SCHEDULED });
         await this.createTransactions(processRepaymentDto, scheudle_instalment, loan, doCreatePartialPaymentTransaction);
         await this.updateRepaymentSchedule(scheudle_instalment, processRepaymentDto);
         await this.updateLoan(processRepaymentDto, loan);
 
-        // update isInstalmentFullyPiad on sendpulse when it's not tigger from handle-over-payment.
-        if (doUpdateIsInstalmentFullyPaidOnSendpulse) {
+        /**
+         *  Do below task when function is not called from over payment usecase.
+         *  Becuase these tasks are already doing in over payment usecase file.
+         */
+        if (!isFunctionCalledFromOverPaymentUsecase) {
             const isInstalmentFullyPaid = false;
             await this.updateIsInstalmentFullyPaidOnSendpulse(loan, isInstalmentFullyPaid);
+            await this.triggerPaymentConfirmationFlow(loan);
         }
     }
 

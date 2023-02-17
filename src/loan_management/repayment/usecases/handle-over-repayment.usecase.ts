@@ -41,10 +41,11 @@ export class HandleOverRepaymentUsecase extends HandleRepaymentUsecase {
             const doCreatePartialPaymentTransaction = false;
 
             /**
-             * 1. Do not update isInstalmentFullyPiad on sendpulse becuase if payment is overpaid then it's means instalment fully paid.
-             * 2. we are updating this variable in this handle-over-payment file.
+             * This variable is used to tell other usecase functions that they are called from over payment usecase.
+             * So they will not do the same tasks which we are doing in this(overpayment usecase).
+             * Ex. trigger payment confirmatin flow, update variable on sendpulse.
              */
-            const doUpdateIsInstalmentFullyPaidOnSendpulse = false;
+            const isFunctionCalledFromOverPaymentUsecase = true;
 
 
 
@@ -59,7 +60,7 @@ export class HandleOverRepaymentUsecase extends HandleRepaymentUsecase {
                 equalPaymentProcessDto.amount = scheudle_instalment.ins_overdue_amount;
                 equalPaymentProcessDto.image = processRepaymentDto.image;
                 equalPaymentProcessDto.note = processRepaymentDto.note;
-                await this.handleEqualPaymentUsecase.process(equalPaymentProcessDto, doCreatePartialPaymentTransaction, doUpdateIsInstalmentFullyPaidOnSendpulse);
+                await this.handleEqualPaymentUsecase.process(equalPaymentProcessDto, doCreatePartialPaymentTransaction, isFunctionCalledFromOverPaymentUsecase);
                 processRepaymentDto.amount = processRepaymentDto.amount - scheudle_instalment.ins_overdue_amount;
 
             } else if (processRepaymentDto.amount < scheudle_instalment.ins_overdue_amount) {
@@ -68,15 +69,14 @@ export class HandleOverRepaymentUsecase extends HandleRepaymentUsecase {
                 underPaymentProcessDto.amount = processRepaymentDto.amount;
                 underPaymentProcessDto.image = processRepaymentDto.image;
                 underPaymentProcessDto.note = processRepaymentDto.note;
-                await this.handleUnderRepaymentUsecase.process(underPaymentProcessDto, doCreatePartialPaymentTransaction, doUpdateIsInstalmentFullyPaidOnSendpulse);
+                await this.handleUnderRepaymentUsecase.process(underPaymentProcessDto, doCreatePartialPaymentTransaction, isFunctionCalledFromOverPaymentUsecase);
                 processRepaymentDto.amount = 0;
             }
         }
 
-        // update isInstalmentFullyPiad on sendpulse when it's not tigger from handle-over-payment.
         const isInstalmentFullyPaid = true;
         await this.updateIsInstalmentFullyPaidOnSendpulse(loan, isInstalmentFullyPaid);
-
+        await this.triggerPaymentConfirmationFlow(loan);
     }
 
     async handleExtraPayment(extra_amount: number, processRepaymentDto: any, loan: Loan) {

@@ -10,7 +10,7 @@ import { TransactionService } from "../../transaction/usecases/transaction.servi
 import { ZohoRepaymentHelperService } from "../services/zoho-repayment-helper.service";
 import { RepaymentScheduleService } from "src/loan_management/repayment_schedule/usecases/repayment_schedule.service";
 import { SendpluseService } from "src/external/sendpulse/sendpluse.service";
-
+import { DreamerModel } from 'src/external/zoho/dreams/dreamer/usecases/model/dreamer.model';
 @Injectable()
 export abstract class HandleRepaymentUsecase {
     constructor(
@@ -59,6 +59,13 @@ export abstract class HandleRepaymentUsecase {
             variable_value: isInstalmentFullyPaid ? 'true' : 'false',
             contact_id: loan.client.sendpulse_id,
         });
+    }
+
+    async triggerPaymentConfirmationFlow(loan: Loan) {
+        const model = new DreamerModel();
+        model.externalId = loan.client.sendpulse_id;
+        const flow_id = this.globalService.SENDPULSE_FLOW['FLOW_7.4'];
+        return await this.sendpulseService.runFlow(model, flow_id);
     }
 
 }
