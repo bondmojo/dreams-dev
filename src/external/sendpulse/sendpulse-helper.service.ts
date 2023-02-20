@@ -18,7 +18,7 @@ export class SendpulseHelperService {
     private readonly log = new CustomLogger(SendpulseHelperService.name);
 
     constructor(private readonly globalService: GlobalService) {
-        this.log.log("repayment schedule str=" + globalService.en.getString('repayment_schedule'));
+        //this.log.log("repayment schedule str=" + globalService.en.getString('repayment_schedule'));
     }
 
     calculateLoan(calculateLoanDto: CalculateLoanDto): CalculateLoanResultDto {

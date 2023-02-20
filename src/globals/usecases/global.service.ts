@@ -3,6 +3,7 @@ import { Injectable, Scope } from "@nestjs/common";
 import * as cjson from 'cjson';
 import { timeStamp } from "console";
 import { TelegramKickChatMemberParams } from "nestjs-telegram";
+import { ReadFileService } from "src/s3/usecases/file_read.service";
 
 
 @Injectable()
@@ -129,6 +130,7 @@ export class GlobalService {
     public readonly SENDPULSE_FLOW: any = {
         //KYC Flow ID: Flow_4.4
         "KYC_FLOW": this.isDev ? '62be938d81768640cc494f34' : '63502d36186d03250968943d',
+        "ERROR_FLOW": this.isDev ? '63d0e7fe6cbc090bce34a6fe' : '63d0e7fe6cbc090bce34a6fe',
         "APPLICATION_STATUS_FLOW_ID": {
             "Disbursed": this.isDev ? "62fc9cd35c6b0b21d713cdea" : '63502d5e19b15a483a50d3a4',
             "Approved": this.isDev ? "6343f1b75eba5c54cb644455" : '63502d056a996b64ec62e105',
@@ -259,10 +261,11 @@ export class GlobalService {
         kh: "kh"
     }
 
-    constructor() {
+    constructor(readonly readFileService: ReadFileService) {
         this.log.log("INITIALIZING GLOBALS");
-        this.en = new English();
-        this.kh = new Khmer();
+
+        this.en = new English(readFileService);
+        this.kh = new Khmer(readFileService);
     }
 
     /*
@@ -280,13 +283,16 @@ class English {
 
     private _en: any;
     private log = new CustomLogger(English.name);
-    constructor() {
+    private readFileService;
+    constructor(rfs: ReadFileService) {
+        this.readFileService = rfs;
         this.loadLanguageJson();
     }
     private async loadLanguageJson() {
-        //@FIXME: Move JSON File to AWS S3 
-        this._en = await cjson.load('src/config/locale/en.json');
-        this.log.log("English Language Loaded");
+        const ls = await this.readFileService.readFile('language/en.json');
+        this._en = JSON.parse(ls);
+        //this._en = await cjson.load('src/config / locale / en.json');
+        this.log.log("English Language Loaded" + JSON.stringify(this._en));
     }
 
     public getString(key: string): string {
@@ -298,12 +304,16 @@ class Khmer {
 
     private _kh: any;
     private log = new CustomLogger(English.name);
-    constructor() {
+    private readFileService;
+    constructor(dfs: ReadFileService) {
+        this.readFileService = dfs;
         this.loadLanguageJson();
     }
     private async loadLanguageJson() {
-        //@FIXME: Move JSON File to AWS S3 
-        this._kh = await cjson.load('src/config/locale/kh.json');
+        const ls = await this.readFileService.readFile('language/kh.json');
+        this._kh = JSON.parse(ls);
+
+        //this._kh = await cjson.load('src/config/locale/kh.json');
         this.log.log("Khmer Language Loaded");
     }
 
