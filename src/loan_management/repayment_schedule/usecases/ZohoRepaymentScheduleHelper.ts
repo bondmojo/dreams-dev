@@ -23,10 +23,17 @@ export class ZohoRepaymentScheduleHelper {
         const zohoRepaymentSchedulePair: any = {};
         const id = BigInt(repaymentScheduleModel.zoho_loan_id);
         const zoholoanID = new Record();
-        zoholoanID.setId(id);
+        zoholoanID.setId(id)
+        zohoRepaymentSchedulePair[ZohoInstallmentFields.loan_id] = zoholoanID;
+
+
+        const dreamer_id = BigInt(repaymentScheduleModel.zoho_client_id);
+        const ZohoDreamerID = new Record();
+        ZohoDreamerID.setId(dreamer_id);
+
+        zohoRepaymentSchedulePair[ZohoInstallmentFields.dreamer_name] = ZohoDreamerID;
 
         zohoRepaymentSchedulePair[ZohoInstallmentFields.name] = repaymentScheduleModel.id;
-        zohoRepaymentSchedulePair[ZohoInstallmentFields.loan_id] = zoholoanID;
         zohoRepaymentSchedulePair[ZohoInstallmentFields.total_paid_amount] = Number(repaymentScheduleModel.total_paid_amount);
         zohoRepaymentSchedulePair[ZohoInstallmentFields.overdue_amount] = Number(repaymentScheduleModel.ins_overdue_amount);
         zohoRepaymentSchedulePair[ZohoInstallmentFields.repayment_status] = new Choice(this.globalService.INSTALMENT_PAYMENT_STATUS_STR[repaymentScheduleModel.repayment_status]);

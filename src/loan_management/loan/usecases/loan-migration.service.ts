@@ -41,12 +41,17 @@ export class LoanMigrationService {
         return 'Done';
     }
 
-    async getInsZohoRecord(ins_db_obj: any): Promise<any> {
+    async getInsZohoRecord(ins_db_obj: any, loan: Loan): Promise<any> {
         const zohoRepaymentSchedulePair: any = {};
         const id = BigInt(ins_db_obj.zoho_loan_id);
         const zoholoanID = new Record();
         zoholoanID.setId(id);
 
+        const dreamer_id = BigInt(loan.client.zoho_id);
+        const ZohoDreamerID = new Record();
+        ZohoDreamerID.setId(dreamer_id);
+
+        zohoRepaymentSchedulePair[ZohoInstallmentFields.dreamer_name] = ZohoDreamerID;
         zohoRepaymentSchedulePair[ZohoInstallmentFields.name] = ins_db_obj.id;
         zohoRepaymentSchedulePair[ZohoInstallmentFields.loan_id] = zoholoanID;
         zohoRepaymentSchedulePair[ZohoInstallmentFields.total_paid_amount] = Number(ins_db_obj.total_paid_amount);
@@ -125,12 +130,12 @@ export class LoanMigrationService {
                 /**
                  * Update client_in in all transaction
                  */
-                await this.updateLoanAllTransactions(loan);
+                // await this.updateLoanAllTransactions(loan);
 
                 /** 
                  * Updating Loan Tenure Info in db, zoho, sendpuse
                  * */
-                await this.updateLoanTenure(loan);
+                // await this.updateLoanTenure(loan);
 
                 /**
                  * Create Instalment for only disbursed & fully paid loan.
@@ -208,7 +213,7 @@ export class LoanMigrationService {
     async createInsOnZoho(loan: Loan, instalement_id: string): Promise<string> {
         const ins_db_obj = this.getInsDBOjbect(loan);
         ins_db_obj.id = instalement_id;
-        const ins_zoho_record = await this.getInsZohoRecord(ins_db_obj);
+        const ins_zoho_record = await this.getInsZohoRecord(ins_db_obj, loan);
         const [ins_zoho_id] = await this.zohoRepaymentScheduleHelper.createZohoRepaymentSchedule([ins_zoho_record]);
         return ins_zoho_id;
     }

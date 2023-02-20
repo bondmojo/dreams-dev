@@ -11,5 +11,6 @@ export const ZohoInstallmentFields = {
     installment_fees: 'Installment_Fees',
     loan_completion_date: 'Loan_completion_Date',
     additional_fee: 'Additional_Amount',
-    previous_repayment_dates: 'Previous_Repayment_Dates'
+    previous_repayment_dates: 'Previous_Repayment_Dates',
+    dreamer_name: 'Dreamer_Name',
 }

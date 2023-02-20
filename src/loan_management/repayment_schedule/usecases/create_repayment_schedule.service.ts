@@ -36,8 +36,7 @@ export class CreateRepaymentScheduleUsecase {
                 getRepaymentScheduleModelDto.loan_id = createRepaymentScheduleDto.loan_id;
                 getRepaymentScheduleModelDto.client_id = createRepaymentScheduleDto.client_id;
                 getRepaymentScheduleModelDto.zoho_loan_id = createRepaymentScheduleDto.zoho_loan_id;
-
-
+                getRepaymentScheduleModelDto.zoho_client_id = createRepaymentScheduleDto.zoho_client_id;
                 //add remainder amount in last instalment.
                 if (i == tenure - 1) {
                     getRepaymentScheduleModelDto.principal_amount += createRepaymentScheduleDto.loan_amount % tenure;
@@ -78,7 +77,7 @@ export class CreateRepaymentScheduleUsecase {
         model.client_id = getRepaymentScheduleModelDto.client_id;
         model.ins_number = getRepaymentScheduleModelDto.ins_number;
         model.zoho_loan_id = getRepaymentScheduleModelDto.zoho_loan_id;
-
+        model.zoho_client_id = getRepaymentScheduleModelDto.zoho_client_id;
         model.ins_principal_amount = Number(getRepaymentScheduleModelDto.principal_amount.toFixed(2));
         model.ins_membership_fee = this.globalService.INSTALMENT_MEMBERSHIP_FEE;
         model.ins_overdue_amount = Number((model.ins_principal_amount + model.ins_membership_fee).toFixed(2));

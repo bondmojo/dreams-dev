@@ -17,4 +17,5 @@ export class RepaymentScheduleModel {
     due_date: Date;
     zoho_loan_id: string;
     scheduling_status: string;
+    zoho_client_id: string;
 }

@@ -232,7 +232,7 @@ export class LoanService {
             crpSch.loan_id = loan.id;
             crpSch.loan_tenure = loan.tenure;
             crpSch.zoho_loan_id = loan.zoho_loan_id;
-
+            crpSch.zoho_client_id = loan.client.zoho_id;
             this.log.debug("creating repayment schedule for loan" + JSON.stringify(crpSch));
             await this.createRepaymentScheduleUsecase.create(crpSch);
 
