@@ -148,7 +148,7 @@ export class SendpulseHelperService {
         number = number.replace(/៨/g, "8");
         number = number.replace(/៩/g, "9");
         // Remove other characters from string
-        number = number.replace(/[^0-9-]/g, '');
+        number = number.replace(/[^0-9]/g, '');
         return number;
     }
 
