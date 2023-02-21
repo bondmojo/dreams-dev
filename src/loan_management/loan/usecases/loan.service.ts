@@ -2,7 +2,7 @@ import { EventEmitter2 } from "@nestjs/event-emitter";
 import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from '@nestjs/typeorm';
 import { Choice } from "@zohocrm/typescript-sdk-2.0/utils/util/choice";
-import { add } from "date-fns";
+import { add, format } from "date-fns";
 import { UpdateApplicationStatusRequestDto } from "src/external/sendpulse/dto/update-application-status-request.dto";
 import { CreateZohoLoanApplicationDto } from "src/external/zoho/dreams/zoho-loans/dto/create-loan-appl.dto";
 import { CreateLoanApplicationUsecase } from "src/external/zoho/dreams/zoho-loans/usecases/create-loan-application.usecase";
@@ -167,13 +167,14 @@ export class LoanService {
                 loanResponse.status = false;
                 return loanResponse
             }
+            const formated_repayment_date = format(new Date(loan.repayment_date), 'dd-MM-yyyy');
             const client = loan?.client;
             loanResponse.status = true;
             loanResponse.dreamPoints = "" + (client?.dream_points_earned + client?.dream_points_committed);
             loanResponse.loanAmount = "" + (loan?.amount - loan?.dream_point);
             loanResponse.wireTransferType = loan?.wire_transfer_type;
             loanResponse.loanStatus = loan?.status;
-            loanResponse.dueDate = "" + loan?.repayment_date;
+            loanResponse.dueDate = "" + formated_repayment_date;
             loanResponse.wingCode = "" + loan?.wing_code;
             loanResponse.outstandingBalance = "" + loan?.outstanding_amount;
             loanResponse.membershipTier = client?.tier;

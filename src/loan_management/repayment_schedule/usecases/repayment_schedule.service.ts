@@ -5,7 +5,8 @@ import { RepaymentSchedule } from '../entities/repayment_schedule.entity';
 import { Repository, FindOptionsWhere } from 'typeorm';
 import { UpdateRepaymentScheduleDto, GetInstalmentDto } from '../dto';
 import { GlobalService } from "src/globals/usecases/global.service";
-import { differenceInCalendarDays } from 'date-fns'
+import { differenceInCalendarDays, format } from 'date-fns'
+
 
 @Injectable()
 export class RepaymentScheduleService {
@@ -57,6 +58,9 @@ export class RepaymentScheduleService {
             // Set overdue_days to 0 when value is negative (when today is greater then due date)
             overdue_days = (overdue_days < 0) ? 0 : overdue_days;
 
+            // Format instalment due date
+            instalment.due_date = format(new Date(instalment.due_date), 'dd-MM-yyyy');
+
             // appending other variable in instalment response
             const response = { ...instalment, overdue_days };
 
@@ -75,11 +79,12 @@ export class RepaymentScheduleService {
         const installments = await this.find({ loan_id }, [], { ['due_date']: 'ASC' });
         let payment_plan_msg = "";
         for (let i = 0; i < installments.length; i++) {
+            const formatted_due_date = format(new Date(installments[i].due_date), 'dd-MM-yyyy');
             if (installments[i].ins_overdue_amount == 0) {
                 // strikethrough instalment if overdue is zero
-                payment_plan_msg = payment_plan_msg + `<del>$${installments[i].ins_overdue_amount} - ${installments[i].due_date}</del>`;
+                payment_plan_msg = payment_plan_msg + `<del>$${installments[i].ins_overdue_amount} - ${formatted_due_date}</del>`;
             } else {
-                payment_plan_msg = payment_plan_msg + `$${installments[i].ins_overdue_amount} - ${installments[i].due_date} `;
+                payment_plan_msg = payment_plan_msg + `$${installments[i].ins_overdue_amount} - ${formatted_due_date} `;
             }
             if (i < installments.length) {
                 payment_plan_msg += '\n'
