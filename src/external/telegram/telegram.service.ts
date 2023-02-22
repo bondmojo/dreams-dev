@@ -27,9 +27,9 @@ export class CustomTelegramService {
 
     async sendMessageWithCustomKeyboard(customTelegramKeyboardMessage: CustomTelegramKeyboardMessage): Promise<any> {
         const telegram_chat_id = customTelegramKeyboardMessage.telegram_chat_id;
-        const delaiInSec = customTelegramKeyboardMessage.delayInSeconds ? Number(customTelegramKeyboardMessage.delayInSeconds) : 2000;
+        const delayInSec = customTelegramKeyboardMessage.delayInSeconds ? Number(customTelegramKeyboardMessage.delayInSeconds) : 0;
 
-        const delayinMillis = delaiInSec * 1000;
+        const delayinMillis = delayInSec * 1000;
 
         let customKeyboardButtonArray: TelegramKeyboardButton[][] = [];
         let len = customTelegramKeyboardMessage.keyboardOptions.length;
