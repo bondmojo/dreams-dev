@@ -33,7 +33,7 @@ export class LoanMigrationService {
 
     async migrateData(): Promise<any> {
         // Migrate client table data
-        // await this.migrateClientData();
+        await this.migrateClientData();
 
         // migration loan table data
         await this.migrateLoanData();
@@ -120,7 +120,7 @@ export class LoanMigrationService {
         for (let i = 0; i < loans.length; i++) {
             const loan = loans[i];
 
-            if (loan.id != "LN17817476") {
+            if (loan.client_id != "CL98164989") {
                 continue;
             }
             try {
@@ -129,12 +129,12 @@ export class LoanMigrationService {
                 /**
                 * Update client_in in all transaction
                 */
-                //  await this.updateLoanAllTransactions(loan);
+                await this.updateLoanAllTransactions(loan);
 
                 /** 
                  * Updating Loan Tenure Info in db, zoho, sendpuse
                  * */
-                // await this.updateLoanTenure(loan);
+                await this.updateLoanTenure(loan);
 
                 /**
                  * Create Instalment for only disbursed & fully paid loan.
@@ -258,7 +258,7 @@ export class LoanMigrationService {
         }
         );
         const ids = transaction_ids_for_ins_id_update.map(i => i.id);
-        await this.transactionService.bulkUpdate([], { repayment_schedule_id: instalement_id });
+        await this.transactionService.bulkUpdate(ids, { repayment_schedule_id: instalement_id });
         console.log('Add Installment Ids in Loan Transaction Done ', loan.id);
     }
 }
