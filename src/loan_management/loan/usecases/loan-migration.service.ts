@@ -237,6 +237,8 @@ export class LoanMigrationService {
                 return this.globalService.INSTALMENT_PAYMENT_STATUS.PAYMENT_DUE;
             case "Payment Rescheduled":
                 return this.globalService.INSTALMENT_PAYMENT_STATUS.PAYMENT_RESCHEDULED;
+            default:
+                return this.globalService.INSTALMENT_PAYMENT_STATUS.NOT_PAID;
         }
     }
 
