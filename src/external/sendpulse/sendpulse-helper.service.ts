@@ -14,7 +14,7 @@ import RepaymentScheduleDto from "./dto/repayment-schedule.dto";
 @Injectable()
 export class SendpulseHelperService {
     private readonly FEES: number = 3;
-    private readonly LOAN_CYCLE: number = 30;
+    private readonly LOAN_DEFAULT_TENURE: number = 1;
     private readonly log = new CustomLogger(SendpulseHelperService.name);
 
     constructor(private readonly globalService: GlobalService) {
@@ -38,7 +38,7 @@ export class SendpulseHelperService {
             result.receivableAmount = (amount - dreamsPoint).toString();
             result.is_success = "true";
             const date = new Date();
-            const payday = add(date, { days: this.LOAN_CYCLE });
+            const payday = add(date, { months: Number(tenure) });;
             result.paymentDate = format(payday, 'dd-MM-yyyy');
             result.maxTenure = this.globalService.CLACULATE_MAX_TENURE({ amount });
             result.tenureType = this.globalService.LOAN_TENURE_TYPE.MONTHLY;
