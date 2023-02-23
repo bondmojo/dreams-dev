@@ -120,17 +120,16 @@ export class LoanMigrationService {
         for (let i = 0; i < loans.length; i++) {
             const loan = loans[i];
 
-            if (loan.id != "LN5525109") {
+            if (loan.id != "LN17817476") {
                 continue;
             }
             try {
 
                 console.log("****Start count ------------->", count, loan.id);
-
                 /**
-                 * Update client_in in all transaction
-                 */
-                // await this.updateLoanAllTransactions(loan);
+                * Update client_in in all transaction
+                */
+                //  await this.updateLoanAllTransactions(loan);
 
                 /** 
                  * Updating Loan Tenure Info in db, zoho, sendpuse
@@ -145,6 +144,7 @@ export class LoanMigrationService {
                     const instalement_id = 'INS' + Math.floor(Math.random() * 100000000);
                     const ins_zoho_id = await this.createInsOnZoho(loan, instalement_id);
                     await this.createInsInDb(loan, ins_zoho_id, instalement_id);
+                    await this.updateInsIdInTransactions(loan, instalement_id);
                 }
 
                 console.log("****End count ------------->", count);
@@ -246,5 +246,19 @@ export class LoanMigrationService {
         const transaction_ids = loan.transaction.map(i => i.id);
         await this.transactionService.bulkUpdate(transaction_ids, { client_id: loan.client_id });
         console.log('updateLoanAllTransactions Done ', loan.id);
+    }
+
+    async updateInsIdInTransactions(loan: Loan, instalement_id: string) {
+        const transaction_ids_for_ins_id_update = loan.transaction.filter(i => {
+            if (['credit_repayment', 'fee_payment', 'partial_payment', 'late_fee', 'debit_wing_wei_luy_transfer_fee', 'credit_wing_wei_luy_transfer_fee'].includes(i.type)) {
+                return true;
+            }
+            return false;
+
+        }
+        );
+        const ids = transaction_ids_for_ins_id_update.map(i => i.id);
+        await this.transactionService.bulkUpdate([], { repayment_schedule_id: instalement_id });
+        console.log('Add Installment Ids in Loan Transaction Done ', loan.id);
     }
 }
