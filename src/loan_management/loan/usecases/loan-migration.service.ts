@@ -3,9 +3,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { CustomLogger } from "../../../custom_logger";
 import { Loan } from '../entities/loan.entity';
 import { GlobalService } from "../../../globals/usecases/global.service"
-import { Repository, In, Between } from 'typeorm';
+import { Repository } from 'typeorm';
 import { ZohoLoanHelperService } from "./zoho-loan-helper.service";
-import { differenceInCalendarDays } from "date-fns"
 import { TransactionService } from "../../transaction/usecases/transaction.service";
 import { SendpluseService } from "src/external/sendpulse/sendpluse.service";
 import { ClientService } from '../../client/usecases/client.service';
@@ -106,6 +105,10 @@ export class LoanMigrationService {
         model.previous_repayment_dates = loan.previous_repayment_dates;
         if (loan.paid_date) {
             model.paid_date = new Date(loan.paid_date);
+            // if loan has partial paid amount then repayment_status should be partial paid
+            if (model.repayment_status == 100) {
+                model.repayment_status = 200;
+            }
         }
 
         return model;
@@ -254,7 +257,6 @@ export class LoanMigrationService {
                 return true;
             }
             return false;
-
         }
         );
         const ids = transaction_ids_for_ins_id_update.map(i => i.id);
