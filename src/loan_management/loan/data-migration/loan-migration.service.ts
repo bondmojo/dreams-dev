@@ -4,7 +4,7 @@ import { CustomLogger } from "../../../custom_logger";
 import { Loan } from '../entities/loan.entity';
 import { GlobalService } from "../../../globals/usecases/global.service"
 import { Repository } from 'typeorm';
-import { ZohoLoanHelperService } from "./zoho-loan-helper.service";
+import { ZohoLoanHelperService } from "../usecases/zoho-loan-helper.service";
 import { TransactionService } from "../../transaction/usecases/transaction.service";
 import { SendpluseService } from "src/external/sendpulse/sendpluse.service";
 import { ClientService } from '../../client/usecases/client.service';
@@ -14,8 +14,16 @@ import { ZohoInstallmentFields } from "src/globals/zoho_fields_mapping/Installme
 import { GetTransactionDto } from "src/loan_management/transaction/dto";
 import { ZohoRepaymentScheduleHelper } from "src/loan_management/repayment_schedule/usecases/ZohoRepaymentScheduleHelper";
 import { RepaymentScheduleService } from "src/loan_management/repayment_schedule/usecases/repayment_schedule.service";
-import { SENSPULSE_TELEGRAM_ID_PAIR } from "../data-migration/sendpulse-telegram-id-pair";
+import { SENSPULSE_TELEGRAM_ID_PAIR } from "./sendpulse-telegram-id-pair";
 @Injectable()
+/**
+ * Note: before writing new migration code please create new file data-migration/versions folder and paste this file data over there to perform migration history versionning.
+ * Feature: Tenure 
+ * Version: V2
+ * Date: Faburary 2023
+ * Developed by: Nitesh Soni
+ * Work done in migration(Needs to be add):
+ */
 export class LoanMigrationService {
     private readonly log = new CustomLogger(LoanMigrationService.name);
     constructor(

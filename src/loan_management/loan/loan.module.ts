@@ -12,7 +12,7 @@ import { LoanController } from './loan.controller';
 import { PaymentReminderService } from './notification/payment-reminder.service';
 import { LoanHelperService } from './usecases/loan-helper.service';
 import { LoanService } from './usecases/loan.service';
-import { LoanMigrationService } from './usecases/loan-migration.service';
+import { LoanMigrationService } from './data-migration/loan-migration.service';
 import { ZohoLoanHelperService } from './usecases/zoho-loan-helper.service';
 import { SendpulseLoanHelperService } from './usecases/sendpulse-loan-helper.service';
 import { HandleLatePaymentService } from './usecases/handle-late-payment.service';

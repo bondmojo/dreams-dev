@@ -1,7 +1,7 @@
 import { DisbursedLoanDto, CreateLoanDto, CreateRepaymentTransactionDto, VideoReceivedCallbackDto, HandlePaymentDueLoansDto, UpdateRepaymentDateDto } from './dto';
 import { Body, Controller, Param, Post, Get } from '@nestjs/common';
 import { LoanService } from "./usecases/loan.service";
-import { LoanMigrationService } from "./usecases/loan-migration.service";
+import { LoanMigrationService } from "./data-migration/loan-migration.service";
 import { CustomLogger } from "../../custom_logger";
 import { PaymentReminderService } from "./notification/payment-reminder.service";
 import { HandleLatePaymentService } from "./usecases/handle-late-payment.service";
