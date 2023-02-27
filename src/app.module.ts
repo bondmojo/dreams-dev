@@ -19,6 +19,10 @@ import { DataSource } from 'typeorm';
 import { RepaymentScheduleModule } from './loan_management/repayment_schedule/repayment_schedule.module';
 import { RepaymentModule } from './loan_management/repayment/repayment.module';
 import { CustomTelegramModule } from './external/telegram/telegram.module';
+import { WinstonModule } from 'nest-winston';
+import * as winston from 'winston';
+import { format } from 'winston';
+
 @Module({
   controllers: [HealthCheckController],
   imports: [
@@ -29,6 +33,19 @@ import { CustomTelegramModule } from './external/telegram/telegram.module';
         return dataSource;
       },
     }),
+    WinstonModule.forRoot(({
+      format: format.combine(
+        format.timestamp(),
+        format.json(),
+      ),
+      transports: [
+        new winston.transports.File({
+          filename: 'logs/error.log',
+          level: 'error',
+        }),
+        new winston.transports.File({ filename: 'logs/debug.log' }),
+      ],
+    })),
     ScheduleModule.forRoot(),
     ConfigModule.forRoot(), EventEmitterModule.forRoot(), ZohoModule, DreamerModule, SendpulseModule, ClientModule, LoanModule,
     TransactionModule, GlobalModule, S3Module, RepaymentScheduleModule, RepaymentModule, CustomTelegramModule]

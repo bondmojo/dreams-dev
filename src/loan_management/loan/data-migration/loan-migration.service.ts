@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, Inject } from "@nestjs/common";
 import { InjectRepository } from '@nestjs/typeorm';
 import { CustomLogger } from "../../../custom_logger";
 import { Loan } from '../entities/loan.entity';
@@ -15,6 +15,8 @@ import { GetTransactionDto } from "src/loan_management/transaction/dto";
 import { ZohoRepaymentScheduleHelper } from "src/loan_management/repayment_schedule/usecases/ZohoRepaymentScheduleHelper";
 import { RepaymentScheduleService } from "src/loan_management/repayment_schedule/usecases/repayment_schedule.service";
 import { SENSPULSE_TELEGRAM_ID_PAIR } from "./sendpulse-telegram-id-pair";
+import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
+import { Logger } from 'winston';
 @Injectable()
 /**
  * Note: before writing new migration code please create new file data-migration/versions folder and paste this file data over there to perform migration history versionning.
@@ -25,7 +27,6 @@ import { SENSPULSE_TELEGRAM_ID_PAIR } from "./sendpulse-telegram-id-pair";
  * Work done in migration(Needs to be add):
  */
 export class LoanMigrationService {
-    private readonly log = new CustomLogger(LoanMigrationService.name);
     constructor(
         @InjectRepository(Loan)
         private readonly loanRepository: Repository<Loan>,
@@ -36,7 +37,10 @@ export class LoanMigrationService {
         private readonly clientService: ClientService,
         private readonly zohoRepaymentScheduleHelper: ZohoRepaymentScheduleHelper,
         private readonly repaymentScheduleService: RepaymentScheduleService,
-    ) { }
+        @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger
+    ) {
+
+    }
 
     async migrateData(): Promise<any> {
         // Migrate client table data
