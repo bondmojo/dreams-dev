@@ -1,6 +1,5 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, Inject } from "@nestjs/common";
 import { InjectRepository } from '@nestjs/typeorm';
-import { CustomLogger } from "../../../../custom_logger";
 import { Loan } from '../../entities/loan.entity';
 import { GlobalService } from "../../../../globals/usecases/global.service"
 import { Repository } from 'typeorm';
@@ -15,16 +14,23 @@ import { GetTransactionDto } from "src/loan_management/transaction/dto";
 import { ZohoRepaymentScheduleHelper } from "src/loan_management/repayment_schedule/usecases/ZohoRepaymentScheduleHelper";
 import { RepaymentScheduleService } from "src/loan_management/repayment_schedule/usecases/repayment_schedule.service";
 import { SENSPULSE_TELEGRAM_ID_PAIR } from "../sendpulse-telegram-id-pair";
+import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
+import { Logger } from 'winston';
 @Injectable()
 /**
+ * Note: before writing new migration code please create new file in data-migration/versions folder and paste this file data over there to maintain migration history.
  * Feature: Tenure 
  * Version: V2
  * Date: Faburary 2023
  * Developed by: Nitesh Soni
- * Work done in migration(Needs to be add):
+ * Work done in this migration file
+ * 1. Database: Adding telegram ids in all clients records
+ * 2. Database: Adding client Ids in all transactions of all loans
+ * 3. Zoho, Sendpulse and Database: Updating tenure and tenure type variables. 
+ * 4. Zoho, Database: Creating instalment for existing loans.
+ * 5. Database: Adding instalment id in existing transactions. 
  */
 export class LoanMigrationService {
-    private readonly log = new CustomLogger(LoanMigrationService.name);
     constructor(
         @InjectRepository(Loan)
         private readonly loanRepository: Repository<Loan>,
@@ -35,16 +41,63 @@ export class LoanMigrationService {
         private readonly clientService: ClientService,
         private readonly zohoRepaymentScheduleHelper: ZohoRepaymentScheduleHelper,
         private readonly repaymentScheduleService: RepaymentScheduleService,
-    ) { }
+        @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger
+    ) {
+
+    }
 
     async migrateData(): Promise<any> {
-        // Migrate client table data
-        await this.migrateClientData();
+        //Get All Clients from database
+        const clients: any[] = await this.clientService.find({}, ['loan']);
+        for (let i = 0; i < clients.length; i++) {
+            const client = clients[i];
+            if (client.id != "CL98164989") {
+                continue;
+            }
 
-        // migration loan table data
-        await this.migrateLoanData();
+            try {
+                this.logger.info(`🚀 Starting Migration For 🙍‍♂️ ${client.full_en}(${client.id}) `)
+                // Add telegram ids to all clients
+                await this.migrateTelegramId(client);
 
-        return 'Done';
+                // Running migration on client loan
+                const loans = client.loan;
+                if (loans.length == 0) {
+                    this.logger.info(`🚫 NO LOANS FOUND FOR USER ${client.full_en}(${client.id}) `)
+                }
+                for (let j = 0; j < loans.length; j++) {
+                    try {
+                        const loan = await this.loanRepository.findOne({
+                            where: { id: loans[j].id },
+                            relations: ['client', 'transaction'],
+                        });
+
+                        // adding client_id in all transacations
+                        await this.updateClientIdInLoanAllTransactions(loan);
+
+                        // Updating Loan Tenure Info in db, zoho, sendpuse
+                        await this.updateLoanTenure(loan);
+
+                        if (["Disbursed", "Fully Paid"].includes(loan.status)) {
+                            const instalement_id = 'INS' + Math.floor(Math.random() * 100000000);
+                            const ins_zoho_id = await this.createInsOnZoho(loan, instalement_id);
+                            await this.createInsInDb(loan, ins_zoho_id, instalement_id);
+                            await this.updateInsIdInTransactions(loan, instalement_id);
+                        }
+
+                    } catch (error) {
+                        this.logger.info(`❌ Error in loan for loop ${client.full_en}(${client.id}) = ${error}`);
+                        this.logger.error(`❌ Error in loan for loop ${client.full_en}(${client.id}) = ${error}`);
+                    }
+                }
+
+                this.logger.info(`🥂 Done migration for ${client.full_en}(${client.id}) 🙌`);
+                this.logger.info(`⏳⏳⏳⏳⏳⏳⏳⏳⏳⏳⏳⏳⏳⏳⏳⏳⏳⏳⏳⏳⏳⏳ PREPARING SYSTEM FOR NEXT USER MIGRATION ⏳⏳⏳⏳⏳⏳⏳⏳⏳⏳⏳⏳⏳⏳⏳⏳⏳⏳⏳⏳⏳⏳⏳⏳⏳`);
+            } catch (error) {
+                this.logger.info(`Error: User = ${client}`);
+            }
+        }
+        return 'Data Migration Done 😃';
     }
 
     async getInsZohoRecord(ins_db_obj: any, loan: Loan): Promise<any> {
@@ -121,118 +174,97 @@ export class LoanMigrationService {
         return model;
     }
 
-    async migrateLoanData() {
-        const loans = await this.loanRepository.find({
-            relations: ['client', 'transaction'],
-        });
-        console.log("Total loans ==", loans.length);
-        let count = 0;
-        for (let i = 0; i < loans.length; i++) {
-            const loan = loans[i];
-
-            if (loan.client_id != "CL98164989") {
-                continue;
+    async migrateTelegramId(client: any) {
+        try {
+            const telegram_id = SENSPULSE_TELEGRAM_ID_PAIR[client.sendpulse_id as keyof typeof SENSPULSE_TELEGRAM_ID_PAIR];
+            if (telegram_id) {
+                client.telegram_id = telegram_id['t_id'];
+                await this.clientService.update(client);
             }
-            try {
-
-                console.log("****Start count ------------->", count, loan.id);
-                /**
-                * Update client_in in all transaction
-                */
-                await this.updateLoanAllTransactions(loan);
-
-                /** 
-                 * Updating Loan Tenure Info in db, zoho, sendpuse
-                 * */
-                await this.updateLoanTenure(loan);
-
-                /**
-                 * Create Instalment for only disbursed & fully paid loan.
-                 * For request & approved loan, the instalment will automatically create on oan disbursment.
-                 */
-                if (["Disbursed", "Fully Paid"].includes(loan.status)) {
-                    const instalement_id = 'INS' + Math.floor(Math.random() * 100000000);
-                    const ins_zoho_id = await this.createInsOnZoho(loan, instalement_id);
-                    await this.createInsInDb(loan, ins_zoho_id, instalement_id);
-                    await this.updateInsIdInTransactions(loan, instalement_id);
-                }
-
-                console.log("****End count ------------->", count);
-                count++;
-            } catch (e) {
-                console.error(`Loan ${loan.id}  has Migration Error ${e}`);
-            }
-
+            this.logger.info(`👍 TELEGRAM ID MIGRATION DONE SUCCESSFULLY ${client.full_en}(${client.id})`);
+        } catch (error) {
+            this.logger.info(`❌ ERROR IN migrateTelegramId ${client.full_en}(${client.id}) ${error}`);
+            this.logger.error(`❌ ERROR IN migrateTelegramId ${client.full_en}(${client.id}) ${error}`);
         }
-    }
 
-    async migrateClientData() {
-        const clients = await this.clientService.find({});
-        for (let i = 0; i < clients.length; i++) {
-            const client = clients[i];
-            try {
-                console.log("Migrating Client:", i, client.id);
-                const telegram_id = SENSPULSE_TELEGRAM_ID_PAIR[client.sendpulse_id as keyof typeof SENSPULSE_TELEGRAM_ID_PAIR];
-                if (telegram_id) {
-                    client.telegram_id = telegram_id['t_id'];
-                    await this.clientService.update(client);
-                }
-            } catch (e) {
-                console.error(`Client ${client.id}  has Migration Error ${e}`);
-            }
-        }
-        console.log("-------- Client Migration Done");
     }
 
     async updateLoanTenure(loan: Loan) {
         // Update Tenure Info on Zoho
-        const loan_retool_url = this.globalService.DREAMS_RETOOL_URL + "#customer_id=" + loan?.client_id;
-        const zohoLoanKeyValuePairs: any = {
-            Tenure: 1,
-            Tenure_Type: this.globalService.LOAN_TENURE_TYPE.MONTHLY,
-            Retool_URL: loan_retool_url
-        };
+        try {
+            const loan_retool_url = this.globalService.DREAMS_RETOOL_URL + "#customer_id=" + loan?.client_id;
+            const zohoLoanKeyValuePairs: any = {
+                Tenure: 1,
+                Tenure_Type: this.globalService.LOAN_TENURE_TYPE.MONTHLY,
+                Retool_URL: loan_retool_url
+            };
 
-        await this.zohoLoanHelperService.updateZohoFields(loan.zoho_loan_id, zohoLoanKeyValuePairs, this.globalService.ZOHO_MODULES.LOAN);
-        console.log('ZOHO: Loan Updation DONE ', loan.id);
+            await this.zohoLoanHelperService.updateZohoFields(loan.zoho_loan_id, zohoLoanKeyValuePairs, this.globalService.ZOHO_MODULES.LOAN);
+            this.logger.info(`👍 ZOHO: LOAN TENURE UPDATION DONE SUCCESSFULLY ${loan.client.full_en}(${loan.client.id})`);
+        } catch (error) {
+            this.logger.info(`❌ ZOHO: ERROR IN LOAN TENURE UPDATION ${loan.client.full_en}(${loan.client.id}) ${error}`);
+            this.logger.error(`❌ ZOHO: ERROR IN LOAN TENURE UPDATION ${loan.client.full_en}(${loan.client.id}) ${error}`);
+        }
 
-        // Update Tenure info in DB
-        const updateLoanDto: any = {};
-        updateLoanDto.id = loan.id;
-        updateLoanDto.tenure = 1;
-        updateLoanDto.tenure_type = "Monthly"
-        await this.loanRepository.update(updateLoanDto.id, updateLoanDto);
-        console.log('DB: Loan Updation DONE ', loan.id);
+        // Update Tenure info in database
+        try {
+            const updateLoanDto: any = {};
+            updateLoanDto.id = loan.id;
+            updateLoanDto.tenure = 1;
+            updateLoanDto.tenure_type = "Monthly"
+            await this.loanRepository.update(updateLoanDto.id, updateLoanDto);
+            this.logger.info(`👍 DATABASE: LOAN TENURE UPDATION DONE SUCCESSFULLY ${loan.client.full_en}(${loan.client.id})`);
+        } catch (error) {
+            this.logger.info(`❌ DATABASE: ERROR IN LOAN TENURE UPDATION ${loan.client.full_en}(${loan.client.id}) ${error}`);
+            this.logger.error(`❌ DATABASE: ERROR IN LOAN TENURE UPDATION ${loan.client.full_en}(${loan.client.id}) ${error}`);
+        }
 
         // Update Tenure info in sendpulse
-
-        await this.sendpulseService.updateSendpulseVariable({
-            variable_name: 'tenure',
-            variable_id: this.globalService.SENDPULSE_VARIABLE_ID.TENURE,
-            variable_value: '1',
-            contact_id: loan.client.sendpulse_id,
-        });
-        await this.sendpulseService.updateSendpulseVariable({
-            variable_name: 'tenureType',
-            variable_id: this.globalService.SENDPULSE_VARIABLE_ID.TENURE_TYPE,
-            variable_value: 'Monthly',
-            contact_id: loan.client.sendpulse_id,
-        });
+        try {
+            await this.sendpulseService.updateSendpulseVariable({
+                variable_name: 'tenure',
+                variable_id: this.globalService.SENDPULSE_VARIABLE_ID.TENURE,
+                variable_value: '1',
+                contact_id: loan.client.sendpulse_id,
+            });
+            await this.sendpulseService.updateSendpulseVariable({
+                variable_name: 'tenureType',
+                variable_id: this.globalService.SENDPULSE_VARIABLE_ID.TENURE_TYPE,
+                variable_value: 'Monthly',
+                contact_id: loan.client.sendpulse_id,
+            });
+            this.logger.info(`👍 SENDPULSE: LOAN TENURE UPDATION DONE SUCCESSFULLY ${loan.client.full_en}(${loan.client.id})`);
+        } catch (error) {
+            this.logger.info(`❌ SENDPULSE: ERROR IN LOAN TENURE UPDATION ${loan.client.full_en}(${loan.client.id}) ${error}`);
+            this.logger.error(`❌ SENDPULSE: ERROR IN LOAN TENURE UPDATION ${loan.client.full_en}(${loan.client.id}) ${error}`);
+        }
     }
 
     async createInsOnZoho(loan: Loan, instalement_id: string): Promise<string> {
-        const ins_db_obj = this.getInsDBOjbect(loan);
-        ins_db_obj.id = instalement_id;
-        const ins_zoho_record = await this.getInsZohoRecord(ins_db_obj, loan);
-        const [ins_zoho_id] = await this.zohoRepaymentScheduleHelper.createZohoRepaymentSchedule([ins_zoho_record]);
-        return ins_zoho_id;
+        try {
+            const ins_db_obj = this.getInsDBOjbect(loan);
+            ins_db_obj.id = instalement_id;
+            const ins_zoho_record = await this.getInsZohoRecord(ins_db_obj, loan);
+            const [ins_zoho_id] = await this.zohoRepaymentScheduleHelper.createZohoRepaymentSchedule([ins_zoho_record]);
+            this.logger.info(`👍 ZOHO: INSTALMENT CREATION DONE SUCCESSFULLY ${loan.client.full_en}(${loan.client.id})`);
+            return ins_zoho_id;
+        } catch (error) {
+            this.logger.info(`❌ ZOHO: ERROR IN INSTALMENT CREATION ${loan.client.full_en}(${loan.client.id}) ${error}`);
+            this.logger.error(`❌ ZOHO: ERROR IN INSTALMENT CREATION ${loan.client.full_en}(${loan.client.id}) ${error}`);
+        }
     }
 
     async createInsInDb(loan: Loan, ins_zoho_id: string, instalement_id: string) {
-        const ins_db_obj = this.getInsDBOjbect(loan);
-        ins_db_obj.id = instalement_id
-        ins_db_obj.zoho_repayment_schedule_id = ins_zoho_id;
-        return await this.repaymentScheduleService.save(ins_db_obj);
+        try {
+            const ins_db_obj = this.getInsDBOjbect(loan);
+            ins_db_obj.id = instalement_id
+            ins_db_obj.zoho_repayment_schedule_id = ins_zoho_id;
+            this.logger.info(`👍 DATABASE: INSTALMENT CREATION DONE SUCCESSFULLY ${loan.client.full_en}(${loan.client.id})`);
+            return await this.repaymentScheduleService.save(ins_db_obj);
+        } catch (error) {
+            this.logger.info(`❌ DATABASE: ERROR IN INSTALMENT CREATION ${loan.client.full_en}(${loan.client.id}) ${error}`);
+            this.logger.error(`❌ DATABASE: ERROR IN INSTALMENT CREATION ${loan.client.full_en}(${loan.client.id}) ${error}`);
+        }
     }
 
     getRepaymentStatus(loan_payment_status: string): any {
@@ -252,22 +284,32 @@ export class LoanMigrationService {
         }
     }
 
-    async updateLoanAllTransactions(loan: Loan) {
-        const transaction_ids = loan.transaction.map(i => i.id);
-        await this.transactionService.bulkUpdate(transaction_ids, { client_id: loan.client_id });
-        console.log('updateLoanAllTransactions Done ', loan.id);
+    async updateClientIdInLoanAllTransactions(loan: Loan) {
+        try {
+            const transaction_ids = loan.transaction.map(i => i.id);
+            await this.transactionService.bulkUpdate(transaction_ids, { client_id: loan.client_id });
+            this.logger.info(`👍 DATABASE: UPDATE CLIENT ID IN LOAN's ALL TRANSACTION MIGRATION DONE SUCCESSFULLY ${loan.client.full_en}(${loan.client.id})`);
+        } catch (e) {
+            this.logger.info(`❌ DATABASE: ERROR IN UPDATE CLIENT ID IN LOAN's ALL TRANSACTION MIGRATION ${loan.client.full_en}(${loan.client.id}) ${e}`);
+            this.logger.error(`❌ DATABASE: ERROR IN UPDATE CLIENT ID IN LOAN's ALL TRANSACTION MIGRATION ${loan.client.full_en}(${loan.client.id}) ${e}`);
+        }
     }
 
     async updateInsIdInTransactions(loan: Loan, instalement_id: string) {
-        const transaction_ids_for_ins_id_update = loan.transaction.filter(i => {
-            if (['credit_repayment', 'fee_payment', 'partial_payment', 'late_fee', 'debit_wing_wei_luy_transfer_fee', 'credit_wing_wei_luy_transfer_fee'].includes(i.type)) {
-                return true;
+        try {
+            const transaction_ids_for_ins_id_update = loan.transaction.filter(i => {
+                if (['credit_repayment', 'fee_payment', 'partial_payment', 'late_fee', 'debit_wing_wei_luy_transfer_fee', 'credit_wing_wei_luy_transfer_fee'].includes(i.type)) {
+                    return true;
+                }
+                return false;
             }
-            return false;
+            );
+            const ids = transaction_ids_for_ins_id_update.map(i => i.id);
+            await this.transactionService.bulkUpdate(ids, { repayment_schedule_id: instalement_id });
+            this.logger.info(`👍 DATABASE: INSTALMENT IDs IN TRANSACTION UPDATION DONE SUCCESSFULLY ${loan.client.full_en}(${loan.client.id})`);
+        } catch (e) {
+            this.logger.info(`❌ DATABASE: ERROR IN INSTALMENT IDs IN TRANSACTION UPDATION ${loan.client.full_en}(${loan.client.id}) ${e}`);
+            this.logger.error(`❌ DATABASE: ERROR IN INSTALMENT IDs IN TRANSACTION UPDATION ${loan.client.full_en}(${loan.client.id}) ${e}`);
         }
-        );
-        const ids = transaction_ids_for_ins_id_update.map(i => i.id);
-        await this.transactionService.bulkUpdate(ids, { repayment_schedule_id: instalement_id });
-        console.log('Add Installment Ids in Loan Transaction Done ', loan.id);
     }
 }
