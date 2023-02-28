@@ -72,6 +72,7 @@ export class LoanMigrationService {
                             relations: ['client', 'transaction'],
                         });
 
+                        this.logger.info(`💰 MIGRATING LOAN FOR ${loan.id}`);
                         // adding client_id in all transacations
                         await this.updateClientIdInLoanAllTransactions(loan);
 
@@ -84,14 +85,14 @@ export class LoanMigrationService {
                             await this.createInsInDb(loan, ins_zoho_id, instalement_id);
                             await this.updateInsIdInTransactions(loan, instalement_id);
                         }
-
+                        this.logger.info(`🥂 LOAN MIGRATION DONE ${loan.id}`);
                     } catch (error) {
                         this.logger.info(`❌ Error in loan for loop ${client.full_en}(${client.id}) = ${error}`);
                         this.logger.error(`❌ Error in loan for loop ${client.full_en}(${client.id}) = ${error}`);
                     }
                 }
 
-                this.logger.info(`🥂 Done migration for ${client.full_en}(${client.id}) 🙌`);
+                this.logger.info(`🟢  Done migration for ${client.full_en}(${client.id}) 🙌`);
                 this.logger.info(`⏳⏳⏳⏳⏳⏳⏳⏳⏳⏳⏳⏳⏳⏳⏳⏳⏳⏳⏳⏳⏳⏳ PREPARING SYSTEM FOR NEXT USER MIGRATION ⏳⏳⏳⏳⏳⏳⏳⏳⏳⏳⏳⏳⏳⏳⏳⏳⏳⏳⏳⏳⏳⏳⏳⏳⏳`);
             } catch (error) {
                 this.logger.info(`Error: User = ${client}`);
@@ -288,7 +289,7 @@ export class LoanMigrationService {
         try {
             const transaction_ids = loan.transaction.map(i => i.id);
             await this.transactionService.bulkUpdate(transaction_ids, { client_id: loan.client_id });
-            this.logger.info(`👍 DATABASE: UPDATE CLIENT ID IN LOAN's ALL TRANSACTION MIGRATION DONE SUCCESSFULLY ${loan.client.full_en}(${loan.client.id})`);
+            this.logger.info(`👍 DATABASE: UPDATE CLIENT ID IN ALL TRANSACTION DONE SUCCESSFULLY ${loan.client.full_en}(${loan.client.id})`);
         } catch (e) {
             this.logger.info(`❌ DATABASE: ERROR IN UPDATE CLIENT ID IN LOAN's ALL TRANSACTION MIGRATION ${loan.client.full_en}(${loan.client.id}) ${e}`);
             this.logger.error(`❌ DATABASE: ERROR IN UPDATE CLIENT ID IN LOAN's ALL TRANSACTION MIGRATION ${loan.client.full_en}(${loan.client.id}) ${e}`);
