@@ -72,7 +72,7 @@ export class SendpulseHelperService {
                 }
                 repaymentScheduleDto.ins_overdue_amount = Number((principal_amount + this.globalService.INSTALMENT_MEMBERSHIP_FEE).toFixed(2));
                 const now = new Date();
-                repaymentScheduleDto.due_date = format(addMonths(now, repaymentScheduleDto.ins_number), 'dd-MMM-yyyy');
+                repaymentScheduleDto.due_date = format(addMonths(now, repaymentScheduleDto.ins_number), 'dd-MM-yyyy');
                 repaymentScheduleDto.currency = calculateRepaymentScheduleDto.currency;
                 repaymentScheduleArray.push(repaymentScheduleDto);
             }
