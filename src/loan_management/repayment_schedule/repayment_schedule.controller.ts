@@ -1,4 +1,4 @@
-import { CreateRepaymentScheduleDto, GetRepaymentScheduleDto } from './dto';
+import { CreateRepaymentScheduleDto, UpdateRepaymentDateDto } from './dto';
 import { Body, Controller, Post, Get, Param } from '@nestjs/common';
 import { CustomLogger } from "../../custom_logger";
 import { CreateRepaymentScheduleUsecase } from './usecases/create_repayment_schedule.service';
@@ -6,7 +6,7 @@ import { RepaymentScheduleService } from './usecases/repayment_schedule.service'
 import { MethodParamsRespLogger } from 'src/decorator';
 import { GlobalService } from 'src/globals/usecases/global.service';
 import { GetInstalmentDto } from './dto';
-
+import { UpdateRepaymentDateUsecase } from './usecases/update-repayment-date.usecase.service';
 @Controller('repaymentSchedule')
 export class RepaymentScheduleController {
   private readonly logger = new CustomLogger(RepaymentScheduleController.name);
@@ -14,6 +14,7 @@ export class RepaymentScheduleController {
     private readonly createRepaymentScheduleUsecase: CreateRepaymentScheduleUsecase,
     private readonly repaymentScheduleService: RepaymentScheduleService,
     private readonly globalService: GlobalService,
+    private readonly updateRepaymentDateUsecase: UpdateRepaymentDateUsecase,
   ) {
   }
   @Post()
@@ -32,5 +33,10 @@ export class RepaymentScheduleController {
   @MethodParamsRespLogger(new CustomLogger(RepaymentScheduleController.name))
   async getInstalment(@Body() getInstalmentDto: GetInstalmentDto) {
     return await this.repaymentScheduleService.getInstalment(getInstalmentDto);
+  }
+
+  @Post('updateRepaymentDate')
+  async updateRepaymentDate(@Body() updateRepaymentDateDto: UpdateRepaymentDateDto) {
+    return await this.updateRepaymentDateUsecase.updateRepaymentDate(updateRepaymentDateDto);
   }
 }
