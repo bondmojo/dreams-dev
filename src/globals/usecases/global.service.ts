@@ -130,7 +130,7 @@ export class GlobalService {
     public readonly SENDPULSE_FLOW: any = {
         //KYC Flow ID: Flow_4.4
         "KYC_FLOW": this.isDev ? '62be938d81768640cc494f34' : '63502d36186d03250968943d',
-        "ERROR_FLOW": this.isDev ? '63d0e7fe6cbc090bce34a6fe' : '63d0e7fe6cbc090bce34a6fe',
+        "ERROR_FLOW": this.isDev ? '63d0e7fe6cbc090bce34a6fe' : '63fe61cc0e3fec383504f199',
         "APPLICATION_STATUS_FLOW_ID": {
             "Disbursed": this.isDev ? "62fc9cd35c6b0b21d713cdea" : '63502d5e19b15a483a50d3a4',
             "Approved": this.isDev ? "6343f1b75eba5c54cb644455" : '63502d056a996b64ec62e105',
