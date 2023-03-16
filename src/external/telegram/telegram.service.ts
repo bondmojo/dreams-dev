@@ -155,7 +155,7 @@ export class CustomTelegramService {
     }
 
     private async sendKeyboardMessage(keyboardButtonArray: TelegramKeyboardButton[][], telegram_chat_id: string, message: string, waitInMilliSec?: number): Promise<any> {
-        const customKeyboard: TelegramReplyKeyboardMarkup = { keyboard: keyboardButtonArray, one_time_keyboard: true,/*  is_persistent: true */ };
+        const customKeyboard: TelegramReplyKeyboardMarkup = { keyboard: keyboardButtonArray, one_time_keyboard: true, resize_keyboard: true };
         const data: TelegramSendMessageParams = {
             chat_id: telegram_chat_id,
             text: message,

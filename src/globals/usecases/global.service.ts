@@ -131,7 +131,7 @@ export class GlobalService {
     public readonly SENDPULSE_FLOW: any = {
         //KYC Flow ID: Flow_4.4
         "KYC_FLOW": this.isDev ? '62be938d81768640cc494f34' : '63502d36186d03250968943d',
-        "ERROR_FLOW": this.isDev ? '63d0e7fe6cbc090bce34a6fe' : '63d0e7fe6cbc090bce34a6fe',
+        "ERROR_FLOW": this.isDev ? '63d0e7fe6cbc090bce34a6fe' : '63fe61cc0e3fec383504f199',
         "APPLICATION_STATUS_FLOW_ID": {
             "Disbursed": this.isDev ? "62fc9cd35c6b0b21d713cdea" : '63502d5e19b15a483a50d3a4',
             "Approved": this.isDev ? "6343f1b75eba5c54cb644455" : '63502d056a996b64ec62e105',
@@ -162,7 +162,7 @@ export class GlobalService {
         //Verification_call
         "FLOW_4.7": this.isDev ? "6343d395bc32a404aa0f256a" : '63502d953159eb63ba30bead',
         // Payment Confirmation FLow
-        "FLOW_7.4": this.isDev ? "637b3068f4f6fb4873206fcb" : '63502fb40f6f1901106bde54',
+        "FLOW_7.4": this.isDev ? "637b3068f4f6fb4873206fcb" : '6411e54d80bbb81ff551db2f',
         // Video Received Confirmation Flow
         "FLOW_4.9": this.isDev ? '63722b1c383fae7ce1107fa4' : '637b687dbaff8b1f2208d173',
         // Send Video Message Flow
