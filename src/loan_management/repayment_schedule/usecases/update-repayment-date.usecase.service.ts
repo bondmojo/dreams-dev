@@ -9,6 +9,7 @@ import { Choice } from "@zohocrm/typescript-sdk-2.0/utils/util/choice";
 import { UpdateRepaymentDateDto } from '../dto';
 import { RepaymentSchedule } from '../entities/repayment_schedule.entity';
 import { LoanService } from 'src/loan_management/loan/usecases/loan.service';
+import { promises } from 'dns';
 @Injectable()
 export class UpdateRepaymentDateUsecase {
   private readonly log = new CustomLogger(UpdateRepaymentDateUsecase.name);
@@ -33,13 +34,36 @@ export class UpdateRepaymentDateUsecase {
       })
       const loan = await this.loanService.findOneForInternalUse({ id: updateRepaymentDateDto.loan_id });
 
+      this.doValidate(loan, unpaid_instaments, updateRepaymentDateDto);
+
       // await this.updateInstalmentDataInDB(loan, unpaid_instaments, updateRepaymentDateDto);
-      // await this.updateLoanDataInZoho(loan, updateRepaymentDateDto);
+      //  await this.updateLoanDataInZoho(loan, updateRepaymentDateDto);
       return 'Loan Updated Successfully';
     } catch (error) {
       this.log.error(`UPDATE REPAYMENT DATE SERVICE: ERROR OCCURED WHILE RUNNING updateRepaymentDate:  ${error}`);
+      return error;
     }
+  }
 
+  getScheduleInstalment(instalments: RepaymentSchedule[]): RepaymentSchedule {
+    return instalments.find((e: RepaymentSchedule) => e.scheduling_status == this.globalService.INSTALMENT_SCHEDULING_STATUS.SCHEDULED)
+  }
+
+  doValidate(loan: any, instalments: RepaymentSchedule[], updateRepaymentDateDto: any) {
+    if (!loan) {
+      throw new HttpException(`Loan not found for ${updateRepaymentDateDto.loan_id}`, HttpStatus.BAD_REQUEST);
+    }
+    if (loan.status == this.globalService.LOAN_STATUS.FULLY_PAID) {
+      throw new HttpException(`Can't update repayment date of fully paid Loan ${updateRepaymentDateDto.loan_id}`, HttpStatus.BAD_REQUEST);
+    }
+    const scheduled_instalment = this.getScheduleInstalment(instalments);
+    if (!scheduled_instalment) {
+      throw new HttpException(`No scheduled instalment found for ${updateRepaymentDateDto.loan_id}`, HttpStatus.BAD_REQUEST);
+    }
+    if (compareAsc(new Date(updateRepaymentDateDto.repayment_date), new Date(scheduled_instalment.due_date)) != 1) {
+      throw new HttpException(`New Repayment Date should be greater then instalment due date  ${scheduled_instalment.id}`, HttpStatus.BAD_REQUEST);
+    }
+    return true
   }
 
   // async updateInstalmentDataInDB(loan: any, instalments: any, updateRepaymentDateDto: UpdateRepaymentDateDto) {
