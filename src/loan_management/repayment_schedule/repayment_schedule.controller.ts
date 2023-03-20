@@ -36,6 +36,7 @@ export class RepaymentScheduleController {
   }
 
   @Post('updateRepaymentDate')
+  @MethodParamsRespLogger(new CustomLogger(RepaymentScheduleController.name))
   async updateRepaymentDate(@Body() updateRepaymentDateDto: UpdateRepaymentDateDto) {
     return await this.updateRepaymentDateUsecase.updateRepaymentDate(updateRepaymentDateDto);
   }
