@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { InjectRepository } from '@nestjs/typeorm';
-import { RefundDreamPointDto } from "../dto";
+import { RefundDreamPointDto, EarnDreamPointDto } from "../dto";
 import { CustomLogger } from "../../../custom_logger";
 import { Client } from '../entities/client.entity';
 import { Repository } from 'typeorm';
@@ -84,5 +84,41 @@ export class DreamPointService {
             contact_id: client.sendpulse_id,
         });
         return;
+    }
+
+    async earnDreamPoint(earnDreamPointDto: EarnDreamPointDto): Promise<any> {
+        try {
+            if (!earnDreamPointDto.amount) {
+                throw new BadRequestException('Incorrect Amount.');
+            }
+            if (!earnDreamPointDto.type || !((Object.values(this.globalService.TRANSACTION_TYPE).indexOf(earnDreamPointDto.type) > -1))) {
+                throw new BadRequestException(`Incorrect Transaction Type ${earnDreamPointDto.type}`);
+            }
+
+            const client = await this.clientService.findbyId(
+                earnDreamPointDto.client_id
+            );
+
+            // Create Dream Point Earn Transaction
+            const transactionDto = {
+                client_id: earnDreamPointDto.client_id,
+                amount: earnDreamPointDto.amount,
+                image: earnDreamPointDto.image,
+                type: this.globalService.TRANSACTION_TYPE.REFERRAL_DREAM_POINTS_EARNED,
+                note: earnDreamPointDto.note,
+            }
+            await this.transactionService.create(transactionDto);
+
+            // Update Earned Dream points in client table
+            const dream_points_earned = client.dream_points_earned;
+            const updateClientDto = {
+                id: client.id,
+                dream_points_earned: dream_points_earned + earnDreamPointDto.amount,
+            };
+            return await this.clientService.update(updateClientDto);
+        } catch (error) {
+            this.log.error(`DREAM POINT SERVICE: ERROR OCCURED WHILE RUNNING earnDreamPoint:  ${error}`);
+            throw error;
+        }
     }
 }

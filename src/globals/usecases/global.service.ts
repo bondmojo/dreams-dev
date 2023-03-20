@@ -57,6 +57,7 @@ export class GlobalService {
         LATE_FEE: 'late_fee',
         PARTIAL_PAYMENT: 'partial_payment',
         DREAM_POINT_REFUND: 'dream_point_refund',
+        REFERRAL_DREAM_POINTS_EARNED: 'referral_dream_points_earned'
     };
 
     public readonly WIRE_TRANSFER_TYPES: any = {
