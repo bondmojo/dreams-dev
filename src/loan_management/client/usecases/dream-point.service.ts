@@ -99,6 +99,10 @@ export class DreamPointService {
                 earnDreamPointDto.client_id
             );
 
+            if (!client) {
+                throw new BadRequestException(`Client not found with id ${earnDreamPointDto.client_id}`);
+            }
+
             // Create Dream Point Earn Transaction
             const transactionDto = {
                 client_id: earnDreamPointDto.client_id,
