@@ -27,7 +27,10 @@ export class DreamPointService {
             const client = await this.clientService.findbyId(
                 refundDreamPointDto.client_id
             );
-
+            if (!client) {
+                throw new BadRequestException(`Client Not Found with Id ${refundDreamPointDto.client_id
+                    }`);
+            }
             const dream_points_earned = client.dream_points_earned;
             if (dream_points_earned < refundDreamPointDto.amount) {
                 throw new BadRequestException('Amount is Greater then Dream Point Balance.');
@@ -43,18 +46,22 @@ export class DreamPointService {
             }
             await this.transactionService.create(transactionDto);
 
-            // FIXME: When user refund dream point set update client tier to 1
-            // await this.updateSendpulseFieldsAsPerClientTier(client, 1);
-
             // Update Client Data
-            const updateClientDto = {
+            const updateClientDto: any = {
                 id: client.id,
-                // tier: 1,
                 dream_points_earned: dream_points_earned - refundDreamPointDto.amount,
             };
+
+            if (refundDreamPointDto.do_reset_memberiship_tier) {
+                // Reset membership tier to 1 in DB & Sendpulse
+                await this.updateSendpulseFieldsAsPerClientTier(client, 1);
+                updateClientDto.tier = '1';
+            }
+
             return await this.clientService.update(updateClientDto);
         } catch (error) {
             this.log.error(`DREAM POINT SERVICE: ERROR OCCURED WHILE RUNNING refundDreamPoint:  ${error}`);
+            throw error;
         }
 
 
@@ -64,7 +71,6 @@ export class DreamPointService {
         const new_tier = tier;
         const new_max_credit_amount = this.globalService.TIER_AMOUNT[new_tier];
         const new_next_loan_amount = this.globalService.TIER_AMOUNT[new_tier + 1];
-
         await this.sendpulseService.updateSendpulseVariable({
             variable_name: 'Tier',
             variable_id: this.globalService.SENDPULSE_VARIABLE_ID.TIER,
@@ -81,6 +87,12 @@ export class DreamPointService {
             variable_name: 'nextLoanAmount',
             variable_id: this.globalService.SENDPULSE_VARIABLE_ID.NEXT_LOAN_AMOUNT,
             variable_value: '' + new_next_loan_amount,
+            contact_id: client.sendpulse_id,
+        });
+        await this.sendpulseService.updateSendpulseVariable({
+            variable_name: 'tenure',
+            variable_id: this.globalService.SENDPULSE_VARIABLE_ID.TENURE,
+            variable_value: '1',
             contact_id: client.sendpulse_id,
         });
         return;
