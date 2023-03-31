@@ -180,7 +180,8 @@ export class LoanService {
             loanResponse.membershipTier = client?.tier;
             loanResponse.lastTransactionAmount = "" + await this.loanHelperService.getLoanLastPartialPaymentAmount(loan.id);
             loanResponse.dreamPointsEarned = "" + client?.dream_points_earned;
-            loanResponse.nextLoanAmount = "" + this.globalService.TIER_AMOUNT[+client?.tier];
+            loanResponse.maxCreditAmount = "" + this.globalService.TIER_AMOUNT[+client?.tier];
+            loanResponse.nextLoanAmount = "" + this.globalService.TIER_AMOUNT[+client?.tier + 1];
             return loanResponse;
         } catch (error) {
             this.log.error(`LOAN SERVICE: ERROR OCCURED WHILE RUNNING findOne:  ${error}`);
