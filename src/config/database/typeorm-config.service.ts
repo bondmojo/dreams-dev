@@ -13,15 +13,17 @@ export class TypeOrmConfigService implements TypeOrmOptionsFactory {
       password: process.env.DATABASE_PASSWORD,
       database: process.env.DATABASE_NAME,
       synchronize: process.env.DATABASE_SYNCHRONIZE === 'true',
-      entities: ['dist/**/entities/*.entity.js', 'dist/**/**/entities/*.entity.js'],
-      migrations: ["src/migrations/*.js"],
+      entities: [
+        'dist/**/entities/*.entity.js',
+        'dist/**/**/entities/*.entity.js',
+      ],
+      migrations: ['src/migrations/*.js'],
       migrationsRun: true,
       dropSchema: false,
       keepConnectionAlive: true,
       logging: false,
       cli: {
         migrationsDir: 'src/migrations',
-
       },
     } as TypeOrmModuleOptions;
   }
