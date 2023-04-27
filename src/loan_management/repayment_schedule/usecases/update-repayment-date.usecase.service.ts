@@ -19,6 +19,7 @@ import {
   format,
   compareAsc,
   differenceInMonths,
+  addMonths,
 } from 'date-fns';
 import { GlobalService } from '../../../globals/usecases/global.service';
 import { ZohoRepaymentScheduleHelper } from './ZohoRepaymentScheduleHelper';
@@ -121,182 +122,66 @@ export class UpdateRepaymentDateUsecase {
     instalments: any,
     updateRepaymentDateDto: UpdateRepaymentDateDto,
   ) {
-    const first_ins = instalments[0];
-    const new_repayment_date = updateRepaymentDateDto.repayment_date;
-    const current_repayment_date = first_ins.due_date;
-    const first_repayment_date =
-      first_ins.previous_repayment_dates &&
-      first_ins.previous_repayment_dates.length
-        ? first_ins.previous_repayment_dates[0]
-        : current_repayment_date;
-
-    if (
-      compareAsc(
-        new Date(new_repayment_date),
-        new Date(current_repayment_date),
-      ) != 1
-    ) {
-      throw new HttpException(
-        `New Repayment Date should be greater then last repayment date  ${first_ins.id}`,
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-
-    let ins_additional_fee = Number(first_ins.ins_additional_fee);
-
-    let number_of_penalties = Number(first_ins.number_of_penalties);
-    let ins_overdue_amount = Number(first_ins.ins_overdue_amount);
-
-    const difference_in_month =
-      differenceInMonths(
-        new Date(new_repayment_date),
-        addDays(new Date(current_repayment_date), 1),
-      ) + 1;
-    const extra_fee_charges =
-      difference_in_month * this.globalService.INSTALMENT_LATE_FEE_EACH_MONTH;
-    number_of_penalties = number_of_penalties + difference_in_month;
-    ins_additional_fee = ins_additional_fee + extra_fee_charges;
-    ins_overdue_amount = ins_overdue_amount + extra_fee_charges;
-
-    const previous_repayment_dates = first_ins.previous_repayment_dates ?? [];
-    previous_repayment_dates.push(current_repayment_date);
-
-    // Fields to be update
-    first_ins.number_of_penalties = number_of_penalties;
-    (first_ins.previous_repayment_dates = previous_repayment_dates),
-      (first_ins.ins_overdue_amount = ins_overdue_amount);
-    first_ins.ins_additional_fee = ins_additional_fee;
-    first_ins.due_date = new_repayment_date;
-    first_ins.repayment_status =
-      this.globalService.INSTALMENT_PAYMENT_STATUS.PAYMENT_RESCHEDULED;
-    await this.RepaymentScheduleRepository.save(first_ins);
-
-    // Update dates for next all instalment
-    // for (let index = 1; index < instalments.length; index++) {
-    //   const instalment = instalments[index];
-
-    // }
-    // const new_repayment_date = updateRepaymentDateDto.repayment_date;
-    // const current_repayment_date = loan.repayment_date;
-    // const first_repayment_date = (loan.previous_repayment_dates && loan.previous_repayment_dates.length) ? loan.previous_repayment_dates[0] : current_repayment_date;
-
-    // if (compareAsc(new Date(new_repayment_date), new Date(first_repayment_date)) != 1) {
-    //   throw new HttpException(`New Repayment Date should be greater then first repayment date  ${loan.id}`, HttpStatus.BAD_REQUEST);
-    // }
-
-    // let late_fee = loan.late_fee;
-    // let late_fee_applied_count = loan.late_fee_applied_count;
-    // let outstanding_amount = loan.outstanding_amount;
-
     // /**
-    //  * 1. $3 fee applied on each month from repayment date.
-    //  * 2. We will not charge extra $3 if repayment date reschedule multiple time in same month.
-    //  * 3. Total month from loan disbursement is used to calculate late fee($3 * months).
-    //  * 4. late_fee_applied_count = total_months_from_loan_disbursement (as we charge late fee monthly).
-    //  * 5. Below we add ONE day in first_repayment_date to find difference becuase we charge on next day of repayment date of month
+    //  * 1. $3 fee applied on each time repayment date update.
+    //  * 2. We will charge extra $3 if repayment date reschedule multiple time in same month.
     //  * (for example if repayment date is 5th Dec then we will charge late fee from 6th december).
-    //  * 6. Below we add ONE in total_months_from_loan_disbursement becuase fee should apply from the next day of repayment date
-    //  * but the differenceInMonths function will give 0 when we compare 5th Dec with 6th Dec so we added one in total.
     //  */
 
-    // const total_months_from_loan_disbursement = differenceInMonths(new Date(new_repayment_date), addDays(new Date(first_repayment_date), 1)) + 1;
+    // const loanFieldsToUpdate: {
+    //   late_fee_applied_count: string;
+    //   previous_repayment_dates: string;
+    //   outstanding_amount: string;
+    //   late_fee: string;
+    //   repayment_date: string;
+    //   payment_status: string;
+    // } = {};
 
-    // if (total_months_from_loan_disbursement > loan.late_fee_applied_count) {
-    //   const extra_fee_charges = (total_months_from_loan_disbursement - loan.late_fee_applied_count) * this.globalService.LOAN_LATE_FEE_EACH_MONTH;
-    //   late_fee_applied_count = total_months_from_loan_disbursement;
-    //   late_fee = late_fee + extra_fee_charges;
-    //   outstanding_amount = outstanding_amount + extra_fee_charges;
-    // }
+    const ScheduleInstalment = instalments[0];
+    const ScheduleInsNewRepaymentDate = updateRepaymentDateDto.repayment_date;
+    const ScheduleInsCurRepaymentDate = ScheduleInstalment.due_date;
 
-    // const previous_repayment_dates = loan.previous_repayment_dates ?? [];
-    // previous_repayment_dates.push(current_repayment_date);
+    const differenceInMonth =
+      differenceInMonths(
+        new Date(ScheduleInsNewRepaymentDate),
+        addDays(new Date(ScheduleInsCurRepaymentDate), 1),
+      ) + 1;
 
-    // const fields_to_be_update: object = {
-    //   late_fee_applied_count: late_fee_applied_count,
-    //   previous_repayment_dates: previous_repayment_dates,
-    //   outstanding_amount: outstanding_amount,
-    //   late_fee: late_fee,
-    //   repayment_date: new_repayment_date,
-    //   payment_status: this.globalService.LOAN_PAYMENT_STATUS.PAYMENT_RESCHEDULED
-    // }
+    const extraFeeCharges =
+      differenceInMonth * this.globalService.INSTALMENT_LATE_FEE_EACH_MONTH;
 
-    // this.log.log(`Updating Database Loan Data For Loan = ${loan.id} ${JSON.stringify(fields_to_be_update)} `);
-    // await this.loanRepository.update(loan.id, fields_to_be_update);
+    const updatedInstalments = instalments.map(
+      (instalment: any, index: any) => {
+        if (index === 0) {
+          // Schedule Instlaments
+          return {
+            ...instalment,
+            number_of_penalties:
+              Number(instalment.number_of_penalties) + differenceInMonth,
+            previous_repayment_dates: [
+              ...(instalment.previous_repayment_dates || []),
+              ScheduleInsCurRepaymentDate,
+            ],
+            ins_overdue_amount:
+              Number(instalment.ins_overdue_amount) + extraFeeCharges,
+            ins_additional_fee:
+              Number(instalment.ins_additional_fee) + extraFeeCharges,
+            due_date: ScheduleInsNewRepaymentDate,
+            repayment_status:
+              this.globalService.INSTALMENT_PAYMENT_STATUS.PAYMENT_RESCHEDULED,
+          };
+        } else {
+          // Not Schedule Instlaments
+          return {
+            ...instalment,
+            due_date: addMonths(new Date(ScheduleInsNewRepaymentDate), index),
+          };
+        }
+      },
+    );
+
+    await this.RepaymentScheduleRepository.save(updatedInstalments);
+
+    console.log(instalments);
   }
-
-  // async fetchtLoan(id: string): Promise<Loan | null> {
-  //   const loan = await this.loanRepository.findOne({ where: { id } });
-  //   if (!loan) {
-  //     throw new HttpException(`No Loan Found For ${id}`, HttpStatus.BAD_REQUEST);
-  //   }
-  //   if (loan.status == this.globalService.LOAN_STATUS.FULLY_PAID) {
-  //     throw new HttpException(`Can not update repayment date of fully paid loan ${loan.id}`, HttpStatus.BAD_REQUEST);
-  //   }
-
-  //   this.log.log("Loan which repayment date needs rescheduling =" + JSON.stringify(loan));
-  //   return loan;
-  // }
-
-  // async updateLoanDataInDB(loan: Loan, updateRepaymentDateDto: UpdateRepaymentDateDto) {
-  //   const new_repayment_date = updateRepaymentDateDto.repayment_date;
-  //   const current_repayment_date = loan.repayment_date;
-  //   const first_repayment_date = (loan.previous_repayment_dates && loan.previous_repayment_dates.length) ? loan.previous_repayment_dates[0] : current_repayment_date;
-
-  //   if (compareAsc(new Date(new_repayment_date), new Date(first_repayment_date)) != 1) {
-  //     throw new HttpException(`New Repayment Date should be greater then first repayment date  ${loan.id}`, HttpStatus.BAD_REQUEST);
-  //   }
-
-  //   let late_fee = loan.late_fee;
-  //   let late_fee_applied_count = loan.late_fee_applied_count;
-  //   let outstanding_amount = loan.outstanding_amount;
-
-  //   /**
-  //    * 1. $3 fee applied on each month from repayment date.
-  //    * 2. We will not charge extra $3 if repayment date reschedule multiple time in same month.
-  //    * 3. Total month from loan disbursement is used to calculate late fee($3 * months).
-  //    * 4. late_fee_applied_count = total_months_from_loan_disbursement (as we charge late fee monthly).
-  //    * 5. Below we add ONE day in first_repayment_date to find difference becuase we charge on next day of repayment date of month
-  //    * (for example if repayment date is 5th Dec then we will charge late fee from 6th december).
-  //    * 6. Below we add ONE in total_months_from_loan_disbursement becuase fee should apply from the next day of repayment date
-  //    * but the differenceInMonths function will give 0 when we compare 5th Dec with 6th Dec so we added one in total.
-  //    */
-
-  //   const total_months_from_loan_disbursement = differenceInMonths(new Date(new_repayment_date), addDays(new Date(first_repayment_date), 1)) + 1;
-
-  //   if (total_months_from_loan_disbursement > loan.late_fee_applied_count) {
-  //     const extra_fee_charges = (total_months_from_loan_disbursement - loan.late_fee_applied_count) * this.globalService.LOAN_LATE_FEE_EACH_MONTH;
-  //     late_fee_applied_count = total_months_from_loan_disbursement;
-  //     late_fee = late_fee + extra_fee_charges;
-  //     outstanding_amount = outstanding_amount + extra_fee_charges;
-  //   }
-
-  //   const previous_repayment_dates = loan.previous_repayment_dates ?? [];
-  //   previous_repayment_dates.push(current_repayment_date);
-
-  //   const fields_to_be_update: object = {
-  //     late_fee_applied_count: late_fee_applied_count,
-  //     previous_repayment_dates: previous_repayment_dates,
-  //     outstanding_amount: outstanding_amount,
-  //     late_fee: late_fee,
-  //     repayment_date: new_repayment_date,
-  //     payment_status: this.globalService.LOAN_PAYMENT_STATUS.PAYMENT_RESCHEDULED
-  //   }
-
-  //   this.log.log(`Updating Database Loan Data For Loan = ${loan.id} ${JSON.stringify(fields_to_be_update)} `);
-  //   await this.loanRepository.update(loan.id, fields_to_be_update);
-  // }
-
-  // async updateLoanDataInZoho(loan: Loan, updateRepaymentDateDto: UpdateRepaymentDateDto) {
-  //   const latest_loan = await this.loanRepository.findOne({ where: { id: loan.id } });
-  //   let previous_repayment_dates: any = latest_loan.previous_repayment_dates;
-  //   previous_repayment_dates = (previous_repayment_dates.toString()).replace(/,/g, " \n ");
-
-  //   const zohoKeyValuePairs = {
-  //     Payment_Status: new Choice(this.globalService.LOAN_PAYMENT_STATUS.PAYMENT_RESCHEDULED),
-  //     Previous_Repayment_Dates: previous_repayment_dates,
-  //     Outstanding_Balance: latest_loan.outstanding_amount,
-  //     Late_Fee: latest_loan.late_fee
-  //   };
-  //   // await this.zohoLoanHelperService.updateZohoFields(loan.zoho_loan_id, zohoKeyValuePairs, this.globalService.ZOHO_MODULES.LOAN);
-  // }
 }
