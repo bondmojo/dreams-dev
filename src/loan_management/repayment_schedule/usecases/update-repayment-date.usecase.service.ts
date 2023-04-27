@@ -128,15 +128,6 @@ export class UpdateRepaymentDateUsecase {
     //  * (for example if repayment date is 5th Dec then we will charge late fee from 6th december).
     //  */
 
-    // const loanFieldsToUpdate: {
-    //   late_fee_applied_count: string;
-    //   previous_repayment_dates: string;
-    //   outstanding_amount: string;
-    //   late_fee: string;
-    //   repayment_date: string;
-    //   payment_status: string;
-    // } = {};
-
     const ScheduleInstalment = instalments[0];
     const ScheduleInsNewRepaymentDate = updateRepaymentDateDto.repayment_date;
     const ScheduleInsCurRepaymentDate = ScheduleInstalment.due_date;
@@ -181,7 +172,34 @@ export class UpdateRepaymentDateUsecase {
     );
 
     await this.RepaymentScheduleRepository.save(updatedInstalments);
+    const last_ins_due_date =
+      updatedInstalments[updatedInstalments.length - 1].due_date;
+    //  update loan after rescheduling
+    await this.updateLoanFields({
+      loan,
+      extraFeeCharges,
+      differenceInMonth,
+      last_ins_due_date,
+    });
+  }
 
-    console.log(instalments);
+  async updateLoanFields({
+    loan,
+    extraFeeCharges,
+    differenceInMonth,
+    last_ins_due_date,
+  }: any) {
+    loan.late_fee = loan.late_fee + extraFeeCharges;
+    loan.late_fee_applied_count =
+      loan.late_fee_applied_count + differenceInMonth;
+    loan.previous_repayment_dates = [
+      ...(loan.previous_repayment_dates || []),
+      loan.repayment_date,
+    ];
+    loan.outstanding_amount = loan.outstanding_amount + extraFeeCharges;
+    loan.repayment_date = last_ins_due_date;
+    loan.repayment_status =
+      this.globalService.LOAN_PAYMENT_STATUS.PAYMENT_RESCHEDULED;
+    this.loanService.save(loan);
   }
 }
