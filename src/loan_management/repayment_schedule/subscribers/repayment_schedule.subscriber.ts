@@ -4,7 +4,6 @@ import {
   UpdateEvent,
   Connection,
 } from 'typeorm';
-import { Injectable } from '@nestjs/common';
 import { Choice } from '@zohocrm/typescript-sdk-2.0/utils/util/choice';
 
 import { RepaymentSchedule } from '../entities/repayment_schedule.entity';
