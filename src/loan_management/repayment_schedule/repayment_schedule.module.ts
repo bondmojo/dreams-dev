@@ -10,7 +10,7 @@ import { DreamerModule } from 'src/external/zoho/dreams/dreamer.module';
 import { ZohoRepaymentScheduleHelper } from './usecases/ZohoRepaymentScheduleHelper';
 import { UpdateRepaymentDateUsecase } from './usecases/update-repayment-date.usecase.service';
 import { LoanModule } from '../loan/loan.module';
-import { RepaymentScheduleSubscriber } from './subscribers/repayment_schedule';
+import { RepaymentScheduleSubscriber } from './subscribers/repayment_schedule.subscriber';
 @Module({
   imports: [
     SendpulseModule,

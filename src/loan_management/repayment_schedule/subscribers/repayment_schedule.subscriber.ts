@@ -43,7 +43,9 @@ export class RepaymentScheduleSubscriber
         const newValue = event.entity[column.propertyName];
         switch (key) {
           case 'previous_repayment_dates':
-            zohoKeyValuePairs.Previous_Repayment_Dates = newValue.toString();
+            zohoKeyValuePairs.Previous_Repayment_Dates = newValue
+              .toString()
+              .replace(/,/g, ' \n ');
             break;
           case 'ins_overdue_amount':
             zohoKeyValuePairs.Overdue_Amount = newValue;
