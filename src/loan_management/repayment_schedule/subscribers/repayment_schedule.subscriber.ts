@@ -58,7 +58,7 @@ export class RepaymentScheduleSubscriber
             zohoKeyValuePairs.Repayment_Date = new Date(newValue);
             break;
           case 'repayment_status':
-            zohoKeyValuePairs.Installment_Status = new Choice(
+            zohoKeyValuePairs.Repayment_Status = new Choice(
               this.globalService.INSTALMENT_PAYMENT_STATUS_STR['' + newValue],
             );
             break;
