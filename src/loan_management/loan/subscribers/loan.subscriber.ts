@@ -4,19 +4,17 @@ import {
   UpdateEvent,
   Connection,
 } from 'typeorm';
-import { Injectable } from '@nestjs/common';
 import { Choice } from '@zohocrm/typescript-sdk-2.0/utils/util/choice';
 
-import { RepaymentSchedule } from '../entities/repayment_schedule.entity';
+import { Loan } from '../entities/loan.entity';
 import { GlobalService } from 'src/globals/usecases/global.service';
-import { ZohoRepaymentScheduleHelper } from '../usecases/ZohoRepaymentScheduleHelper';
+import { ZohoLoanHelperService } from '../usecases/zoho-loan-helper.service';
+
 @EventSubscriber()
-export class RepaymentScheduleSubscriber
-  implements EntitySubscriberInterface<RepaymentSchedule>
-{
+export class LoanSubscriber implements EntitySubscriberInterface<Loan> {
   constructor(
     private readonly connection: Connection,
-    private readonly zohoRepaymentScheduleHelper: ZohoRepaymentScheduleHelper,
+    private readonly zohoLoanHelperService: ZohoLoanHelperService,
     private readonly globalService: GlobalService,
   ) {
     connection.subscribers.push(this);
@@ -25,7 +23,7 @@ export class RepaymentScheduleSubscriber
    * Indicates that this subscriber only listen to Post events.
    */
   listenTo() {
-    return RepaymentSchedule;
+    return Loan;
   }
 
   /**
@@ -34,9 +32,9 @@ export class RepaymentScheduleSubscriber
   async afterUpdate(event: UpdateEvent<any>) {
     try {
       const zohoKeyValuePairs: any = {};
-      const zoho_repayment_schedule_id =
-        event.entity.zoho_repayment_schedule_id;
-      const module_name = 'repayment_schedules';
+      const zoho_loan_id = event.entity.zoho_loan_id;
+      const module_name = this.globalService.ZOHO_MODULES.LOAN;
+
       event.updatedColumns.forEach((column) => {
         const key = column.databaseName;
         const newValue = event.entity[column.propertyName];
@@ -46,19 +44,20 @@ export class RepaymentScheduleSubscriber
               .toString()
               .replace(/,/g, ' \n ');
             break;
-          case 'ins_overdue_amount':
-            zohoKeyValuePairs.Overdue_Amount = newValue;
+          case 'outstanding_amount':
+            zohoKeyValuePairs.Outstanding_Balance = newValue;
             break;
-          case 'ins_additional_fee':
-            zohoKeyValuePairs.Additional_Amount = newValue;
+          case 'late_fee':
+            zohoKeyValuePairs.Late_Fee = newValue;
             break;
           case 'due_date':
             zohoKeyValuePairs.Repayment_Date = new Date(newValue);
             break;
-          case 'repayment_status':
-            zohoKeyValuePairs.Installment_Status = new Choice(
-              this.globalService.INSTALMENT_PAYMENT_STATUS_STR['' + newValue],
-            );
+          case 'payment_status':
+            zohoKeyValuePairs.Payment_Status = new Choice(newValue);
+            break;
+          case 'repayment_date':
+            zohoKeyValuePairs.Repayment_Date = new Date(newValue);
             break;
         }
       });
@@ -66,8 +65,9 @@ export class RepaymentScheduleSubscriber
       if (Object.keys(zohoKeyValuePairs).length === 0) {
         return;
       }
-      await this.zohoRepaymentScheduleHelper.updateZohoFields(
-        zoho_repayment_schedule_id,
+
+      await this.zohoLoanHelperService.updateZohoFields(
+        zoho_loan_id,
         zohoKeyValuePairs,
         module_name,
       );
