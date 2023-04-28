@@ -9,9 +9,12 @@ import { Choice } from '@zohocrm/typescript-sdk-2.0/utils/util/choice';
 import { Loan } from '../entities/loan.entity';
 import { GlobalService } from 'src/globals/usecases/global.service';
 import { ZohoLoanHelperService } from '../usecases/zoho-loan-helper.service';
+import { CustomLogger } from 'src/custom_logger';
 
 @EventSubscriber()
 export class LoanSubscriber implements EntitySubscriberInterface<Loan> {
+  private readonly log = new CustomLogger(LoanSubscriber.name);
+
   constructor(
     private readonly connection: Connection,
     private readonly zohoLoanHelperService: ZohoLoanHelperService,
@@ -61,6 +64,7 @@ export class LoanSubscriber implements EntitySubscriberInterface<Loan> {
             break;
         }
       });
+
       // DO NOT CALL zohoLoanHelperService when zohoKeyValuePairs is empty object
       if (Object.keys(zohoKeyValuePairs).length === 0) {
         return;
@@ -72,7 +76,7 @@ export class LoanSubscriber implements EntitySubscriberInterface<Loan> {
         module_name,
       );
     } catch (error) {
-      console.log('error', error);
+      this.log.error(`LOAN SUBSCRIBER ERROR (in afterUpdate) :  ${error}`);
     }
   }
 }

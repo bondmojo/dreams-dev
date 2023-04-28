@@ -9,10 +9,13 @@ import { Choice } from '@zohocrm/typescript-sdk-2.0/utils/util/choice';
 import { RepaymentSchedule } from '../entities/repayment_schedule.entity';
 import { GlobalService } from 'src/globals/usecases/global.service';
 import { ZohoRepaymentScheduleHelper } from '../usecases/ZohoRepaymentScheduleHelper';
+import { CustomLogger } from 'src/custom_logger';
+
 @EventSubscriber()
 export class RepaymentScheduleSubscriber
   implements EntitySubscriberInterface<RepaymentSchedule>
 {
+  private readonly log = new CustomLogger(RepaymentScheduleSubscriber.name);
   constructor(
     private readonly connection: Connection,
     private readonly zohoRepaymentScheduleHelper: ZohoRepaymentScheduleHelper,
@@ -71,7 +74,9 @@ export class RepaymentScheduleSubscriber
         module_name,
       );
     } catch (error) {
-      console.log('error', error);
+      this.log.error(
+        `REPAYMENT SCHEDULE SUBSCRIBER ERROR (in afterUpdate) :  ${error}`,
+      );
     }
   }
 }
