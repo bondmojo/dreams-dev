@@ -1,29 +1,9 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CustomLogger } from 'src/custom_logger';
-import {
-  Repository,
-  Not,
-  LessThanOrEqual,
-  LessThan,
-  Between,
-  In,
-  IsNull,
-} from 'typeorm';
-import {
-  addDays,
-  subDays,
-  differenceInDays,
-  startOfDay,
-  endOfDay,
-  format,
-  compareAsc,
-  differenceInMonths,
-  addMonths,
-} from 'date-fns';
+import { Repository, LessThan } from 'typeorm';
+import { addDays, compareAsc, differenceInMonths, addMonths } from 'date-fns';
 import { GlobalService } from '../../../globals/usecases/global.service';
-import { ZohoRepaymentScheduleHelper } from './ZohoRepaymentScheduleHelper';
-import { Choice } from '@zohocrm/typescript-sdk-2.0/utils/util/choice';
 import { UpdateRepaymentDateDto } from '../dto';
 import { RepaymentSchedule } from '../entities/repayment_schedule.entity';
 import { LoanService } from 'src/loan_management/loan/usecases/loan.service';
@@ -34,7 +14,6 @@ export class UpdateRepaymentDateUsecase {
   constructor(
     @InjectRepository(RepaymentSchedule)
     private readonly RepaymentScheduleRepository: Repository<RepaymentSchedule>,
-    private readonly zohoRepaymentScheduleHelper: ZohoRepaymentScheduleHelper,
     private readonly globalService: GlobalService,
     private readonly loanService: LoanService,
   ) {}
@@ -198,8 +177,9 @@ export class UpdateRepaymentDateUsecase {
     ];
     loan.outstanding_amount = loan.outstanding_amount + extraFeeCharges;
     loan.repayment_date = last_ins_due_date;
-    loan.repayment_status =
+    loan.payment_status =
       this.globalService.LOAN_PAYMENT_STATUS.PAYMENT_RESCHEDULED;
+
     this.loanService.save(loan);
   }
 }
