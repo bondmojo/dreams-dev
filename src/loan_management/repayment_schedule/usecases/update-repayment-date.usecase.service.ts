@@ -50,11 +50,15 @@ export class UpdateRepaymentDateUsecase {
     }
   }
 
-  getScheduleInstalment(instalments: RepaymentSchedule[]): RepaymentSchedule {
+  getScheduleInstalment(
+    instalments: RepaymentSchedule[],
+    instalment_id: string,
+  ): RepaymentSchedule {
     return instalments.find(
       (e: RepaymentSchedule) =>
         e.scheduling_status ==
-        this.globalService.INSTALMENT_SCHEDULING_STATUS.SCHEDULED,
+          this.globalService.INSTALMENT_SCHEDULING_STATUS.SCHEDULED &&
+        e.id == instalment_id,
     );
   }
 
@@ -75,21 +79,30 @@ export class UpdateRepaymentDateUsecase {
         HttpStatus.BAD_REQUEST,
       );
     }
-    const scheduled_instalment = this.getScheduleInstalment(instalments);
-    if (!scheduled_instalment) {
+    if (loan.status == this.globalService.LOAN_STATUS.FULLY_PAID) {
       throw new HttpException(
-        `No scheduled instalment found for ${updateRepaymentDateDto.loan_id}`,
+        `Can't update repayment date of fully paid Loan ${updateRepaymentDateDto.loan_id}`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    const instalment = this.getScheduleInstalment(
+      instalments,
+      updateRepaymentDateDto.instalment_id,
+    );
+    if (!instalment) {
+      throw new HttpException(
+        `No scheduled instalment found for ${updateRepaymentDateDto.instalment_id}`,
         HttpStatus.BAD_REQUEST,
       );
     }
     if (
       compareAsc(
         new Date(updateRepaymentDateDto.repayment_date),
-        new Date(scheduled_instalment.due_date),
+        new Date(instalment.due_date),
       ) != 1
     ) {
       throw new HttpException(
-        `New Repayment Date should be greater then instalment due date  ${scheduled_instalment.id}`,
+        `New Repayment Date should be greater then instalment due date  ${instalment.id}`,
         HttpStatus.BAD_REQUEST,
       );
     }
@@ -102,8 +115,9 @@ export class UpdateRepaymentDateUsecase {
     updateRepaymentDateDto: UpdateRepaymentDateDto,
   ) {
     // /**
-    //  * 1. $3 fee applied on each time repayment date update.
-    //  * 2. We will charge extra $3 if repayment date reschedule multiple time in same month.
+    //  * 1. First instalment is scheudle instalment.
+    //  * 2. $3 fee applied on each time repayment date update.
+    //  * 3. We will charge extra $3 if repayment date reschedule multiple time in same month.
     //  * (for example if repayment date is 5th Dec then we will charge late fee from 6th december).
     //  */
 
