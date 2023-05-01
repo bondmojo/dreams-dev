@@ -3,4 +3,5 @@ export class RefundDreamPointDto {
   amount: number;
   image: string;
   note: string;
+  do_reset_memberiship_tier: boolean
 }

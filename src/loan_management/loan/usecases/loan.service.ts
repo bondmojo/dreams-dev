@@ -50,6 +50,11 @@ export class LoanService {
   //Even, If one Query/Insert in DB fails. all Insertion needs to be reverted. TODO later on
   //FIXME3: Error Handling needs to be done.
 
+  async save(loan: Loan) {
+    // Used Repository save function when you want to call entity subscriber
+    await this.loanRepository.save(loan);
+  }
+
   async create(createLoanDto: any): Promise<Loan> {
     try {
       if (!createLoanDto.tenure) {
@@ -140,11 +145,6 @@ export class LoanService {
     await this.loanRepository.update(updateLoanDto.id, updateLoanDto);
   }
 
-  async save(loan: Loan) {
-    // Used Repository save function when you want to call entity subscriber
-    await this.loanRepository.save(loan);
-  }
-
   async createLoanInZoho(createLoanDto: any): Promise<any> {
     try {
       const zohoLoanDto = new CreateZohoLoanApplicationDto();
@@ -228,8 +228,10 @@ export class LoanService {
         '' +
         (await this.loanHelperService.getLoanLastPartialPaymentAmount(loan.id));
       loanResponse.dreamPointsEarned = '' + client?.dream_points_earned;
-      loanResponse.nextLoanAmount =
+      loanResponse.maxCreditAmount =
         '' + this.globalService.TIER_AMOUNT[+client?.tier];
+      loanResponse.nextLoanAmount =
+        '' + this.globalService.TIER_AMOUNT[+client?.tier + 1];
       return loanResponse;
     } catch (error) {
       this.log.error(

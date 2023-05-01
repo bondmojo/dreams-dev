@@ -25,10 +25,13 @@ export class ClientService {
             // Generating client id
             const createClientDto: CreateClientDto = createClientAndLoanDto;
             createClientDto.id = createClientAndLoanDto.client_id = 'CL' + Math.floor(Math.random() * 100000000);
+            if (!createClientDto.telegram_id) {
+                const contact = await this.sendpulseService.getContact(createClientAndLoanDto.sendpulse_id);
+                createClientDto.telegram_id = contact.telegram_id;
+            }
             const clientFromDb = await this.clientRepository.save(createClientDto);
             const clientClone = { ...clientFromDb };
 
-            //
             this.sendpulseService.createClientId(clientClone);
 
             // Create loan for client request object

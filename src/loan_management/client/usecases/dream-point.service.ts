@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { InjectRepository } from '@nestjs/typeorm';
-import { RefundDreamPointDto } from "../dto";
+import { RefundDreamPointDto, EarnDreamPointDto } from "../dto";
 import { CustomLogger } from "../../../custom_logger";
 import { Client } from '../entities/client.entity';
 import { Repository } from 'typeorm';
@@ -27,7 +27,10 @@ export class DreamPointService {
             const client = await this.clientService.findbyId(
                 refundDreamPointDto.client_id
             );
-
+            if (!client) {
+                throw new BadRequestException(`Client Not Found with Id ${refundDreamPointDto.client_id
+                    }`);
+            }
             const dream_points_earned = client.dream_points_earned;
             if (dream_points_earned < refundDreamPointDto.amount) {
                 throw new BadRequestException('Amount is Greater then Dream Point Balance.');
@@ -43,18 +46,22 @@ export class DreamPointService {
             }
             await this.transactionService.create(transactionDto);
 
-            // FIXME: When user refund dream point set update client tier to 1
-            // await this.updateSendpulseFieldsAsPerClientTier(client, 1);
-
             // Update Client Data
-            const updateClientDto = {
+            const updateClientDto: any = {
                 id: client.id,
-                // tier: 1,
                 dream_points_earned: dream_points_earned - refundDreamPointDto.amount,
             };
+
+            if (refundDreamPointDto.do_reset_memberiship_tier) {
+                // Reset membership tier to 1 in DB & Sendpulse
+                await this.updateSendpulseFieldsAsPerClientTier(client, 1);
+                updateClientDto.tier = '1';
+            }
+
             return await this.clientService.update(updateClientDto);
         } catch (error) {
             this.log.error(`DREAM POINT SERVICE: ERROR OCCURED WHILE RUNNING refundDreamPoint:  ${error}`);
+            throw error;
         }
 
 
@@ -64,7 +71,6 @@ export class DreamPointService {
         const new_tier = tier;
         const new_max_credit_amount = this.globalService.TIER_AMOUNT[new_tier];
         const new_next_loan_amount = this.globalService.TIER_AMOUNT[new_tier + 1];
-
         await this.sendpulseService.updateSendpulseVariable({
             variable_name: 'Tier',
             variable_id: this.globalService.SENDPULSE_VARIABLE_ID.TIER,
@@ -84,5 +90,45 @@ export class DreamPointService {
             contact_id: client.sendpulse_id,
         });
         return;
+    }
+
+    async earnDreamPoint(earnDreamPointDto: EarnDreamPointDto): Promise<any> {
+        try {
+            if (!earnDreamPointDto.amount) {
+                throw new BadRequestException('Incorrect Amount.');
+            }
+            if (!earnDreamPointDto.type || !((Object.values(this.globalService.TRANSACTION_TYPE).indexOf(earnDreamPointDto.type) > -1))) {
+                throw new BadRequestException(`Incorrect Transaction Type ${earnDreamPointDto.type}`);
+            }
+
+            const client = await this.clientService.findbyId(
+                earnDreamPointDto.client_id
+            );
+
+            if (!client) {
+                throw new BadRequestException(`Client not found with id ${earnDreamPointDto.client_id}`);
+            }
+
+            // Create Dream Point Earn Transaction
+            const transactionDto = {
+                client_id: earnDreamPointDto.client_id,
+                amount: earnDreamPointDto.amount,
+                image: earnDreamPointDto.image,
+                type: this.globalService.TRANSACTION_TYPE.REFERRAL_DREAM_POINTS_EARNED,
+                note: earnDreamPointDto.note,
+            }
+            await this.transactionService.create(transactionDto);
+
+            // Update Earned Dream points in client table
+            const dream_points_earned = client.dream_points_earned;
+            const updateClientDto = {
+                id: client.id,
+                dream_points_earned: dream_points_earned + earnDreamPointDto.amount,
+            };
+            return await this.clientService.update(updateClientDto);
+        } catch (error) {
+            this.log.error(`DREAM POINT SERVICE: ERROR OCCURED WHILE RUNNING earnDreamPoint:  ${error}`);
+            throw error;
+        }
     }
 }
