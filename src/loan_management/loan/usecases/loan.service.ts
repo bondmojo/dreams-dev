@@ -252,7 +252,8 @@ export class LoanService {
       });
       if (
         updateLoanDto.status === this.globalService.LOAN_STATUS.APPROVED ||
-        updateLoanDto.status === this.globalService.LOAN_STATUS.NOT_QUALIFIED
+        updateLoanDto.status === this.globalService.LOAN_STATUS.NOT_QUALIFIED ||
+        updateLoanDto.status === this.globalService.LOAN_STATUS.CANCELED
       ) {
         const updateApplStatus = new UpdateApplicationStatusRequestDto();
         updateApplStatus.sendpulse_user_id = updateLoanDto.sendpulse_user_id;
