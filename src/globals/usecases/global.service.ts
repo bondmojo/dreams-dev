@@ -15,6 +15,7 @@ export class GlobalService {
 
     public readonly LOAN_FEES: number = 3;
     public readonly LOAN_LATE_FEE_EACH_MONTH: number = 3;
+    public readonly INSTALMENT_LATE_FEE_EACH_MONTH: number = 3;
     public readonly LOAN_GRACE_PERIOD_DAYS: number = 3;
     public en: English;
     public kh: Khmer;
@@ -229,6 +230,7 @@ export class GlobalService {
         PARTIAL_PAYMENT: 'partial_payment',
         DREAM_POINT_REFUND: 'dream_point_refund',
         OVER_PAYMENT: 'over_payment',
+        FEE_WAIVER: "fee_waiver",
     };
 
     public CLACULATE_MAX_TENURE({ amount }: { amount: number; }): string {

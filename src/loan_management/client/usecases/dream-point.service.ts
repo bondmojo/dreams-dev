@@ -89,12 +89,6 @@ export class DreamPointService {
             variable_value: '' + new_next_loan_amount,
             contact_id: client.sendpulse_id,
         });
-        await this.sendpulseService.updateSendpulseVariable({
-            variable_name: 'tenure',
-            variable_id: this.globalService.SENDPULSE_VARIABLE_ID.TENURE,
-            variable_value: '1',
-            contact_id: client.sendpulse_id,
-        });
         return;
     }
 
