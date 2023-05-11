@@ -104,6 +104,15 @@ export class GlobalService {
     9: 500,
     10: 500,
     11: 500,
+    12: 500,
+    13: 500,
+    14: 500,
+    15: 500,
+    16: 500,
+    17: 500,
+    18: 500,
+    19: 500,
+    20: 500,
   };
 
   CALC_WING_WEI_LUY_TRANSFER_FEE(amount: number): number {
