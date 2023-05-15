@@ -10,9 +10,8 @@ import {
 import { Loan } from '../../loan/entities/loan.entity';
 import { RepaymentSchedule } from 'src/loan_management/repayment_schedule/entities/repayment_schedule.entity';
 import { Transaction } from 'src/loan_management/transaction/entities/transaction.entity';
-@Entity({ name: "clients" })
+@Entity({ name: 'clients' })
 export class Client {
-
   @PrimaryColumn()
   id: string;
 
@@ -22,14 +21,17 @@ export class Client {
   @Column({ nullable: true })
   migration_test: string;
 
-  @OneToMany(() => Loan, loan => loan.client)
+  @OneToMany(() => Loan, (loan) => loan.client)
   loan: Loan;
 
-  @OneToMany(() => RepaymentSchedule, repayment_schedule => repayment_schedule.client)
+  @OneToMany(
+    () => RepaymentSchedule,
+    (repayment_schedule) => repayment_schedule.client,
+  )
   repayment_schedule: RepaymentSchedule;
 
-  @OneToMany(() => Transaction, transaction => transaction.client)
-  transaction: Transaction[]
+  @OneToMany(() => Transaction, (transaction) => transaction.client)
+  transaction: Transaction[];
 
   @Column({ nullable: true, unique: true })
   zoho_id: string;
@@ -120,11 +122,4 @@ export class Client {
 
   @UpdateDateColumn()
   updated_at: string;
-
-  @AfterUpdate()
-  afterSaveHook() {
-    // FIXME: update client zoho field through this hook
-    console.log(`In Client Update Hook: ${JSON.stringify(this)}`);
-  }
-};
-
+}
