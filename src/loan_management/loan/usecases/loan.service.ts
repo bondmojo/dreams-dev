@@ -131,7 +131,7 @@ export class LoanService {
         createLoanDto,
       );
       this.log.log('Created Transaction');
-
+      await this.loanHelperService.updateClientPaymentDetails(createLoanDto);
       return loanFromDb;
     } catch (error) {
       this.log.error(

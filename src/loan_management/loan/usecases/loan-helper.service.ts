@@ -534,4 +534,14 @@ export class LoanHelperService {
     }
     return this.globalService.LOAN_PAYMENT_STATUS.PAID_ON_TIME;
   }
+
+  // update payment details in client
+  async updateClientPaymentDetails(createLoanDto: any) {
+    const updateClientDto = {
+      id: createLoanDto.client_id,
+      acc_provider_type: createLoanDto.acc_provider_type,
+      acc_number: createLoanDto.acc_number,
+    };
+    this.eventEmitter.emit('client.update', updateClientDto);
+  }
 }
