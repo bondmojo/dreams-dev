@@ -6,13 +6,13 @@ import {
   UpdateDateColumn,
   ManyToOne,
   JoinColumn,
-  OneToMany
+  OneToMany,
 } from 'typeorm';
 import { Loan } from '../../loan/entities/loan.entity';
 import { Client } from '../../client/entities/client.entity';
 import { Transaction } from '../../transaction/entities/transaction.entity';
 
-@Entity({ name: "loan_repayment_schedule" })
+@Entity({ name: 'loan_repayment_schedule' })
 export class RepaymentSchedule {
   @PrimaryColumn()
   id: string;
@@ -23,18 +23,18 @@ export class RepaymentSchedule {
   @Column()
   loan_id: string;
 
-  @ManyToOne(() => Loan, loan => loan.repayment_schedule)
+  @ManyToOne(() => Loan, (loan) => loan.repayment_schedule)
   @JoinColumn({ name: 'loan_id', referencedColumnName: 'id' })
   loan: Loan;
 
   @Column()
   client_id: string;
 
-  @ManyToOne(() => Client, client => client.repayment_schedule)
+  @ManyToOne(() => Client, (client) => client.repayment_schedule)
   @JoinColumn({ name: 'client_id', referencedColumnName: 'id' })
   client: Client;
 
-  @OneToMany(() => Transaction, transaction => transaction.repayment_schedule)
+  @OneToMany(() => Transaction, (transaction) => transaction.repayment_schedule)
   transaction: Transaction[];
 
   @Column({ type: 'decimal', precision: 10, scale: 2 })
@@ -47,7 +47,7 @@ export class RepaymentSchedule {
   ins_membership_fee: number;
 
   @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
-  ins_additional_fee: number; // it's late fee 
+  ins_additional_fee: number; // it's late fee
 
   @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
   total_paid_amount: number;
@@ -64,7 +64,7 @@ export class RepaymentSchedule {
   @Column({ type: 'int', default: 0, unsigned: true })
   number_of_penalties: number;
 
-  @Column({ type: "json", nullable: true })
+  @Column({ type: 'json', nullable: true })
   previous_repayment_dates: object[];
 
   @Column({ type: 'date' })
@@ -93,5 +93,7 @@ export class RepaymentSchedule {
 
   @Column({ nullable: true, default: 'USD' })
   currency: string;
-};
 
+  @Column({ type: 'date', nullable: true })
+  last_payment_receipt_date: Date;
+}
