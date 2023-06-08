@@ -4,6 +4,7 @@ import * as cjson from 'cjson';
 import { timeStamp } from 'console';
 import { TelegramKickChatMemberParams } from 'nestjs-telegram';
 import { ReadFileService } from 'src/s3/usecases/file_read.service';
+import { differenceInMonths } from 'date-fns';
 
 @Injectable()
 export class GlobalService {
@@ -320,37 +321,67 @@ export class GlobalService {
     FEE_WAIVER: 'fee_waiver',
   };
 
-  public CLACULATE_MAX_TENURE({ amount }: { amount: number }): string {
-    let max_tenure = '1';
+  public CLACULATE_MAX_TENURE({
+    amount,
+    max_repayment_date,
+  }: {
+    amount: number;
+    max_repayment_date: string;
+  }): string {
+    let max_tenure = 1;
+
+    // return 1 if max repayment date not exists
+    if (!max_repayment_date) {
+      return '0';
+    }
 
     if (amount <= this.TIER_AMOUNT['2']) {
-      max_tenure = '1';
+      max_tenure = 1;
     } else if (
       amount > this.TIER_AMOUNT['2'] &&
       amount <= this.TIER_AMOUNT['4']
     ) {
-      max_tenure = '2';
+      max_tenure = 2;
     } else if (
       amount > this.TIER_AMOUNT['4'] &&
       amount <= this.TIER_AMOUNT['5']
     ) {
-      max_tenure = '3';
+      max_tenure = 3;
     } else if (
       amount > this.TIER_AMOUNT['5'] &&
       amount <= this.TIER_AMOUNT['6']
     ) {
-      max_tenure = '4';
+      max_tenure = 4;
     } else if (
       amount > this.TIER_AMOUNT['6'] &&
       amount <= this.TIER_AMOUNT['7']
     ) {
-      max_tenure = '5';
+      max_tenure = 5;
     } else if (
       amount > this.TIER_AMOUNT['7'] /* && amount <= this.TIER_AMOUNT['8']*/
     ) {
-      max_tenure = '6';
+      max_tenure = 6;
     }
-    return max_tenure;
+
+    // calculate max_tenure according to max_repayment_date
+    const today = new Date();
+    const [m_date, m_month, m_year] = max_repayment_date
+      .split('-')
+      .map((e) => Number(e));
+
+    const max_repayment_date_tenure =
+      differenceInMonths(new Date(m_year, m_month, m_date), today) - 1;
+
+    if (max_repayment_date_tenure <= 0) {
+      return '0';
+    }
+
+    // Return Minimum Tenure
+    max_tenure =
+      max_repayment_date_tenure < max_tenure
+        ? max_repayment_date_tenure
+        : max_tenure;
+    return max_tenure + '';
   }
 
   public readonly LANGUAGE = {
